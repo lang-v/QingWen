@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">青文</string>
+    <string name="book_new">更新</string>
+    <string name="searchTextTips">搜索作者/书名</string>
+</resources>
