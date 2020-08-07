@@ -1,8 +1,14 @@
-package com.novel.qingwen.view
+package com.novel.qingwen.view.activity
 
+import android.app.Activity
+import android.content.res.Resources
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.novel.qingwen.R
@@ -24,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_welcome)
         GlobalScope.launch(Dispatchers.Main) {
             delay(600)//do something
+            window.statusBarColor = Color.parseColor("#ff669900")
             val binding:ActivityMainBinding = DataBindingUtil.setContentView(this@MainActivity,R.layout.activity_main)
             binding.lifecycleOwner = this@MainActivity
             binding.mainVM = mainVM
@@ -35,4 +42,9 @@ class MainActivity : AppCompatActivity() {
         }
         //setContentView(R.fragment_search_list_item.activity_main)
     }
+
+
+}
+infix fun Activity.show(msg:String){
+    Toast.makeText(this,msg,Toast.LENGTH_SHORT).show()
 }

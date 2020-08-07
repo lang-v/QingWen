@@ -22,6 +22,7 @@ import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.databinding.FragmentSearchBookBinding
 import com.novel.qingwen.net.NetUtil
 import com.novel.qingwen.view.adapter.SearchBookListAdapter
+import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.SearchVM
 import kotlinx.android.synthetic.main.fragment_search_book.*
 import kotlinx.coroutines.Dispatchers
@@ -31,7 +32,9 @@ import kotlinx.coroutines.launch
 class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.OnClickListener {
     private val viewModel: SearchVM by viewModels()
     private lateinit var adapter: SearchBookListAdapter
-
+    private val dialog:NoticeDialog by lazy {
+        NoticeDialog.build(requireContext(),"搜索中...")
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,11 +43,19 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
             DataBindingUtil.inflate(inflater, R.layout.fragment_search_book, container, false)
         binding.searchVM = viewModel
         binding.lifecycleOwner = this
-        viewModel.attachView(this)
         return binding.root
 //        return inflater.inflate(R.fragment_search_list_item.fragment_search_book,container,false)
     }
 
+    override fun onStart() {
+        super.onStart()
+        viewModel.attachView(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.detachView()
+    }
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         init()
@@ -77,11 +88,6 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
         })
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        viewModel.detachView()
-    }
-
     override fun showMsg(msg: String) {
         GlobalScope.launch(Dispatchers.Main) {
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
@@ -91,6 +97,8 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
     override fun onComplete() {
         GlobalScope.launch(Dispatchers.Main) {
             adapter.notifyDataSetChanged()
+            if (dialog.isShowing)
+            dialog.dismiss()
         }
     }
 
@@ -108,5 +116,7 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
         //清空内容
         viewModel.getList().clear()
         viewModel.doSearch()
+        if (dialog.isShowing)dialog.dismiss()
+        dialog.show()
     }
 }

@@ -2,4 +2,7 @@
     <string name="app_name">青文</string>
     <string name="book_new">更新</string>
     <string name="searchTextTips">搜索作者/书名</string>
+    <string name="add_to_bookshelf">加入书架</string>
+    <string name="resume">简介</string>
+    <string name="contents">目录</string>
 </resources>

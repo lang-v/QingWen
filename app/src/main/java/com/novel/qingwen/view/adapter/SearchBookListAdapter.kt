@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.novel.qingwen.R
 import com.novel.qingwen.bean.SearchResultItem
+import com.novel.qingwen.view.activity.ResumeActivity
 
 class SearchBookListAdapter(private val list:ArrayList<SearchResultItem>): RecyclerView.Adapter<SearchBookListAdapter.ViewHolder>() {
 
@@ -41,7 +42,7 @@ class SearchBookListAdapter(private val list:ArrayList<SearchResultItem>): Recyc
         holder.tags.removeAllViews()
         holder.tags.addView(view)
         holder.itemView.setOnClickListener {
-            Toast.makeText(it.context,"item $position: ${item.Name} clicked",Toast.LENGTH_SHORT).show()
+            ResumeActivity.start(holder.itemView.context,item.Id.toLong(),item.Name)
         }
     }
 }

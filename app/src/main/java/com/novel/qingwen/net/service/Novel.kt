@@ -8,8 +8,8 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface Novel {
-    @HTTP(method = "GET",path = "https://infosxs.pysmei.com/BookFiles/Html/{pageid}/{novelid}/info.html",hasBody = false)
-    fun getBookInfo(@Path("pageid") pageId: Int,@Path("novelid") novelId: Int):Call<BookInfo>
+    @HTTP(method = "GET",path = "BookFiles/Html/{pageid}/{novelid}/info.html",hasBody = false)
+    fun getBookInfo(@Path("novelid") novelId: Long,@Path("pageid") pageId: Long=(novelId/1000 + 1)):Call<BookInfo>
 
     @HTTP(method = "GET",path = "https://contentxs.pysmei.com/BookFiles/Html/{pageid}/{novelid}/{chapterid}.html",hasBody = false)
     fun getChapterContent(@Path("pageid") pageId: Int,@Path("novelid") novelId: Int,@Path("chapterid") chapterId:Int):Call<ChapterContent>

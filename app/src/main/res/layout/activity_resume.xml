@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import
+            alias="VM"
+            type="com.novel.qingwen.viewmodel.ResumeVM" />
+
+        <variable
+            name="resumeVM"
+            type="VM" />
+    </data>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="false"
+        android:clipToPadding="false"
+        tools:context=".view.activity.ResumeActivity">
+
+        <ImageView
+            android:id="@+id/resumeBg"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_alignParentTop="true"
+            android:foreground="@color/foreground"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_launcher_background"
+            app:blurUrl="@{resumeVM.Info.img}"
+            tools:targetApi="m" />
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/resumeToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/transparent" />
+
+
+        <ImageView
+            android:id="@+id/resumeImg"
+            android:layout_width="100dp"
+            android:layout_height="120dp"
+            android:layout_below="@id/resumeToolbar"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/white"
+            android:scaleType="fitXY"
+            app:imageUrl="@{resumeVM.info.img}" />
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/resumeToolbar"
+            android:layout_marginStart="20dp"
+            android:layout_toEndOf="@id/resumeImg"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/resumeName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:ellipsize="end"
+                android:lines="1"
+                android:text="@{resumeVM.info.name}"
+                android:textColor="@android:color/white"
+                android:textSize="25sp" />
+
+            <TextView
+                android:id="@+id/resumeAuthor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="10dp"
+                android:text="@{resumeVM.info.author}" />
+
+            <TextView
+                android:id="@+id/resumeType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="10dp"
+                android:text="@{resumeVM.info.type}" />
+
+            <TextView
+                android:id="@+id/resumeStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="@android:color/white"
+                android:text="@{resumeVM.info.status}"
+                android:textAlignment="textStart" />
+
+            <TextView
+                android:id="@+id/resumeScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textColor="@android:color/white"
+                android:text="@{resumeVM.info.score}" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:layout_below="@id/resumeBg"
+            android:background="@drawable/line_shape" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_below="@id/imageView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/imageView2"
+                android:layout_marginTop="10dp"
+                android:paddingStart="16dp"
+                android:text="@string/resume"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                tools:ignore="RtlSymmetry" />
+
+            <TextView
+                android:id="@+id/resumeText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:padding="5dp"
+                android:text="@{resumeVM.info.resumeText}" />
+
+            <ImageView
+                android:background="@color/foreground"
+                android:layout_width="match_parent"
+                android:layout_height="5dp"/>
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/contents"
+                android:textColor="@android:color/black"
+                android:textSize="18sp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:padding="5dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+                <ImageView
+                    android:id="@+id/resumeContents"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:src="@android:drawable/ic_menu_sort_by_size" />
+
+                <TextView
+                    android:id="@+id/resumeLastChapterTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_toEndOf="@id/resumeContents"
+                    android:text="@{resumeVM.info.lastChapterTime}" />
+
+                <TextView
+                    android:id="@+id/resumeLastChapterName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/resumeLastChapterTime"
+                    android:layout_marginStart="10dp"
+                    android:layout_toEndOf="@id/resumeContents"
+                    android:text="@{resumeVM.info.lastChapterName}"
+                    android:textColor="@android:color/black" />
+            </RelativeLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+</layout>

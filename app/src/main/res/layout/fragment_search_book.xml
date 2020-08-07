@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:background="@color/colorPrimary"
         tools:context=".view.fragment.SearchBook">
 
         <EditText
@@ -37,19 +38,21 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_alignEnd="@id/searchET"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="14dp"
             android:layout_marginEnd="10dp"
             android:background="@drawable/search_button_selector"/>
 
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="5dp"
-            android:layout_below="@id/searchET"
-            android:background="@drawable/line_shape" />
+<!--        <ImageView-->
+<!--            android:id="@+id/imageView1"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="5dp"-->
+<!--            android:layout_below="@id/searchET"-->
+<!--            android:background="@drawable/line_shape" />-->
 
 
         <androidx.recyclerview.widget.RecyclerView
             android:overScrollMode="never"
+            android:background="@android:color/white"
             android:id="@+id/searchListView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
