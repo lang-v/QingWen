@@ -1,32 +1,19 @@
 package com.novel.qingwen.view.activity
 
-import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.util.Log
 import android.view.*
-import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
-import com.bumptech.glide.Glide
-import com.bumptech.glide.GlideBuilder
-import com.bumptech.glide.request.RequestOptions
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.databinding.ActivityResumeBinding
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.ResumeVM
-import jp.wasabeef.glide.transformations.BlurTransformation
 import kotlinx.android.synthetic.main.activity_resume.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -68,7 +55,7 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
             if (dialog.isShowing)dialog.dismiss()
             dialog.show()
         } else
-            show("获取信息失败，未找到此书")
+            showError("获取信息失败，未找到此书")
         //viewModel.name="123456"
     }
 
@@ -97,6 +84,9 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
 //                height+=statusHeight
 //            }
 //            resumeBg.setPadding(0,-statusHeight,0,0)
+            resumeContents.setOnClickListener {
+                ContentsActivity.start(this,viewModel.info.id,viewModel.info.name,viewModel.info.status)
+            }
         }
     }
 
@@ -121,18 +111,19 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
                 finish()
             }
             R.id.addToBookShelf -> {
-                show("加入书架")
+                showSuccess("加入书架")
             }
         }
-        Log.e("SL", "item:$item")
         return super.onOptionsItemSelected(item)
     }
 
     override fun showMsg(msg: String) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+        showError(msg)
+        if (dialog.isShowing)
+            dialog.dismiss()
     }
 
-    override fun onComplete() {
+    override fun onComplete(target: Int) {
         if (dialog.isShowing)
             dialog.dismiss()
     }

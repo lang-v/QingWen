@@ -1,21 +1,19 @@
 package com.novel.qingwen.view.activity
 
 import android.app.Activity
-import android.content.res.Resources
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.novel.qingwen.R
 import com.novel.qingwen.databinding.ActivityMainBinding
+import com.novel.qingwen.room.RoomUtil
 import com.novel.qingwen.view.adapter.FragmentAdapter
 import com.novel.qingwen.view.fragment.SearchBook
 import com.novel.qingwen.viewmodel.MainVM
+import com.novel.qingwen.utils.Show
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -30,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_welcome)
         GlobalScope.launch(Dispatchers.Main) {
             delay(600)//do something
-            window.statusBarColor = Color.parseColor("#ff669900")
+            window.statusBarColor = Color.parseColor("#669900")
             val binding:ActivityMainBinding = DataBindingUtil.setContentView(this@MainActivity,R.layout.activity_main)
             binding.lifecycleOwner = this@MainActivity
             binding.mainVM = mainVM
@@ -45,6 +43,12 @@ class MainActivity : AppCompatActivity() {
 
 
 }
-infix fun Activity.show(msg:String){
-    Toast.makeText(this,msg,Toast.LENGTH_SHORT).show()
+infix fun Activity.showError(msg:String){
+    Show.show(this,msg,Show.ERROR)
+}
+infix fun Activity.showSuccess(msg:String){
+    Show.show(this,msg,Show.RIGHT)
+}
+infix fun Activity.show(msg: String){
+    Show.show(this,msg,Show.NONE)
 }

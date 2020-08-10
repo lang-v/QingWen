@@ -1,15 +1,6 @@
 package com.novel.qingwen.viewmodel
 
-import android.util.Log
-import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.widget.EditText
-import android.widget.TextView
-import androidx.databinding.BindingAdapter
 import androidx.lifecycle.MutableLiveData
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.bean.SearchResult
 import com.novel.qingwen.bean.SearchResultItem
@@ -33,8 +24,9 @@ class SearchVM : BaseVM(), ResponseCallback<SearchResult> {
     }
 
     fun doSearch() {
-        if (searchText.value == "")
+        if (searchText.value == "" || searchText.value==null) {
             return
+        }
         //清空列表重新搜索
 //        list.clear()
 //        adapter.notifyDataSetChanged()
@@ -81,11 +73,14 @@ class SearchVM : BaseVM(), ResponseCallback<SearchResult> {
     }
 
     override fun onSuccess(t: SearchResult) {
-        Log.e("SL",t.toString())
         list.addAll(t.data)
         iView?.onComplete()
         //GlobalScope.launch(Dispatchers.Main) {
 //        adapter.notifyDataSetChanged()
         //}
+    }
+    override fun onCleared() {
+        NetUtil.clear(this)
+        super.onCleared()
     }
 }

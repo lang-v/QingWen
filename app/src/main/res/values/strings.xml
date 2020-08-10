@@ -5,4 +5,9 @@
     <string name="add_to_bookshelf">加入书架</string>
     <string name="resume">简介</string>
     <string name="contents">目录</string>
+    <string name="title_activity_read">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="top">顶部</string>
+    <string name="bottom">底部</string>
 </resources>

@@ -1,34 +1,15 @@
 package com.novel.qingwen.viewmodel
 
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
-import android.os.Handler
-import android.util.Log
 import android.widget.ImageView
 import androidx.databinding.BaseObservable
 import androidx.databinding.BindingAdapter
-import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.Request
-import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.SimpleTarget
-import com.bumptech.glide.request.target.SizeReadyCallback
-import com.bumptech.glide.request.target.Target
-import com.bumptech.glide.request.transition.Transition
-import com.novel.qingwen.BR
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.bean.BookInfo
 import com.novel.qingwen.blur.BlurTransformation
 import com.novel.qingwen.net.NetUtil
 import com.novel.qingwen.net.callback.ResponseCallback
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 
 class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
@@ -49,6 +30,8 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
         var resumeText: String = ""
         var lastChapterTime: String = ""
         var lastChapterName: String = ""
+
+        var id:Long = 0L
     }
 
     init {
@@ -82,6 +65,7 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
                 .apply(RequestOptions.bitmapTransform(BlurTransformation(view.context, 25, 8)))
                 .load(url)
                 .into(view)
+        }
 //                .into(object :SimpleTarget<Bitmap>(){
 //                    override fun onResourceReady(
 //                        resource: Bitmap,
@@ -90,7 +74,7 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
 //                        view.background = BitmapDrawable(resource)
 //                    }
 //                })
-        }
+//        }
     }
 
     override fun onFailure() {
@@ -98,6 +82,7 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
     }
 
     override fun onSuccess(t: BookInfo) {
+        info.id = t.data.Id.toLong()
         info.img = "https://imgapixs.pysmei.com/BookFiles/BookImages/${t.data.Img}"
         info.name = t.data.Name
         info.author = "作者：${t.data.Author}"
@@ -108,6 +93,10 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
         info.lastChapterTime = t.data.LastTime
         info.lastChapterName = t.data.LastChapter
         iView?.onComplete()
+    }
+    override fun onCleared() {
+        NetUtil.clear(this)
+        super.onCleared()
     }
 }
 //id = 501574

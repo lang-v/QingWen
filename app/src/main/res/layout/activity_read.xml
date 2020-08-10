@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:background="@android:color/white"
+    tools:context=".view.activity.ReadActivity">
+
+    <com.novel.qingwen.view.MyRecyclerView
+        android:id="@+id/readList"
+        android:overScrollMode="never"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+<!--    <com.novel.qingwen.view.CustomScrollView-->
+<!--        android:id="@+id/readLayout"-->
+<!--        android:fillViewport="true"-->
+<!--        android:overScrollMode="never"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent">-->
+
+<!--        <LinearLayout-->
+<!--            android:id="@+id/readPages"-->
+<!--            android:orientation="vertical"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content">-->
+<!--        </LinearLayout>-->
+
+<!--    </com.novel.qingwen.view.CustomScrollView>-->
+<!--下面两个部分 不能被list遮挡-->
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/readToolbar"
+        android:layout_marginTop="-70dp"
+        android:background="@color/colorPrimary"
+        android:layout_gravity="top"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"/>
+
+    <RelativeLayout
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="-100dp"
+        android:background="@color/colorPrimary"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"/>
+</FrameLayout>

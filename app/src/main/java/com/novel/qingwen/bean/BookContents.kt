@@ -7,7 +7,7 @@ data class BookContents(
 )
 
 data class VolumeData(
-    val id: Int,
+    val id: Long,
     val list: List<Volume>,
     val name: String
 )
@@ -19,6 +19,6 @@ data class Volume(
 
 data class Chapter(
     val hasContent: Int,
-    val id: Int,
+    val id: Long,
     val name: String
 )

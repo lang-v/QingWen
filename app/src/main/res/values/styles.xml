@@ -8,7 +8,7 @@
 
     <style name="transparent" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:textColorPrimary">@android:color/white</item>
-<!--        <item name="colorPrimaryDark">@color/foreground</item>-->
+        <!--        <item name="colorPrimaryDark">@color/foreground</item>-->
     </style>
 
     <style name="processBar" parent="Widget.AppCompat.ProgressBar">
@@ -21,7 +21,7 @@
         <!-- 是否浮现在activity之上 -->
         <item name="android:windowIsFloating">true</item>
         <!-- 半透明 -->
-<!--        <item name="android:windowIsTranslucent">true</item>-->
+        <!--        <item name="android:windowIsTranslucent">true</item>-->
         <!-- 无标题 -->
         <item name="android:windowNoTitle">true</item>
         <item name="android:background">@android:color/transparent</item>
@@ -30,6 +30,15 @@
         <!-- 模糊 -->
         <item name="android:backgroundDimEnabled">false</item>
         <!-- 遮罩层 -->
-<!--        <item name="android:backgroundDimAmount">0.5</item>-->
+        <!--        <item name="android:backgroundDimAmount">0.5</item>-->
     </style>
+
+    <style name="FullscreenTheme" parent="AppTheme">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:screenOrientation">fullSensor</item>
+        <item name="android:windowBackground">@null</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+
 </resources>

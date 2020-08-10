@@ -7,12 +7,12 @@ data class ChapterContent(
 )
 
 data class ChapterData(
-    val cid: Int,
+    val cid: Long,
     val cname: String,
     val content: String,
     val hasContent: Int,
-    val id: Int,
+    val id: Long,
     val name: String,
-    val nid: Int,
-    val pid: Int
+    val nid: Long,
+    val pid: Long
 )

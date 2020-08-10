@@ -1,6 +1,5 @@
 package com.novel.qingwen.view.fragment
 
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.view.KeyEvent
 import androidx.fragment.app.Fragment
@@ -12,8 +11,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +21,7 @@ import com.novel.qingwen.net.NetUtil
 import com.novel.qingwen.view.adapter.SearchBookListAdapter
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.SearchVM
+import com.novel.qingwen.utils.Show
 import kotlinx.android.synthetic.main.fragment_search_book.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -91,10 +89,12 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
     override fun showMsg(msg: String) {
         GlobalScope.launch(Dispatchers.Main) {
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+            if (dialog.isShowing)
+                dialog.dismiss()
         }
     }
 
-    override fun onComplete() {
+    override fun onComplete(target: Int) {
         GlobalScope.launch(Dispatchers.Main) {
             adapter.notifyDataSetChanged()
             if (dialog.isShowing)
@@ -113,6 +113,11 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
     }
 
     private fun doSearch() {
+        if (searchET.text.toString() == "") {
+            Show.show(requireContext(), "请输入后再尝试",Show.ERROR)
+            searchET.isFocusable = true
+            return
+        }
         //清空内容
         viewModel.getList().clear()
         viewModel.doSearch()
