@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.databinding.FragmentSearchBookBinding
-import com.novel.qingwen.net.NetUtil
+import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.view.adapter.SearchBookListAdapter
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.SearchVM

@@ -9,7 +9,6 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.novel.qingwen.R
 import com.novel.qingwen.databinding.ActivityMainBinding
-import com.novel.qingwen.room.RoomUtil
 import com.novel.qingwen.view.adapter.FragmentAdapter
 import com.novel.qingwen.view.fragment.SearchBook
 import com.novel.qingwen.viewmodel.MainVM

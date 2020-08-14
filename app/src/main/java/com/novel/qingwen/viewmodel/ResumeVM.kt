@@ -5,10 +5,11 @@ import androidx.databinding.BaseObservable
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.novel.qingwen.R
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.bean.BookInfo
 import com.novel.qingwen.blur.BlurTransformation
-import com.novel.qingwen.net.NetUtil
+import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.net.callback.ResponseCallback
 
 
@@ -51,6 +52,7 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
         ) {
             Glide.with(imageView.context)
                 .load(url)
+                .error(R.drawable.notfoundpic)
                 .into(imageView)
         }
 
@@ -62,8 +64,10 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
         fun loadBlurImage(view: ImageView, url: String) {
             Glide.with(view.context)
                 .asBitmap()
-                .apply(RequestOptions.bitmapTransform(BlurTransformation(view.context, 25, 8)))
                 .load(url)
+                    //巨丑 error这里不会调用高斯模糊,我宁愿没有图片
+//                .error(R.drawable.notfoundpic)
+                .apply(RequestOptions.bitmapTransform(BlurTransformation(view.context, 25, 8)))
                 .into(view)
         }
 //                .into(object :SimpleTarget<Bitmap>(){

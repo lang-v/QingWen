@@ -20,6 +20,7 @@
             android:theme="@style/FullscreenTheme">
 
         </activity>
+
         <activity
             android:name=".view.activity.ContentsActivity"
             android:label="目录"

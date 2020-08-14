@@ -9,17 +9,17 @@ import com.novel.qingwen.room.entity.Chapter
 @Dao
 interface ChapterDao {
 
-    @Query("select * from Chapter where id=:chapterId")
-    fun loadById(chapterId:Long):Chapter?
+    @Query("select * from Chapter where novelId=:novelId and chapterId=:chapterId")
+    fun loadById(novelId:Long,chapterId:Long):Chapter?
 
-    @Query("update Chapter set content=:newContent where id=:chapterId")
-    fun update(chapterId: Long,newContent: String)
+    @Query("update Chapter set content=:newContent where novelId=:novelId and chapterId=:chapterId")
+    fun update(novelId:Long,chapterId: Long,newContent: String)
 
-    @Query("update Chapter set nextChapter=:nextId where id=:chapterId")
-    fun update(chapterId: Long,nextId:Long)
+    @Query("update Chapter set nextChapter=:nextId where novelId=:novelId and chapterId=:chapterId")
+    fun update(novelId:Long,chapterId: Long,nextId:Long)
 
-    @Query("update Chapter set nextChapter=:nextId ,content=:newContent where id=:chapterId")
-    fun update(chapterId: Long,newContent: String,nextId:Long)
+    @Query("update Chapter set nextChapter=:nextId ,content=:newContent where novelId=:novelId and chapterId=:chapterId")
+    fun update(novelId:Long,chapterId: Long,newContent: String,nextId:Long)
 
     @Delete
     fun delete(chapter: Chapter)

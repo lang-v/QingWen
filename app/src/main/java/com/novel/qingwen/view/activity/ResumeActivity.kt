@@ -6,6 +6,7 @@ import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
 import com.novel.qingwen.R
@@ -14,6 +15,7 @@ import com.novel.qingwen.databinding.ActivityResumeBinding
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.ResumeVM
 import kotlinx.android.synthetic.main.activity_resume.*
+import kotlinx.android.synthetic.main.fragment_search_list_item.*
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -23,6 +25,7 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
     }
     private val name by lazy {
         intent.getStringExtra("name")
+//        "重生之绝爱"
     }
 
 //    val name = "青文"
@@ -76,10 +79,15 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
             resumeToolbar.setNavigationIcon(R.drawable.back_btn_selector)
             supportActionBar!!.title = name
             //动态设置toolbar高度
-            val statusHeight = getStatusHeight()
-            resumeToolbar.setPadding(0, statusHeight, 0, 0)
-            resumeToolbar.titleMarginTop = statusHeight/2
-//            resumeToolbar.layoutParams.apply { height += statusHeight / 2 }
+            val statusHeight = (getStatusHeight()*0.9).roundToInt()
+//            resumeToolbar.setPadding(0, statusHeight/2, 0, 0)
+//            resumeToolbar.textAlignment = TextView.
+//            resumeToolbar.titleMarginTop = (statusHeight*1.5).toInt()
+
+            resumeToolbar.layoutParams.apply {
+                height+=statusHeight
+            }
+            resumeToolbar.setPadding(0,statusHeight,0,0)
 //            resumeBg.layoutParams.apply {
 //                height+=statusHeight
 //            }
@@ -90,6 +98,7 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
         }
     }
 
+    //设置沉浸状态栏
     private fun setTranslucentStatus(){
         val options = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         window.decorView.systemUiVisibility = options

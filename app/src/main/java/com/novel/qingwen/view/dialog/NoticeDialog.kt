@@ -29,7 +29,7 @@ class NoticeDialog(context: Context) : Dialog(context,R.style.DialogTheme) {
         setContentView(R.layout.process_dialog_layout)
         //空白处无法取消
         setCancelable(false)
-        setOnKeyListener { dialog, keyCode, event ->
+        setOnKeyListener { dialog, keyCode, _ ->
             var target = false
             if (keyCode == KeyEvent.KEYCODE_BACK) {
                 target = true

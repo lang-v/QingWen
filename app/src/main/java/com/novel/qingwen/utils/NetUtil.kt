@@ -1,7 +1,5 @@
-package com.novel.qingwen.net
+package com.novel.qingwen.utils
 
-import android.util.JsonReader
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
@@ -18,6 +16,9 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+/**
+ * 请求过程使用try catch捕获Json解析异常
+ */
 object NetUtil {
     var searchCallback: ResponseCallback<SearchResult>? = null
     var infoCallback: ResponseCallback<BookInfo>? = null
@@ -87,7 +88,10 @@ object NetUtil {
     }
 
     fun searchNext() {
-        search(searchText, ++currentPage)
+        search(
+            searchText,
+            ++currentPage
+        )
     }
 
     /**
@@ -104,8 +108,13 @@ object NetUtil {
             override fun onResponse(call: Call<BookInfo>, response: Response<BookInfo>) {
                 if (response.body() == null)
                     infoCallback?.onFailure()
-                else
-                    infoCallback?.onSuccess(response.body()!!)
+                else {
+                    try {
+                        infoCallback?.onSuccess(response.body()!!)
+                    }catch (e:JsonSyntaxException){
+                        infoCallback?.onFailure()
+                    }
+                }
             }
         })
     }
@@ -153,10 +162,16 @@ object NetUtil {
                 call: Call<ChapterContent>,
                 response: Response<ChapterContent>
             ) {
-                if (response.body() == null)
-                    chapterContentCallback?.onFailure()
+                if (response.body() != null) {
+                    try {
+                        chapterContentCallback?.onSuccess(response.body()!!)
+                    } catch (e: JsonSyntaxException) {
+                        chapterContentCallback?.onFailure()
+                    }
+                }
                 else
-                    chapterContentCallback?.onSuccess(response.body()!!)
+                    chapterContentCallback?.onFailure()
+
             }
         })
     }

@@ -1,47 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clipToPadding="false"
     android:background="@android:color/white"
+    android:clipToPadding="false"
     tools:context=".view.activity.ReadActivity">
 
-    <com.novel.qingwen.view.MyRecyclerView
-        android:id="@+id/readList"
-        android:overScrollMode="never"
+    <RelativeLayout
+        android:id="@+id/readLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
 
-<!--    <com.novel.qingwen.view.CustomScrollView-->
-<!--        android:id="@+id/readLayout"-->
-<!--        android:fillViewport="true"-->
-<!--        android:overScrollMode="never"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent">-->
+        <com.novel.qingwen.view.widget.CustomTextView
+            android:id="@+id/readHead"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:background="@android:color/transparent"
+            android:gravity="center_vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="10dp" />
 
-<!--        <LinearLayout-->
-<!--            android:id="@+id/readPages"-->
-<!--            android:orientation="vertical"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content">-->
-<!--        </LinearLayout>-->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/readList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/readFooter"
+            android:layout_below="@id/readHead"
+            android:background="@android:color/transparent"
+            android:overScrollMode="never" />
 
-<!--    </com.novel.qingwen.view.CustomScrollView>-->
-<!--下面两个部分 不能被list遮挡-->
+        <RelativeLayout
+            android:id="@+id/readFooter"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:layout_alignParentBottom="true"
+            android:background="@android:color/white" />
+
+    </RelativeLayout>
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/readToolbar"
-        android:layout_marginTop="-70dp"
-        android:background="@color/colorPrimary"
-        android:layout_gravity="top"
         android:layout_width="match_parent"
-        android:layout_height="70dp"/>
+        android:minHeight="70dp"
+        android:layout_height="70dp"
+        android:gravity="center_vertical|start"
+        android:layout_marginTop="-70dp"
+        android:background="@color/colorPrimary" />
 
     <RelativeLayout
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="-100dp"
-        android:background="@color/colorPrimary"
+        android:id="@+id/readSetting"
         android:layout_width="match_parent"
-        android:layout_height="100dp"/>
+        android:layout_height="150dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="-150dp"
+        android:background="@color/colorPrimary">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="10dp"
+            android:text="小"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="中"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:text="大"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_alignParentEnd="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:layout_marginLeft="16dip"
+            android:layout_marginRight="16dip"
+            android:background="@drawable/ic_small_middle_big" />
+
+
+        <com.novel.qingwen.view.widget.CustomSeekBar
+            android:id="@+id/readTextSizeSeekBar"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:max="100"
+            app:size="5" />
+    </RelativeLayout>
+
 </FrameLayout>

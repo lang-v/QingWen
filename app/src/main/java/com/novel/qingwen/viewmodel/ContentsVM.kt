@@ -2,7 +2,7 @@ package com.novel.qingwen.viewmodel
 
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.bean.BookContents
-import com.novel.qingwen.net.NetUtil
+import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.net.callback.ResponseCallback
 
 class ContentsVM : BaseVM(), ResponseCallback<BookContents> {

@@ -1,4 +1,4 @@
-package com.novel.qingwen.view
+package com.novel.qingwen.view.widget
 
 import android.content.Context
 import android.util.AttributeSet
@@ -9,7 +9,7 @@ class CustomScrollView: ScrollView {
     constructor(context: Context, attributeSet: AttributeSet?):super(context,attributeSet)
     constructor(context: Context, attributeSet: AttributeSet?, defStyleAtt:Int):super(context,attributeSet,defStyleAtt)
 
-    var onScrollListener:OnScrollListener? = null
+    var onScrollListener: OnScrollListener? = null
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
         super.onScrollChanged(l, t, oldl, oldt)
         if (onScrollListener == null) return
