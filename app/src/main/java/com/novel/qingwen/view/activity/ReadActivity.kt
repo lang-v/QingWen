@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -85,11 +86,12 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     private val contentManager = LinearLayoutManager(this)
 
     //目录
-    private val contentsViewModel:ContentsVM by viewModels()
-    private val contentsAdapter:BookContentsListAdapter by lazy {
-        BookContentsListAdapter(contentsViewModel.getList(),this)
+    private val contentsViewModel: ContentsVM by viewModels()
+    private val contentsAdapter: BookContentsListAdapter by lazy {
+        BookContentsListAdapter(contentsViewModel.getList(), this)
     }
     private val contentsManager = LinearLayoutManager(this)
+
     //数据由viewModel保管 数据视图分离
     private val headList by lazy { contentsViewModel.getHeadList() }
 
@@ -140,6 +142,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         BookShelfListUtil.getList().forEach {
             if (it.novelId == novelId) {
                 it.lastReadId = currentReadID
+                Log.e("SL", "lastReadId=${it.lastChapterId} current=$currentReadID")
                 BookShelfListUtil.update(it)
                 return@forEach
             }
@@ -216,23 +219,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     && newState == RecyclerView.SCROLL_STATE_IDLE//当前recyclerview停止滑动
                     && !readList.canScrollVertically(1) //recyclerview无法向上滑动时
                 ) {
-                    val list = contentViewModel.getList()
-                    if (list.size == 0) {
-                        showError("未知错误。")
-                        return
-                    }
-
-                    val nid = list[list.size - 1].nid
-                    if (nid == -1L) {
-                        if (status == "状态：完结")
-                            showSuccess("恭喜你又读完一本书。")
-                        else
-                            showError("已经是最后一章了。")
-                        return
-                    }
-                    //加载下一章
-                    contentViewModel.getChapter(nid)
-                    dialog.show()
+                    nextChapter()
                     super.onScrollStateChanged(recyclerView, newState)
                     return
                 }
@@ -242,19 +229,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     && newState == RecyclerView.SCROLL_STATE_IDLE//当前recyclerview停止滑动
                     && !readList.canScrollVertically(-1)
                 ) {
-                    val list = contentViewModel.getList()
-                    if (list.size == 0) {
-                        showError("未知错误。")
-                        return
-                    }
-                    val pid = list[0].pid
-                    if (pid == -1L) {
-                        showError("这是第一章哦")
-                        return
-                    }
-                    //加载上一张
-                    contentViewModel.getChapter(pid, true)
-                    dialog.show()
+                    preChapter()
                     super.onScrollStateChanged(recyclerView, newState)
                     return
                 }
@@ -295,7 +270,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     //目录页的初始化
-    private fun contentsInit(){
+    private fun contentsInit() {
         readContentsList.adapter = contentsAdapter
         readContentsList.layoutManager = contentsManager
         //分割线
@@ -384,6 +359,42 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             }
         })
         contentsAdapter.notifyDataSetChanged()
+    }
+
+    private inline fun preChapter() {
+        val list = contentViewModel.getList()
+        if (list.size == 0) {
+            showError("未知错误。")
+            return
+        }
+        val pid = list[0].pid
+        if (pid == -1L) {
+            showError("这是第一章哦")
+            return
+        }
+        //加载上一张
+        contentViewModel.getChapter(pid, true)
+        dialog.show()
+    }
+
+    private inline fun nextChapter() {
+        val list = contentViewModel.getList()
+        if (list.size == 0) {
+            showError("未知错误。")
+            return
+        }
+
+        val nid = list[list.size - 1].nid
+        if (nid == -1L) {
+            if (status == "状态：完结")
+                showSuccess("恭喜你又读完一本书。")
+            else
+                showError("已经是最后一章了。")
+            return
+        }
+        //加载下一章
+        contentViewModel.getChapter(nid)
+        dialog.show()
     }
 
     override fun showMsg(msg: String) {
@@ -500,5 +511,25 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     //目录页选中
     override fun onClick(item: ContentsVM.ContentsInfo) {
 
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        when (keyCode) {
+            KeyEvent.KEYCODE_VOLUME_UP -> {
+                readList.scrollBy(0, -readList.height)
+                if (!readList.canScrollVertically(-1)){
+                    preChapter()
+                }
+                return true
+            }
+            KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                readList.scrollBy(0, readList.height)
+                if (!readList.canScrollVertically(1)){
+                    nextChapter()
+                }
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 }

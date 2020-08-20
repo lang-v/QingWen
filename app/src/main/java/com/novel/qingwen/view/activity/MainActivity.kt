@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         val currentTime = System.currentTimeMillis()
         if (currentTime - lastTime <= 1500) {
             finish()
-            super.onBackPressed()
+            return
         }
         lastTime = currentTime
         show("再按一次退出")

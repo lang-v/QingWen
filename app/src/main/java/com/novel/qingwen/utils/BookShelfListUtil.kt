@@ -7,15 +7,19 @@ import kotlinx.coroutines.launch
 object BookShelfListUtil {
     private val list = ArrayList<BookInfo>()
     private val bookInfoDao = RoomUtil.bookInfoDao
+    var currentBookInfo:BookInfo? = null
     fun init() {
         GlobalScope.launch {
             list.addAll(bookInfoDao.loadAll())
         }
     }
 
-    fun getList():ArrayList<BookInfo> = list
+    fun getList(): ArrayList<BookInfo> = list
 
     fun insert(bookInfo: BookInfo) {
+        list.forEach {
+            if(it.novelId == bookInfo.novelId)return
+        }
         list.add(0, bookInfo)
         GlobalScope.launch {
             bookInfoDao.insert(bookInfo)

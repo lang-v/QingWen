@@ -121,34 +121,12 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
     //生成右上角菜单
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.resume_menu, menu)
-        return true
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        Log.e("Resume onActivityResult","callback ${data?.getLongExtra("currentReadId",-1L)}")
-        when(requestCode){
-            ReadActivity.REQCODE->{
-                if (data==null)return
-                val currentReadId = data.getLongExtra("currentReadId",-1L)
-                if (currentReadId == -1L)return
-                val info = viewModel.info
-                val item = BookInfo(
-                    info.id,
-                    info.img,
-                    info.name,
-                    info.status,
-                    false,
-                    currentReadId,
-                    info.name,
-                    info.firstChapterID,
-                    info.lastChapterID,
-                    info.lastChapterTime,
-                    info.lastChapterName
-                )
-                BookShelfListUtil.insert(item)
-            }
+        val item = menu?.findItem(R.id.addToBookShelf)
+        BookShelfListUtil.getList().forEach {
+            if (it.novelId == BookShelfListUtil.currentBookInfo?.novelId)
+                item?.isEnabled = false
         }
+        return true
     }
 
     //处理 toolbar点击事件
@@ -160,22 +138,11 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
             }
             R.id.addToBookShelf -> {
                 showSuccess("加入书架")
-                val info = viewModel.info
-                BookShelfListUtil.insert(
-                    BookInfo(
-                        info.id,
-                        info.img,
-                        info.name,
-                        info.status,
-                        false,
-                        info.firstChapterID,
-                        info.name,
-                        info.firstChapterID,
-                        info.lastChapterID,
-                        info.lastChapterTime,
-                        info.lastChapterName
+                BookShelfListUtil.currentBookInfo?.let {
+                    BookShelfListUtil.insert(
+                        it
                     )
-                )
+                }
             }
         }
         return super.onOptionsItemSelected(item)

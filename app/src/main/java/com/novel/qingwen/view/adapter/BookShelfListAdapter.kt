@@ -32,7 +32,7 @@ class BookShelfListAdapter(
             .load(item.img)
             .into(holder.img)
 
-        holder.title.text = item.title
+        holder.title.text = item.novelName
         holder.newChapter.text = item.lastChapterName
         holder.newTime.text = item.lastUpdateTime
 
@@ -49,7 +49,7 @@ class BookShelfListAdapter(
             if (item.lastReadId == -1L){
                 Show.show(holder.itemView.context,"未知错误")
             }
-            ReadActivity.start(holder.itemView.context,item.novelId,item.lastReadId,item.title,item.status,isInBookShelf = true)
+            ReadActivity.start(holder.itemView.context,item.novelId,item.lastReadId,item.novelName,item.status,isInBookShelf = true)
             item.update = false
             //写入数据库
             GlobalScope.launch {

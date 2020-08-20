@@ -7,7 +7,6 @@ import androidx.room.PrimaryKey
 data class BookInfo(
     @PrimaryKey val novelId: Long,
     val img:String,
-    val title:String,
     val status:String,
     var update:Boolean=false,
     var lastReadId: Long,

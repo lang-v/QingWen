@@ -43,7 +43,7 @@ class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
             intent.putExtra("id", id)
             intent.putExtra("name", name)
             intent.putExtra("status", status)
-            context.startActivityForResult(intent, ReadActivity.REQCODE)
+            context.startActivity(intent)
         }
     }
 
@@ -276,19 +276,21 @@ class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
         if (resultCode == ReadActivity.REQCODE) {
             if (data == null) return
             val currentReadId = data.getLongExtra("currentReadID", -1L)
+            if (currentReadId == -1L)return
             AlertDialog.Builder(ContextThemeWrapper(this, R.style.CommonDialog))
                 .setTitle("喜欢这本书吗？")
                 .setMessage("加入书架吧！")
                 .setPositiveButton(
                     "好的"
                 ) { _, _ ->
-                    setResult(
-                        ReadActivity.REQCODE,
-                        Intent().apply { putExtra("currentReadId", currentReadId) })
+                    BookShelfListUtil.currentBookInfo?.apply { lastReadId=currentReadId }?.let {
+                        BookShelfListUtil.insert(
+                            it
+                        )
+                    }
                     /*
                     val vm: ResumeVM by viewModels()
                     val info = vm.info
-                    val item = BookInfo(
                         info.id,
                         info.img,
                         info.name,
@@ -308,13 +310,14 @@ class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
 
     //list item click 跳转只readactivity 附带返回值
     override fun onClick(item: ContentsVM.ContentsInfo) {
-        var target = true
+        var target = false
+        var target2= false
         BookShelfListUtil.getList().forEach {
             if (it.novelId == id) {
-                target = false
+                target2 = true
                 return@forEach
             }
         }
-        ReadActivity.start(this, id, item.id, name, status, forResult = target)
+        ReadActivity.start(this, id, item.id, name, status,target2,target)
     }
 }

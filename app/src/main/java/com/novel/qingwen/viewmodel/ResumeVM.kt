@@ -11,6 +11,7 @@ import com.novel.qingwen.net.bean.BookInfo
 import com.novel.qingwen.blur.BlurTransformation
 import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.net.callback.ResponseCallback
+import com.novel.qingwen.utils.BookShelfListUtil
 
 
 class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
@@ -32,8 +33,8 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
         var lastChapterTime: String = ""
         var lastChapterName: String = ""
 
-        var id:Long = 0L
-        var firstChapterID:Long = -1L
+        var id: Long = 0L
+        var firstChapterID: Long = -1L
         var lastChapterID = -1L
     }
 
@@ -67,7 +68,7 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
             Glide.with(view.context)
                 .asBitmap()
                 .load(url)
-                    //巨丑 error这里不会调用高斯模糊,我宁愿没有图片
+                //巨丑 error这里不会调用高斯模糊,我宁愿没有图片
 //                .error(R.drawable.notfoundpic)
                 .apply(RequestOptions.bitmapTransform(BlurTransformation(view.context, 25, 8)))
                 .into(view)
@@ -88,7 +89,7 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
     }
 
     override fun onSuccess(t: BookInfo) {
-        info.id = t.data.Id.toLong()
+        info.id = t.data.Id
         info.img = "https://imgapixs.pysmei.com/BookFiles/BookImages/${t.data.Img}"
         info.name = t.data.Name
         info.author = "作者：${t.data.Author}"
@@ -100,8 +101,22 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
         info.lastChapterName = t.data.LastChapter
         info.firstChapterID = t.data.FirstChapterId
         info.lastChapterID = t.data.LastChapterId
+        val bookInfo = com.novel.qingwen.room.entity.BookInfo(
+            info.id,
+            info.img,
+            info.status,
+            false,
+            info.firstChapterID,
+            info.name,
+            info.firstChapterID,
+            info.lastChapterID,
+            info.lastChapterTime,
+            info.lastChapterName
+        )
+        BookShelfListUtil.currentBookInfo = bookInfo
         iView?.onComplete()
     }
+
     override fun onCleared() {
         NetUtil.clear(this)
         super.onCleared()

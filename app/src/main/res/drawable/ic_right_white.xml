@@ -1,0 +1,16 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+<!--  圆-->
+    <path
+        android:pathData="M12 22 a10 10 0 1 0 0 -20 a10 10 0 1 0 0 20"
+        android:strokeWidth="1"
+        android:strokeColor="@android:color/white" />
+<!--  对勾-->
+
+    <path android:strokeColor="@android:color/white"
+      android:strokeWidth="2"
+      android:pathData="M6 11 l5 4.5 l7 -6.5"/>
+</vector>
