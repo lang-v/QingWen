@@ -11,7 +11,6 @@ class FragmentAdapter(fragmentActivity: FragmentActivity, private val list:List<
 
     override fun getItemCount(): Int = list.size
 
-
     override fun createFragment(position: Int): Fragment = list[position]
 
 }

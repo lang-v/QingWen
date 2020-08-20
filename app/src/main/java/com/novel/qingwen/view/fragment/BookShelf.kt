@@ -1,63 +1,90 @@
 package com.novel.qingwen.view.fragment
 
+import android.graphics.Color
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.ColorInt
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.novel.qingwen.R
-import com.novel.qingwen.bean.BookInfo
+import com.novel.qingwen.base.IBaseView
+import com.novel.qingwen.utils.BookShelfListUtil
+import com.novel.qingwen.view.activity.show
 import com.novel.qingwen.view.adapter.BookShelfListAdapter
+import com.novel.qingwen.viewmodel.BookShelfVM
+import kotlinx.android.synthetic.main.fragment_book_shelf.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
-/**
- * A fragment representing a list of Items.
- */
-class BookShelf : Fragment() {
+class BookShelf : Fragment(), IBaseView{
+    private val viewModel:BookShelfVM by viewModels()
+    private lateinit var adapter:BookShelfListAdapter
 
-    private var columnCount = 1
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        init()
+    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onStart() {
+        super.onStart()
+        viewModel.attachView(this)
+        bookShelfRefresh.isRefreshing = true
+        viewModel.refresh()
+        adapter.notifyDataSetChanged()
+    }
 
-        arguments?.let {
-            columnCount = it.getInt(ARG_COLUMN_COUNT)
+    override fun onStop() {
+        super.onStop()
+        viewModel.detachView()
+    }
+
+    private fun init(){
+        bookShelfRefresh.setColorSchemeColors(Color.GREEN,Color.BLUE,Color.YELLOW)
+        //刷新
+        bookShelfRefresh.setOnRefreshListener {
+            viewModel.refresh()
         }
+        adapter = BookShelfListAdapter(viewModel.getList())
+        bookShelfList.adapter = adapter
+        bookShelfList.layoutManager = LinearLayoutManager(context)
+        //分割线
+        bookShelfList.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                LinearLayoutManager.VERTICAL
+            )
+        )
+
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_book_shelf_list, container, false)
-
-        // Set the adapter
-        if (view is RecyclerView) {
-            with(view) {
-                layoutManager = when {
-                    columnCount <= 1 -> LinearLayoutManager(context)
-                    else -> GridLayoutManager(context, columnCount)
-                }
-                adapter = BookShelfListAdapter(
-                    Any() as List<BookInfo>
-                )
-            }
-        }
-        return view
+        return inflater.inflate(R.layout.fragment_book_shelf, container, false)
     }
 
-    companion object {
+    override fun showMsg(msg: String) {
+        activity?.show(msg)
+    }
 
-        const val ARG_COLUMN_COUNT = "column-count"
-
-        @JvmStatic
-        fun newInstance(columnCount: Int) =
-            BookShelf().apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_COLUMN_COUNT, columnCount)
+    override fun onComplete(target: Int) {
+        GlobalScope.launch (Dispatchers.Main){
+            if (adapter.itemCount == 0){
+                bookShelfTips.visibility = View.VISIBLE
+            }else {
+                if (bookShelfTips.visibility != View.GONE){
+                    bookShelfTips.visibility = View.GONE
                 }
             }
+            adapter.notifyDataSetChanged()
+            if (bookShelfRefresh.isRefreshing)
+                bookShelfRefresh.isRefreshing = false
+        }
     }
 }

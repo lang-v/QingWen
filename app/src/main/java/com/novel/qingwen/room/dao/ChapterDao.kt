@@ -8,7 +8,6 @@ import com.novel.qingwen.room.entity.Chapter
 
 @Dao
 interface ChapterDao {
-
     @Query("select * from Chapter where novelId=:novelId and chapterId=:chapterId")
     fun loadById(novelId:Long,chapterId:Long):Chapter?
 

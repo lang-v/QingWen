@@ -3,10 +3,10 @@ package com.novel.qingwen.utils
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
-import com.novel.qingwen.bean.BookContents
-import com.novel.qingwen.bean.BookInfo
-import com.novel.qingwen.bean.ChapterContent
-import com.novel.qingwen.bean.SearchResult
+import com.novel.qingwen.net.bean.BookContents
+import com.novel.qingwen.net.bean.BookInfo
+import com.novel.qingwen.net.bean.ChapterContent
+import com.novel.qingwen.net.bean.SearchResult
 import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.net.service.Novel
 import okhttp3.ResponseBody

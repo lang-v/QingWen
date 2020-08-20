@@ -89,4 +89,7 @@ dependencies {
     //CardView
     implementation 'androidx.cardview:cardview:1.0.0'
 
+    //swipe layout 侧滑
+    implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
+
 }

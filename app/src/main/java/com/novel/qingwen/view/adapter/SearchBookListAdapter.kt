@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.novel.qingwen.R
-import com.novel.qingwen.bean.SearchResultItem
+import com.novel.qingwen.net.bean.SearchResultItem
 import com.novel.qingwen.view.activity.ResumeActivity
 
 class SearchBookListAdapter(private val list: ArrayList<SearchResultItem>) :

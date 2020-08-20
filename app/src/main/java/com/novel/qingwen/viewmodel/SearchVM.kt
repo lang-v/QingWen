@@ -2,8 +2,8 @@ package com.novel.qingwen.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import com.novel.qingwen.base.BaseVM
-import com.novel.qingwen.bean.SearchResult
-import com.novel.qingwen.bean.SearchResultItem
+import com.novel.qingwen.net.bean.SearchResult
+import com.novel.qingwen.net.bean.SearchResultItem
 import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.net.callback.ResponseCallback
 

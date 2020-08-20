@@ -12,9 +12,7 @@ import com.novel.qingwen.viewmodel.ContentsVM
 
 class BookContentsListAdapter(
     private val list: ArrayList<ContentsVM.ContentsInfo>,
-    private val novelId: Long,
-    private val novelName: String,
-    private val status:String
+    private val listener:ItemOnClickListener
 ) :
     RecyclerView.Adapter<BookContentsListAdapter.VH>() {
 
@@ -36,7 +34,8 @@ class BookContentsListAdapter(
         holder.name.text = item.name
         if (getItemViewType(position) == 2)
             holder.itemView.setOnClickListener {
-                ReadActivity.start(holder.itemView.context, novelId, item.id,novelName,status)
+//                ReadActivity.start(holder.itemView.context, novelId, item.id,novelName,status)
+                listener.onClick(item)
             }
         else {
 
@@ -53,4 +52,7 @@ class BookContentsListAdapter(
     class VH(view: View) : RecyclerView.ViewHolder(view) {
         val name: TextView = view.findViewById(R.id.text)
     }
+}
+interface ItemOnClickListener{
+    fun onClick(item:ContentsVM.ContentsInfo)
 }

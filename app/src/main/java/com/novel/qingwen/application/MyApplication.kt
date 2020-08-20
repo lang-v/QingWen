@@ -1,6 +1,7 @@
 package com.novel.qingwen.application
 
 import android.app.Application
+import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.ConfigUtil
 import com.novel.qingwen.utils.RoomUtil
 import kotlinx.coroutines.Dispatchers
@@ -14,6 +15,7 @@ class MyApplication: Application() {
         RoomUtil.init(this)
         GlobalScope.launch(Dispatchers.Default) {
             ConfigUtil.init()
+            BookShelfListUtil.init()
         }
 //        GlobalScope.launch {
 //            RoomUtil.chapterDao.insertAll(Chapter(11L,"001 重生剑客","那一天，我重生了。",-1,-1))

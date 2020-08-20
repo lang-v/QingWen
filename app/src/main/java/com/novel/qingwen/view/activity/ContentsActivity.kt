@@ -1,38 +1,49 @@
 package com.novel.qingwen.view.activity
 
+import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.DisplayMetrics
+import android.util.Log
+import android.view.ContextThemeWrapper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
+import com.novel.qingwen.room.entity.BookInfo
+import com.novel.qingwen.utils.BookShelfListUtil
+import com.novel.qingwen.utils.RoomUtil
 import com.novel.qingwen.view.adapter.BookContentsListAdapter
+import com.novel.qingwen.view.adapter.ItemOnClickListener
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.ContentsVM
+import com.novel.qingwen.viewmodel.ResumeVM
 import kotlinx.android.synthetic.main.activity_contents.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class ContentsActivity : AppCompatActivity(), IBaseView {
+class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
     companion object {
         // newInstance
-        fun start(context: Context, id: Long, name: String, status: String) {
+        fun start(context: Activity, id: Long, name: String, status: String) {
             val intent = Intent(context, ContentsActivity::class.java)
             intent.putExtra("id", id)
             intent.putExtra("name", name)
             intent.putExtra("status", status)
-            context.startActivity(intent)
+            context.startActivityForResult(intent, ReadActivity.REQCODE)
         }
     }
 
@@ -95,7 +106,7 @@ class ContentsActivity : AppCompatActivity(), IBaseView {
         contentsToolbar.setNavigationIcon(R.drawable.back_btn_selector)
         supportActionBar?.title = name
         //列表适配器
-        adapter = BookContentsListAdapter(viewModel.getList(), id, name, status)
+        adapter = BookContentsListAdapter(viewModel.getList(), this)
         //分割线
         contentsList.addItemDecoration(
             DividerItemDecoration(
@@ -162,13 +173,6 @@ class ContentsActivity : AppCompatActivity(), IBaseView {
                                 return
                             }
                         }
-//                        else {
-//                            if (headList[currentHeadViewIndex].id.toInt() > manager.findFirstVisibleItemPosition()) {
-//                                headView.text = headList[--currentHeadViewIndex].name
-//                                headView.y = 0f
-//                                return
-//                            }
-//                        }
 
                     }
 
@@ -199,7 +203,6 @@ class ContentsActivity : AppCompatActivity(), IBaseView {
         menuInflater.inflate(R.menu.contents_menu, menu)
         return true
     }
-
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -266,5 +269,52 @@ class ContentsActivity : AppCompatActivity(), IBaseView {
             scroller.targetPosition = position
             startSmoothScroll(scroller)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == ReadActivity.REQCODE) {
+            if (data == null) return
+            val currentReadId = data.getLongExtra("currentReadID", -1L)
+            AlertDialog.Builder(ContextThemeWrapper(this, R.style.CommonDialog))
+                .setTitle("喜欢这本书吗？")
+                .setMessage("加入书架吧！")
+                .setPositiveButton(
+                    "好的"
+                ) { _, _ ->
+                    setResult(
+                        ReadActivity.REQCODE,
+                        Intent().apply { putExtra("currentReadId", currentReadId) })
+                    /*
+                    val vm: ResumeVM by viewModels()
+                    val info = vm.info
+                    val item = BookInfo(
+                        info.id,
+                        info.img,
+                        info.name,
+                        info.status,
+                        false,
+                        if (currentReadId == -1L) info.firstChapterID else currentReadId,
+                        info.name,
+                        info.firstChapterID,
+                        info.lastChapterID,
+                        info.lastChapterTime,
+                        info.lastChapterName
+                    )
+                    BookShelfListUtil.insert(item)*/
+                }.setNegativeButton("算了") { _, _ -> }.show()
+        }
+    }
+
+    //list item click 跳转只readactivity 附带返回值
+    override fun onClick(item: ContentsVM.ContentsInfo) {
+        var target = true
+        BookShelfListUtil.getList().forEach {
+            if (it.novelId == id) {
+                target = false
+                return@forEach
+            }
+        }
+        ReadActivity.start(this, id, item.id, name, status, forResult = target)
     }
 }

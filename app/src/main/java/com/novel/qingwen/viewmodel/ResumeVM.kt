@@ -7,7 +7,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.novel.qingwen.R
 import com.novel.qingwen.base.BaseVM
-import com.novel.qingwen.bean.BookInfo
+import com.novel.qingwen.net.bean.BookInfo
 import com.novel.qingwen.blur.BlurTransformation
 import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.net.callback.ResponseCallback
@@ -33,6 +33,8 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
         var lastChapterName: String = ""
 
         var id:Long = 0L
+        var firstChapterID:Long = -1L
+        var lastChapterID = -1L
     }
 
     init {
@@ -96,6 +98,8 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
         info.resumeText = t.data.Desc
         info.lastChapterTime = t.data.LastTime
         info.lastChapterName = t.data.LastChapter
+        info.firstChapterID = t.data.FirstChapterId
+        info.lastChapterID = t.data.LastChapterId
         iView?.onComplete()
     }
     override fun onCleared() {

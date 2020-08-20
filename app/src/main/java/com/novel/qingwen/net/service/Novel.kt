@@ -1,6 +1,6 @@
 package com.novel.qingwen.net.service
 
-import com.novel.qingwen.bean.*
+import com.novel.qingwen.net.bean.*
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.GET

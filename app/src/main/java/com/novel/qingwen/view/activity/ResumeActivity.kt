@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.TextView
 import androidx.activity.viewModels
@@ -12,10 +13,15 @@ import androidx.databinding.DataBindingUtil
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.databinding.ActivityResumeBinding
+import com.novel.qingwen.room.entity.BookInfo
+import com.novel.qingwen.utils.BookShelfListUtil
+import com.novel.qingwen.utils.RoomUtil
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.ResumeVM
 import kotlinx.android.synthetic.main.activity_resume.*
 import kotlinx.android.synthetic.main.fragment_search_list_item.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -28,10 +34,11 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
 //        "重生之绝爱"
     }
 
-//    val name = "青文"
+    //    val name = "青文"
     private val viewModel: ResumeVM by viewModels()
     private lateinit var dataBinding: ActivityResumeBinding
-    private val dialog:NoticeDialog by lazy { NoticeDialog.build(this,"请稍候") }
+    private val dialog: NoticeDialog by lazy { NoticeDialog.build(this, "请稍候") }
+
     companion object {
         fun start(context: Context, id: Long, name: String) {
             val intent = Intent(context, ResumeActivity::class.java)
@@ -55,7 +62,7 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
         //Log.e("SL","id=${id}")
         if (id != -1L) {
             viewModel.load(id)
-            if (dialog.isShowing)dialog.dismiss()
+            if (dialog.isShowing) dialog.dismiss()
             dialog.show()
         } else
             showError("获取信息失败，未找到此书")
@@ -79,27 +86,32 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
             resumeToolbar.setNavigationIcon(R.drawable.back_btn_selector)
             supportActionBar!!.title = name
             //动态设置toolbar高度
-            val statusHeight = (getStatusHeight()*0.9).roundToInt()
+            val statusHeight = (getStatusHeight() * 0.9).roundToInt()
 //            resumeToolbar.setPadding(0, statusHeight/2, 0, 0)
 //            resumeToolbar.textAlignment = TextView.
 //            resumeToolbar.titleMarginTop = (statusHeight*1.5).toInt()
 
             resumeToolbar.layoutParams.apply {
-                height+=statusHeight
+                height += statusHeight
             }
-            resumeToolbar.setPadding(0,statusHeight,0,0)
+            resumeToolbar.setPadding(0, statusHeight, 0, 0)
 //            resumeBg.layoutParams.apply {
 //                height+=statusHeight
 //            }
 //            resumeBg.setPadding(0,-statusHeight,0,0)
             resumeContents.setOnClickListener {
-                ContentsActivity.start(this,viewModel.info.id,viewModel.info.name,viewModel.info.status)
+                ContentsActivity.start(
+                    this,
+                    viewModel.info.id,
+                    viewModel.info.name,
+                    viewModel.info.status
+                )
             }
         }
     }
 
     //设置沉浸状态栏
-    private fun setTranslucentStatus(){
+    private fun setTranslucentStatus() {
         val options = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         window.decorView.systemUiVisibility = options
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
@@ -112,6 +124,33 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
         return true
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.e("Resume onActivityResult","callback ${data?.getLongExtra("currentReadId",-1L)}")
+        when(requestCode){
+            ReadActivity.REQCODE->{
+                if (data==null)return
+                val currentReadId = data.getLongExtra("currentReadId",-1L)
+                if (currentReadId == -1L)return
+                val info = viewModel.info
+                val item = BookInfo(
+                    info.id,
+                    info.img,
+                    info.name,
+                    info.status,
+                    false,
+                    currentReadId,
+                    info.name,
+                    info.firstChapterID,
+                    info.lastChapterID,
+                    info.lastChapterTime,
+                    info.lastChapterName
+                )
+                BookShelfListUtil.insert(item)
+            }
+        }
+    }
+
     //处理 toolbar点击事件
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -121,6 +160,22 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
             }
             R.id.addToBookShelf -> {
                 showSuccess("加入书架")
+                val info = viewModel.info
+                BookShelfListUtil.insert(
+                    BookInfo(
+                        info.id,
+                        info.img,
+                        info.name,
+                        info.status,
+                        false,
+                        info.firstChapterID,
+                        info.name,
+                        info.firstChapterID,
+                        info.lastChapterID,
+                        info.lastChapterTime,
+                        info.lastChapterName
+                    )
+                )
             }
         }
         return super.onOptionsItemSelected(item)

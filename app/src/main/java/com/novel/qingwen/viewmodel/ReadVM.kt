@@ -1,8 +1,7 @@
 package com.novel.qingwen.viewmodel
 
-import android.graphics.Color
 import com.novel.qingwen.base.BaseVM
-import com.novel.qingwen.bean.ChapterContent
+import com.novel.qingwen.net.bean.ChapterContent
 import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.utils.RoomUtil
