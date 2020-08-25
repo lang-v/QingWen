@@ -113,7 +113,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         contentViewModel.init(novelId)
         //开始加载小说内容,这个方法是异步的,确认不是Activity重建后，开始加载数据
         if (savedInstanceState == null || savedInstanceState.getLong("chapterId", -1L) == -1L) {
-            contentViewModel.getChapter(chapterId)//前中后三章
+            contentViewModel.getChapter(chapterId,true,3)//前中后三章
         }
         if (dialog.isShowing) {
             dialog.dismiss()

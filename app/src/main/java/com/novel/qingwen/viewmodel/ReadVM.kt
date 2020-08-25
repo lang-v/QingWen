@@ -38,31 +38,28 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         GlobalScope.launch {
             val t = RoomUtil.chapterDao.loadById(novelId, chapterId)
             if (t != null) {
+                if (t.content.length < 200 || t.nid == -1L){
+                    RoomUtil.chapterDao.delete(t)
+                    getChapter(chapterId, attachStart, count)
+                    return@launch
+                }
                 if (attachStart) {
                     list.add(0, t)
                     iView?.onComplete(1)
                     if (count == 2 && t.pid != -1L) {
                         getChapter(t.pid, attachStart, 1)
                     }
-
                 } else {
                     list.add(t)
-                    iView?.onComplete(2)
+                    iView?.onComplete(2) 
                     if (count == 2 && t.nid != -1L) {
                         getChapter(t.nid, attachStart, 1)
                     }
                 }
-//                if (count == 3) {
-//                    if (t.pid != -1L)
-//                        getChapter(t.pid, true, 1)
-//                    if (t.nid != -1L)
-//                        getChapter(t.nid, false, 1)
-//                }
-
-            } else {
-                this@ReadVM.attachStart = attachStart
-                NetUtil.getChapterContent(novelId, chapterId)
+                return@launch
             }
+            this@ReadVM.attachStart = attachStart
+            NetUtil.getChapterContent(novelId, chapterId)
         }
 //        list.add(t)
     }

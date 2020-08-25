@@ -92,4 +92,7 @@ dependencies {
     //swipe layout 侧滑
     implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
 
+    //bugly
+    implementation 'com.tencent.bugly:crashreport:2.1.5'
+
 }

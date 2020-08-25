@@ -1,11 +1,15 @@
 package com.novel.qingwen.view.activity
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
@@ -16,6 +20,8 @@ import com.novel.qingwen.view.fragment.SearchBook
 import com.novel.qingwen.viewmodel.MainVM
 import com.novel.qingwen.utils.Show
 import com.novel.qingwen.view.fragment.BookShelf
+import com.tbruyelle.rxpermissions2.RxPermissions
+import com.tencent.bugly.crashreport.CrashReport
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -24,11 +30,28 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     private val mainVM:MainVM by viewModels()
+    @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        RxPermissions(this)
+            .request(
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.READ_PHONE_STATE
+            )
+            .subscribe {
+                if (!it){
+                    showError("没有此权限App无法正常运行")
+                    finish()
+                }
+            }
+
         //启动页
         setContentView(R.layout.activity_welcome)
         window.statusBarColor = Color.WHITE
+        initBugly()
+        //CrashReport.testJavaCrash()
         val list = ArrayList<Fragment>()
         list.add(BookShelf())
         list.add(SearchBook())
@@ -44,6 +67,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             adapter.notifyDataSetChanged()
             init()
         }
+    }
+
+    private fun initBugly(){
+        CrashReport.initCrashReport(applicationContext, "20fec18d0c", true);
+//        val context: Context = applicationContext
+//// 获取当前包名
+//        val packageName: String = context.getPackageName()
+//// 获取当前进程名
+//        val processName = getProcessName(Process.myPid())
+//// 设置是否为上报进程
+//        val strategy = UserStrategy(context)
+//        strategy.setUploadProcess(processName == null || processName == packageName)
+//// 初始化Bugly
+//        CrashReport.initCrashReport(context, "20fec18d0c", true, strategy)
     }
 
     private fun init(){

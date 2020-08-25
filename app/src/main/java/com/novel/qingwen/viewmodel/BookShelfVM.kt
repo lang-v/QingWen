@@ -24,6 +24,7 @@ class BookShelfVM:BaseVM() {
                         if (it.lastChapterId != t.data.LastChapterId){
                             it.lastChapterId = t.data.LastChapterId
                             it.lastChapterName = t.data.LastChapter
+                            it.lastUpdateTime = t.data.LastTime
                             it.update = true
                             iView?.onComplete()
                             //写入数据库
