@@ -3,6 +3,7 @@ package com.novel.qingwen.view.activity
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Context
 import android.content.Intent
@@ -44,8 +45,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             chapterId: Long,
             novelName: String,
             status: String,
-            isInBookShelf: Boolean = false,
-            forResult: Boolean = false
+            isInBookShelf: Boolean = false
         ) {
             val intent = Intent(context, ReadActivity::class.java)
             intent.putExtra("novelId", novelId)
@@ -53,15 +53,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             intent.putExtra("novelName", novelName)
             intent.putExtra("status", status)
             intent.putExtra("isInBookShelf", isInBookShelf)
-            if (forResult) {
-                try {
-                    (context as Activity).startActivityForResult(intent, REQCODE)
-                } catch (e: ClassCastException) {
-                    e.printStackTrace()
-                }
-            } else {
-                context.startActivity(intent)
-            }
+            context.startActivity(intent)
         }
     }
 
@@ -113,12 +105,13 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         contentViewModel.init(novelId)
         //开始加载小说内容,这个方法是异步的,确认不是Activity重建后，开始加载数据
         if (savedInstanceState == null || savedInstanceState.getLong("chapterId", -1L) == -1L) {
-            contentViewModel.getChapter(chapterId,true,3)//前中后三章
+            contentViewModel.getChapter(chapterId, true, 3)//前中后三章
         }
         if (dialog.isShowing) {
             dialog.dismiss()
         }
     }
+
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -136,13 +129,12 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         contentViewModel.detachView()
         contentsViewModel.detachView()
         //设置返回值
-        setResult(REQCODE, Intent().apply { putExtra("currentReadId", currentReadID) })
         if (!isInBookShelf) return
         //如果这本书是已经加入书架了的就更新阅读位置
         BookShelfListUtil.getList().forEach {
             if (it.novelId == novelId) {
                 it.lastReadId = currentReadID
-                Log.e("SL", "lastReadId=${it.lastChapterId} current=$currentReadID")
+//                Log.e("SL", "lastReadId=${it.lastChapterId} current=$currentReadID")
                 BookShelfListUtil.update(it)
                 return@forEach
             }
@@ -159,18 +151,19 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         when (item.itemId) {
             //返回
             android.R.id.home -> {
-                setResult(REQCODE, Intent().apply { putExtra("currentReadId", currentReadID) })
                 finish()
             }
             R.id.readMenuContents -> {
                 showSuccess("打开目录")
 //                ContentsActivity.start(this,novelId,novelName,status)
 //                finish()
-                if (readDrawerLayout.isDrawerOpen(readBottomView)) {
-                    readDrawerLayout.openDrawer(readBottomView)
-                    if (contentsViewModel.getList().size == 0)
-                        contentsViewModel.load(novelId)
-                }
+                ContentsActivity.start(this, novelId, novelName, status)
+                finish()
+//                if (readDrawerLayout.isDrawerOpen(readBottomView)) {
+//                    readDrawerLayout.openDrawer(readBottomView)
+//                    if (contentsViewModel.getList().size == 0)
+//                        contentsViewModel.load(novelId)
+//                }
             }
         }
         return super.onOptionsItemSelected(item)
@@ -361,7 +354,12 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         contentsAdapter.notifyDataSetChanged()
     }
 
+    //此锁用于避免短时间内连续加载相同章节
+    private val loadLock = ReentrantLock()
+
     private inline fun preChapter() {
+        if (lock.isLocked) return
+        lock.lock()
         val list = contentViewModel.getList()
         if (list.size == 0) {
             showError("未知错误。")
@@ -378,9 +376,12 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     private inline fun nextChapter() {
+        if (lock.isLocked) return
+        lock.lock()
         val list = contentViewModel.getList()
         if (list.size == 0) {
             showError("未知错误。")
+            lock.unlock()
             return
         }
 
@@ -390,6 +391,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 showSuccess("恭喜你又读完一本书。")
             else
                 showError("已经是最后一章了。")
+            lock.unlock()
             return
         }
         //加载下一章
@@ -407,6 +409,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
      * @param target 1:插入头部 2:插入尾部
      */
     override fun onComplete(target: Int) {
+        if (lock.isLocked)
+            lock.unlock()
         GlobalScope.launch(Dispatchers.Main) {
             when (target) {
                 1 -> {
@@ -433,10 +437,11 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     private fun pageOnClick() {
 //        showSuccess("点击")
 //        Log.e("SL","y=${readSetting.y}")
-        if (isOpen)
+        if (isOpen) {
             closeSetting()
-        else
+        } else {
             openSetting()
+        }
     }
 
     private val topOpen: ObjectAnimator by lazy {
@@ -503,8 +508,25 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     override fun onBackPressed() {
-        setResult(REQCODE, Intent().apply { putExtra("currentReadId", currentReadID) })
-        super.onBackPressed()
+        if (!isInBookShelf){
+            AlertDialog.Builder(ContextThemeWrapper(this, R.style.CommonDialog))
+                .setTitle("喜欢这本书吗？")
+                .setMessage("加入书架吧！")
+                .setPositiveButton(
+                    "好的"
+                ) { _, _ ->
+                    BookShelfListUtil.currentBookInfo?.let {
+                        BookShelfListUtil.insert(
+                            it
+                        )
+                    }
+                    super.onBackPressed()
+                }.setNegativeButton("算了") { _, _ ->
+                    super.onBackPressed()
+                }.show()
+        }else{
+            super.onBackPressed()
+        }
     }
 
 
@@ -517,14 +539,14 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP -> {
                 readList.scrollBy(0, -readList.height)
-                if (!readList.canScrollVertically(-1)){
+                if (!readList.canScrollVertically(-1)) {
                     preChapter()
                 }
                 return true
             }
             KeyEvent.KEYCODE_VOLUME_DOWN -> {
                 readList.scrollBy(0, readList.height)
-                if (!readList.canScrollVertically(1)){
+                if (!readList.canScrollVertically(1)) {
                     nextChapter()
                 }
                 return true

@@ -46,5 +46,7 @@ class NoticeDialog(context: Context) : Dialog(context,R.style.DialogTheme) {
         }
     }
 
+    override fun onBackPressed() {
 
+    }
 }

@@ -1,5 +1,6 @@
 package com.novel.qingwen.viewmodel
 
+import android.util.Log
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.net.bean.ChapterContent
 import com.novel.qingwen.utils.NetUtil
@@ -64,7 +65,6 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
 //        list.add(t)
     }
 
-
     override fun onFailure() {
         iView?.showMsg("加载失败，请检查网络。")
     }
@@ -81,6 +81,7 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
             iView?.onComplete(2)
         }
         GlobalScope.launch {
+//            Log.e("SQLite","$t")
             RoomUtil.chapterDao.insertAll(chapter)
         }
     }

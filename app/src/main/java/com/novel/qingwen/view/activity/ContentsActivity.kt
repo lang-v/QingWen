@@ -38,11 +38,12 @@ import kotlinx.coroutines.launch
 class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
     companion object {
         // newInstance
-        fun start(context: Activity, id: Long, name: String, status: String) {
+        fun start(context: Activity, id: Long, name: String, status: String,subActivity:Boolean = false) {
             val intent = Intent(context, ContentsActivity::class.java)
             intent.putExtra("id", id)
             intent.putExtra("name", name)
             intent.putExtra("status", status)
+            intent.putExtra("subActivity",subActivity)
             context.startActivity(intent)
         }
     }
@@ -56,9 +57,12 @@ class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
     private val name: String by lazy {
         intent.getStringExtra("name")
     }
+    //标记 当前activity是阅读页面的子活动
+    private val subActivity :Boolean by lazy { intent.getBooleanExtra("subActivity",false) }
 
     //小说状态，为了方便后面判断小说是否完结
     private val status: String by lazy { intent.getStringExtra("status") }
+
 
     //自定义  重写了smoothScrollToPosition方法 实现修改滑动时间
     private val manager = MyLinearLayoutManager(this)
@@ -310,14 +314,15 @@ class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
 
     //list item click 跳转只readactivity 附带返回值
     override fun onClick(item: ContentsVM.ContentsInfo) {
-        var target = false
-        var target2= false
+        var target= false
         BookShelfListUtil.getList().forEach {
             if (it.novelId == id) {
-                target2 = true
+                target = true
                 return@forEach
             }
         }
-        ReadActivity.start(this, id, item.id, name, status,target2,target)
+        ReadActivity.start(this, id, item.id, name, status,target)
+        //如果是子活动此时应该关闭当前子活动
+        if (subActivity)finish()
     }
 }

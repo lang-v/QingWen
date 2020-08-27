@@ -51,7 +51,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         setContentView(R.layout.activity_welcome)
         window.statusBarColor = Color.WHITE
         initBugly()
-        //CrashReport.testJavaCrash()
+//        GlobalScope.launch {
+//            CrashReport.testJavaCrash()
+//        }
         val list = ArrayList<Fragment>()
         list.add(BookShelf())
         list.add(SearchBook())
@@ -70,7 +72,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun initBugly(){
-        CrashReport.initCrashReport(applicationContext, "20fec18d0c", true);
+        CrashReport.initCrashReport(applicationContext, "20fec18d0c", false)
 //        val context: Context = applicationContext
 //// 获取当前包名
 //        val packageName: String = context.getPackageName()
