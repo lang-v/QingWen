@@ -55,13 +55,17 @@ class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
 
     //小说名
     private val name: String by lazy {
-        intent.getStringExtra("name")
+        intent.getStringExtra("name")!!
     }
     //标记 当前activity是阅读页面的子活动
-    private val subActivity :Boolean by lazy { intent.getBooleanExtra("subActivity",false) }
+    private val subActivity :Boolean by lazy {
+        intent.getBooleanExtra("subActivity",false)
+    }
 
     //小说状态，为了方便后面判断小说是否完结
-    private val status: String by lazy { intent.getStringExtra("status") }
+    private val status: String by lazy {
+        intent.getStringExtra("status")!!
+    }
 
 
     //自定义  重写了smoothScrollToPosition方法 实现修改滑动时间
@@ -321,7 +325,7 @@ class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
                 return@forEach
             }
         }
-        ReadActivity.start(this, id, item.id, name, status,target)
+        ReadActivity.start(this, id, item.id,0, name, status,target)
         //如果是子活动此时应该关闭当前子活动
         if (subActivity)finish()
     }

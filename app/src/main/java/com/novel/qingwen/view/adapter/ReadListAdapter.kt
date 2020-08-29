@@ -1,9 +1,11 @@
 package com.novel.qingwen.view.adapter
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.room.entity.Chapter
@@ -26,11 +28,13 @@ class ReadListAdapter(
 
     override fun getItemCount(): Int = list.size
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: VH, position: Int) {
+//        holder.text.setText(list[position].content,TextView.BufferType.SPANNABLE)
         holder.text.text = list[position].content
         holder.title.text = list[position].name
-        holder.title.textSize = (ConfigUtil.getConfig().textSize + 5).toFloat()
-
+        holder.title.textSize = ConfigUtil.getTextSize().toFloat() + 5
+        holder.text.textSize = ConfigUtil.getTextSize().toFloat()
         //不拦截所有事件
 //        holder.itemView.setOnTouchListener { _, _ -> false}
         //点击事件给activity处理
@@ -42,5 +46,12 @@ class ReadListAdapter(
 ////            onClickListener.onClick(it)
 //            Log.e("item","onClick")
 //        }
+    }
+
+    override fun onViewAttachedToWindow(holder: VH) {
+        holder.text.textSize = ConfigUtil.getTextSize().toFloat()
+        holder.text.invalidate()
+        holder.text.requestLayout()
+        super.onViewAttachedToWindow(holder)
     }
 }

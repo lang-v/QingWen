@@ -107,6 +107,7 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
             info.status,
             false,
             info.firstChapterID,
+            0,
             info.name,
             info.firstChapterID,
             info.lastChapterID,

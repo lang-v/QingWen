@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion "30.0.1"
 
     compileOptions {
@@ -21,9 +21,9 @@ android {
     defaultConfig {
         applicationId "com.novel.qingwen"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 1
-        versionName "1.0.1"
+        versionName "1.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -63,7 +63,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.7.1'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-alpha01'
 //    implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.github.FrontmanwithWLJ:ElasticView:1.1.0'
+    //1.1.0 只适用于实现了NestScroll的viewgroup
+    implementation 'com.github.FrontmanwithWLJ:ElasticView:1.0.0'
     //glide 高斯模糊
     implementation 'jp.wasabeef:glide-transformations:2.0.1'
 
@@ -93,5 +94,5 @@ dependencies {
     implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
 
     //bugly
-    implementation 'com.tencent.bugly:crashreport:2.1.5'
+    implementation 'com.tencent.bugly:crashreport:2.1.7'
 }

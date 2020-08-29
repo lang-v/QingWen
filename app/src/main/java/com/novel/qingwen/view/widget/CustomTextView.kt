@@ -2,11 +2,8 @@ package com.novel.qingwen.view.widget
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.MotionEvent
-import android.widget.TextView
+import android.util.Log
 import androidx.core.content.res.ResourcesCompat
-import androidx.recyclerview.widget.RecyclerView
-import com.novel.qingwen.R
 import com.novel.qingwen.utils.ConfigUtil
 
 class CustomTextView @JvmOverloads constructor(
@@ -17,16 +14,14 @@ class CustomTextView @JvmOverloads constructor(
 //    constructor(context: Context,attributeSet: AttributeSet?):this(context,attributeSet,0)
 //    constructor(context: Context,attributeSet: AttributeSet?,defStyleAtt:Int):super(context,attributeSet,defStyleAtt){
     init {
-        val config = ConfigUtil.getConfig()
-        setTextColor(config.textColor)
-        textSize = config.textSize.toFloat()
-        //-1 为使用系统默认字体
-        if (config.textStyle != -1) {
-            typeface = ResourcesCompat.getFont(
-                context,
-                if (config.textStyle == 0) R.font.ht else R.font.kt
-            )
-        }
+        setTextColor(ConfigUtil.getTextColor())
+        textSize = ConfigUtil.getTextSize().toFloat()
+        //0 为系统默认字体无须设置
+        if (ConfigUtil.getTextStyle() != 0)
+            typeface = ResourcesCompat.getFont(context, ConfigUtil.getTextStyle())
     }
 
+    override fun setTextSize(size: Float) {
+        super.setTextSize(size)
+    }
 }

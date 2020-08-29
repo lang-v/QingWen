@@ -25,7 +25,7 @@ class CustomSeekBar @JvmOverloads constructor(
                     throw IllegalArgumentException("CustomSeekBar point size only support positive but size=$size")
             }
         }
-        progress = max/(size-1)*((ConfigUtil.getConfig().textSize-5)/5-1)
+        progress = max/(size-1)*(ConfigUtil.getConfig().textSize)
         setOnSeekBarChangeListener(this)
     }
 
@@ -39,7 +39,7 @@ class CustomSeekBar @JvmOverloads constructor(
         val newProgress = index*temp.toInt()
         //使得当前进度条只能在特定位置停留
         super.setProgress(newProgress)
-        listener?.onChanged(index+1)
+        listener?.onChanged(index)
     }
 
     //在这里监听用户拖动进度条的情况

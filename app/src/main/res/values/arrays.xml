@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--    字体大小10 15 20 25 30-->
+    <string-array name="text_size">
+        <item>特小</item>
+        <item>小</item>
+        <item>中</item>
+        <item>大</item>
+        <item>特大</item>
+    </string-array>
+<!--    字体-->
+    <string-array name="text_style">
+        <item>默认</item>
+        <item>黑体</item>
+        <item>楷体</item>
+    </string-array>
+<!-- 阅读页面背景颜色-->
+    <string-array name="background_color">
+<!--        默认字体颜色为黑色-->
+        <item>白</item>
+        <item>米黄</item>
+        <item>暗黄</item>
+        <item>浅绿</item>
+        <item>深绿</item>
+<!--        以下颜色将会改变字体颜色为白色-->
+        <item>浅灰</item>
+        <item>浅黑</item>
+    </string-array>
+
+    <string-array name="text_color">
+        <item>黑色</item>
+        <item>白色</item>
+    </string-array>
+</resources>

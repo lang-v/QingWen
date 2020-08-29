@@ -9,7 +9,7 @@ import com.novel.qingwen.room.entity.BookInfo
 import com.novel.qingwen.room.entity.Chapter
 import com.novel.qingwen.room.entity.Config
 
-@Database(entities = [Chapter::class,Config::class,BookInfo::class],version = 1)
+@Database(entities = [Chapter::class,Config::class,BookInfo::class],version = 1,exportSchema = false)
 abstract class AppDatabase:RoomDatabase() {
     abstract fun chapterDao(): ChapterDao
     abstract fun configDao():ConfigDao

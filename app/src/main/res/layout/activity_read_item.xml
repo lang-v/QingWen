@@ -22,8 +22,8 @@
     <com.novel.qingwen.view.widget.CustomTextView
         android:id="@+id/readItemText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        android:paddingBottom="700dp"
+        android:layout_marginBottom="700dp"
         android:textColor="@android:color/black" />
 </LinearLayout>

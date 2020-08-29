@@ -13,7 +13,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
-    private val list = ArrayList<Chapter>()
+    private var list = ArrayList<Chapter>()
     private var novelId: Long = -1L
     private var attachStart: Boolean = false
     val config: Config = ConfigUtil.getConfig()
@@ -30,6 +30,9 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         return list
     }
 
+    fun clear(){
+        list = ArrayList<Chapter>()
+    }
     /**
      * 小说文章加载时先从数据库中查找，没有缓存则网络请求,返回结果后将结果写入数据库
      * @param attachStart 是否将加载的小说内容添加到集合头部

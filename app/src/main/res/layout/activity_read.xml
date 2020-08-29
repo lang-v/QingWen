@@ -1,146 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/readDrawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:clipToPadding="false"
     tools:context=".view.activity.ReadActivity">
 
-    <FrameLayout
+    <RelativeLayout
+        android:id="@+id/readLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/white"
-        android:clipToPadding="false">
+        android:layout_height="match_parent">
+
+        <com.novel.qingwen.view.widget.CustomTextView
+            android:id="@+id/readHead"
+            android:layout_width="match_parent"
+            android:layout_height="25dp"
+            android:background="@android:color/transparent"
+            android:gravity="center_vertical"
+            android:paddingStart="20dp"
+            android:paddingEnd="10dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/readList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/readFooter"
+            android:layout_below="@id/readHead"
+            android:background="@android:color/transparent"
+            android:overScrollMode="never" />
 
         <RelativeLayout
-            android:id="@+id/readLayout"
+            android:id="@+id/readFooter"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="18dp"
+            android:layout_alignParentBottom="true"
+            android:background="@android:color/transparent">
 
-            <com.novel.qingwen.view.widget.CustomTextView
-                android:id="@+id/readHead"
-                android:layout_width="match_parent"
-                android:layout_height="25dp"
-                android:background="@android:color/transparent"
-                android:gravity="center_vertical"
-                android:paddingStart="20dp"
-                android:paddingEnd="10dp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/readList"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_above="@id/readFooter"
-                android:layout_below="@id/readHead"
-                android:background="@android:color/transparent"
-                android:overScrollMode="never" />
-
-            <RelativeLayout
-                android:id="@+id/readFooter"
-                android:layout_width="match_parent"
-                android:layout_height="25dp"
-                android:layout_alignParentBottom="true"
-                android:background="@android:color/white" />
-
-        </RelativeLayout>
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/readToolbar"
-            android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_marginTop="-70dp"
-            android:background="@color/colorPrimary"
-            android:gravity="center_vertical|start"
-            android:minHeight="70dp" />
-
-        <RelativeLayout
-            android:id="@+id/readSetting"
-            android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_gravity="bottom"
-            android:layout_marginBottom="-150dp"
-            android:background="@color/colorPrimary">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <View
+                android:id="@+id/readBattery"
+                android:layout_width="20dp"
+                android:layout_height="10dp"
                 android:layout_alignParentStart="true"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
-                android:text="小"
-                android:textColor="@android:color/black"
-                android:textSize="14sp" />
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="30dp"
+                android:background="@drawable/ic_battery_five" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp"
-                android:text="中"
-                android:textColor="@android:color/black"
-                android:textSize="14sp" />
-
-            <TextView
+            <com.novel.qingwen.view.widget.CustomTextClock
+                android:id="@+id/readClock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="10dp"
-                android:text="大"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="30dp"
+                android:format12Hour="hh:mm"
+                android:format24Hour="HH:mm"
                 android:textColor="@android:color/black"
-                android:textSize="14sp" />
+                android:textSize="12sp" />
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dip"
-                android:layout_marginTop="25dp"
-                android:layout_marginRight="16dip"
-                android:background="@drawable/ic_small_middle_big" />
-
-
-            <com.novel.qingwen.view.widget.CustomSeekBar
-                android:id="@+id/readTextSizeSeekBar"
-                style="@android:style/Widget.Holo.SeekBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
-                android:max="100"
-                app:size="5" />
         </RelativeLayout>
-    </FrameLayout>
 
-<!--    侧滑目录页-->
+    </RelativeLayout>
 
-    <FrameLayout
-        android:id="@+id/readBottomView"
-        android:layout_gravity="end"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent">
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/readToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_marginTop="-70dp"
+        android:background="@color/colorPrimary"
+        android:gravity="center_vertical|start"
+        android:minHeight="70dp" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/readContentsList"
-            android:scrollbarSize="5dp"
-            android:scrollbarThumbVertical="@color/colorPrimary"
-            android:scrollbars="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    <RelativeLayout
+        android:id="@+id/readSetting"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="-150dp"
+        android:background="@color/colorPrimary">
 
         <TextView
-            android:id="@+id/readHeadView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            android:text="小"
             android:textColor="@android:color/black"
-            android:lines="1"
-            android:visibility="gone"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:paddingStart="5dp"
-            android:textSize="18sp"
-            android:background="@color/colorPrimary"
-            android:ellipsize="end"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:text="中"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            android:text="大"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
+
+        <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:ignore="RtlSymmetry" />
-    </FrameLayout>
+            android:layout_marginLeft="16dip"
+            android:layout_marginTop="25dp"
+            android:layout_marginRight="16dip"
+            android:background="@drawable/ic_small_middle_big" />
 
-</androidx.drawerlayout.widget.DrawerLayout>
+
+        <com.novel.qingwen.view.widget.CustomSeekBar
+            android:id="@+id/readTextSizeSeekBar"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:max="100"
+            app:size="5" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/preChapter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:text="上一章"
+                android:textColor="@android:color/black" />
+
+            <Button
+                android:id="@+id/moreSetting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:text="更多设置"
+                android:textColor="@android:color/black" />
+
+
+            <Button
+                android:id="@+id/nextChapter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@android:color/transparent"
+                android:text="下一章"
+                android:textColor="@android:color/black" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</FrameLayout>

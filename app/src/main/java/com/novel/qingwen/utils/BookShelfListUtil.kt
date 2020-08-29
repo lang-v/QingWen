@@ -32,6 +32,7 @@ object BookShelfListUtil {
                 if (bookInfo.novelId == new.novelId) {
                     bookInfo.update = new.update
                     bookInfo.lastReadId = new.lastReadId
+                    bookInfo.lastReadOffset = new.lastReadOffset
                     bookInfo.lastChapterName = new.lastChapterName
                     bookInfo.lastChapterId = new.lastChapterId
                     bookInfo.lastUpdateTime = new.lastUpdateTime

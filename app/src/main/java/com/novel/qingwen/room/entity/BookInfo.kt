@@ -10,6 +10,7 @@ data class BookInfo(
     val status:String,
     var update:Boolean=false,
     var lastReadId: Long,
+    var lastReadOffset:Int,
     val novelName: String,
     val firstChapterId:Long,
     var lastChapterId: Long,
