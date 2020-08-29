@@ -502,6 +502,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (isOpen)return super.onKeyDown(keyCode, event)
         when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP -> {
                 readList.scrollBy(0, -readList.height)
@@ -552,12 +553,14 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     //刷新布局 应用设置
     private fun refreshLayout() {
         GlobalScope.launch(Dispatchers.Main) {
+            val position = contentManager.findFirstVisibleItemPosition()
             //列表
             contentAdapter = ReadListAdapter(contentViewModel.getList())
             contentManager = CustomLinearLayoutManager(this@ReadActivity)
             readList.adapter = contentAdapter
             readList.layoutManager = contentManager
             contentAdapter.notifyDataSetChanged()
+            contentManager.scrollToPositionWithOffset(position,readOffset)
             //时钟
             readClock.setTextColor(ConfigUtil.getTextColor())
             //head

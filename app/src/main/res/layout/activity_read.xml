@@ -40,8 +40,8 @@
 
             <View
                 android:id="@+id/readBattery"
-                android:layout_width="20dp"
-                android:layout_height="10dp"
+                android:layout_width="25dp"
+                android:layout_height="18dp"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentBottom="true"
                 android:layout_marginStart="30dp"
