@@ -34,7 +34,6 @@ class ReadListAdapter(
         holder.text.text = list[position].content
         holder.title.text = list[position].name
         holder.title.textSize = ConfigUtil.getTextSize().toFloat() + 5
-        holder.text.textSize = ConfigUtil.getTextSize().toFloat()
         //不拦截所有事件
 //        holder.itemView.setOnTouchListener { _, _ -> false}
         //点击事件给activity处理
@@ -46,12 +45,5 @@ class ReadListAdapter(
 ////            onClickListener.onClick(it)
 //            Log.e("item","onClick")
 //        }
-    }
-
-    override fun onViewAttachedToWindow(holder: VH) {
-        holder.text.textSize = ConfigUtil.getTextSize().toFloat()
-        holder.text.invalidate()
-        holder.text.requestLayout()
-        super.onViewAttachedToWindow(holder)
     }
 }

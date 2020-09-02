@@ -15,6 +15,10 @@ class BookShelfVM:BaseVM() {
     fun getList():ArrayList<BookInfo> = list
 
     fun refresh(){
+        if(list.size == 0){
+            iView?.onComplete()
+            return
+        }
         NetUtil.setInfo(object :ResponseCallback<com.novel.qingwen.net.bean.BookInfo>{
             override fun onFailure() {
             }

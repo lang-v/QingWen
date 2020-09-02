@@ -20,6 +20,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
+import com.novel.qingwen.broadcast.BatteryChangeListener
+import com.novel.qingwen.broadcast.BatteryChangeReceiver
 import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.ConfigUtil
 import com.novel.qingwen.view.adapter.BookContentsListAdapter
@@ -41,7 +43,7 @@ import kotlin.math.abs
 
 //todo 交互优化
 class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressChanged,
-    ItemOnClickListener, View.OnClickListener {
+    ItemOnClickListener, View.OnClickListener, BatteryChangeListener {
     companion object {
         const val REQCODE = 100
         fun start(
@@ -86,29 +88,26 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     private val dialog: NoticeDialog by lazy { NoticeDialog.build(this, "请稍候") }
 
     //显示电量
-    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, p1: Intent?) {
-            if (Intent.ACTION_BATTERY_CHANGED == intent.action) {
-                val level = intent.getIntExtra("level", 0)
-                val scale = intent.getIntExtra("scale", 100)
-                val power = level / scale
-                Log.e("battery", "电池电量：:$power")
-                checkBattery(power / 2)
-            }
-        }
-    }
+    private val broadcastReceiver = BatteryChangeReceiver()
+
+    //记录是否在等待刷新布局
+    private var waitForRefresh = false
 
     override fun onResume() {
+        Log.e("life cycle","onResume")
+
         registerReceiver(broadcastReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         super.onResume()
     }
 
     override fun onPause() {
+        Log.e("life cycle","onPause")
         unregisterReceiver(broadcastReceiver)
         super.onPause()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.e("life cycle","onCreate")
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_read)
         dialog.show()
@@ -126,16 +125,18 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     private fun checkBattery(level: Int) {
-        readBattery.background = getDrawable(
-            when (level) {
-                0 -> R.drawable.ic_battery_one
-                1 -> R.drawable.ic_battery_two
-                2 -> R.drawable.ic_battery_three
-                3 -> R.drawable.ic_battery_four
-                4 -> R.drawable.ic_battery_five
-                else -> R.drawable.ic_battery_five
-            }
-        )
+        GlobalScope.launch (Dispatchers.Main) {
+            readBattery.background = getDrawable(
+                when (level/20) {
+                    0 -> R.drawable.ic_battery_one
+                    1 -> R.drawable.ic_battery_two
+                    2 -> R.drawable.ic_battery_three
+                    3 -> R.drawable.ic_battery_four
+                    4 -> R.drawable.ic_battery_five
+                    else -> R.drawable.ic_battery_five
+                }
+            )
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -144,16 +145,22 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     override fun onRestart() {
-        refreshLayout()
+        Log.e("life cycle","onRestart")
+        if (waitForRefresh) {
+            refreshLayout()
+            waitForRefresh = false
+        }
         super.onRestart()
     }
 
     override fun onStart() {
+        Log.e("life cycle","onStart")
         super.onStart()
         contentViewModel.attachView(this)
     }
 
     override fun onStop() {
+        Log.e("life cycle","onStop")
         super.onStop()
         contentViewModel.detachView()
         //设置返回值
@@ -231,8 +238,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         val manager =
             getSystemService(Context.BATTERY_SERVICE) as BatteryManager
         val tmp = manager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-        Log.e("battery", ":$tmp")
-        checkBattery(tmp / 20)
+        checkBattery(tmp)
 
         //settingBar 的几个按键
         preChapter.setOnClickListener(this)
@@ -249,6 +255,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         //不缓存
 //        readList.setItemViewCacheSize(0)
 
+        broadcastReceiver.setListener(this)
         currentReadID = chapterId
         if (isInBookShelf) {
             readOffset = intent.getIntExtra("offset", 0)
@@ -406,11 +413,14 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         if (isOpen) {
             closeSetting()
             //允许滑动
-            contentManager.setScrollEnabled(true)
+//            readList.isEnabled = true
+//            readList.isClickable = true
+//            contentManager.setScrollEnabled(true)
         } else {
             openSetting()
             //禁止滑动
-            contentManager.setScrollEnabled(false)
+//            readList.isClickable = false
+//            contentManager.setScrollEnabled(false)
         }
     }
 
@@ -502,7 +512,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (isOpen)return super.onKeyDown(keyCode, event)
+        if (isOpen) return super.onKeyDown(keyCode, event)
         when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP -> {
                 readList.scrollBy(0, -readList.height)
@@ -526,6 +536,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         when (v?.id) {
             R.id.moreSetting -> {
                 pageOnClick()
+                //当返回activity时调用刷新布局
+                waitForRefresh = true
                 startActivity(Intent(this, SettingActivity::class.java))
             }
             R.id.preChapter -> {
@@ -544,7 +556,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 if (position == contentAdapter.itemCount - 1) {
                     nextChapter()
                 } else {
-                    readList.scrollToPosition(position + 1)
+                    contentManager.scrollToPositionWithOffset(position, -readList.height / 2)
+//                    readList.scrollToPosition(position + 1)
                 }
             }
         }
@@ -560,7 +573,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             readList.adapter = contentAdapter
             readList.layoutManager = contentManager
             contentAdapter.notifyDataSetChanged()
-            contentManager.scrollToPositionWithOffset(position,readOffset)
+            contentManager.scrollToPositionWithOffset(position, readOffset)
             //时钟
             readClock.setTextColor(ConfigUtil.getTextColor())
             //head
@@ -569,4 +582,9 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             readLayout.setBackgroundColor(ConfigUtil.getBackgroundColor())
         }
     }
+
+    override fun change(level: Int) {
+        checkBattery(level)
+    }
+
 }

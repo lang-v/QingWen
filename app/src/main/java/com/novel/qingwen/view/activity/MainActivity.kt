@@ -22,6 +22,7 @@ import com.novel.qingwen.utils.Show
 import com.novel.qingwen.view.fragment.BookShelf
 import com.tbruyelle.rxpermissions2.RxPermissions
 import com.tencent.bugly.Bugly
+import com.tencent.bugly.beta.Beta
 import com.tencent.bugly.crashreport.CrashReport
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
@@ -74,6 +75,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun initBugly(){
         Bugly.init(applicationContext, "20fec18d0c", false)
+        //检查更新
+//        Beta.checkUpgrade(true,true)
         //CrashReport.initCrashReport(applicationContext, "20fec18d0c", false)
 //        val context: Context = applicationContext
 //// 获取当前包名
