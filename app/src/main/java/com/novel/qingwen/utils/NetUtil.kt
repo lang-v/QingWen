@@ -31,15 +31,18 @@ object NetUtil {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
+    /**
+     * https 改成 http 之后加载速度明显提升
+     */
     //书籍信息和目录
     private val infoAndContents = Retrofit.Builder()
-        .baseUrl("https://infosxs.pysmei.com/")
+        .baseUrl("http://infosxs.pysmei.com/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
     //章节内容
     private val chapterContent = Retrofit.Builder()
-        .baseUrl("https://contentxs.pysmei.com/")
+        .baseUrl("http://contentxs.pysmei.com/")
         .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
         .build()
 
