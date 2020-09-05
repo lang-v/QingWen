@@ -24,9 +24,10 @@
         <LinearLayout
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:paddingBottom="5dp"
-            android:background="#11000000"
+            android:paddingTop="5dp"
+            android:background="#ffffff"
             android:layout_alignParentBottom="true"
             android:gravity="center"
             android:orientation="horizontal">
@@ -34,10 +35,10 @@
             <TextView
                 android:id="@+id/mainBookShelfPageBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginTop="5dp"
                 android:gravity="center"
+                android:textSize="8sp"
                 android:text="书架"
                 android:textColor="@android:color/black"
                 app:drawableTopCompat="@drawable/main_page_bookshelf_btn_selector" />
@@ -51,14 +52,13 @@
             <TextView
                 android:id="@+id/mainSearchPageBtn"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginTop="5dp"
+                android:layout_height="wrap_content"
+                android:textSize="8sp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="发现"
                 android:textColor="@android:color/black"
                 app:drawableTopCompat="@drawable/main_page_search_btn_selector" />
-
 
         </LinearLayout>
     </RelativeLayout>

@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/readDrawerLayout"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clipToPadding="false"
-    tools:context=".view.activity.ReadActivity">
+    android:clipToPadding="false">
 
     <RelativeLayout
         android:id="@+id/readLayout"
@@ -61,6 +61,100 @@
 
         </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/readSetting"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginBottom="-150dp"
+            android:layout_alignParentBottom="true"
+            android:paddingBottom="5dp"
+            android:background="@color/colorPrimary">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:text="小"
+                android:textColor="@android:color/black"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:text="中"
+                android:textColor="@android:color/black"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:text="大"
+                android:textColor="@android:color/black"
+                android:textSize="12sp" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dip"
+                android:layout_marginTop="25dp"
+                android:layout_marginRight="16dip"
+                android:background="@drawable/ic_small_middle_big" />
+
+            <com.novel.qingwen.view.widget.CustomSeekBar
+                android:id="@+id/readTextSizeSeekBar"
+                style="@android:style/Widget.Holo.SeekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
+                android:max="100"
+                app:size="5" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/preChapter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:text="上一章"
+                    android:textColor="@android:color/black" />
+
+                <Button
+                    android:id="@+id/moreSetting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:text="更多设置"
+                    android:textColor="@android:color/black" />
+
+
+                <Button
+                    android:id="@+id/nextChapter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:text="下一章"
+                    android:textColor="@android:color/black" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
     </RelativeLayout>
 
     <androidx.appcompat.widget.Toolbar
@@ -71,99 +165,5 @@
         android:background="@color/colorPrimary"
         android:gravity="center_vertical|start"
         android:minHeight="70dp" />
-
-    <RelativeLayout
-        android:id="@+id/readSetting"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="-150dp"
-        android:background="@color/colorPrimary">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:text="小"
-            android:textColor="@android:color/black"
-            android:textSize="14sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
-            android:text="中"
-            android:textColor="@android:color/black"
-            android:textSize="14sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:text="大"
-            android:textColor="@android:color/black"
-            android:textSize="14sp" />
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dip"
-            android:layout_marginTop="25dp"
-            android:layout_marginRight="16dip"
-            android:background="@drawable/ic_small_middle_big" />
-
-
-        <com.novel.qingwen.view.widget.CustomSeekBar
-            android:id="@+id/readTextSizeSeekBar"
-            style="@android:style/Widget.Holo.SeekBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:max="100"
-            app:size="5" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="10dp"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/preChapter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:text="上一章"
-                android:textColor="@android:color/black" />
-
-            <Button
-                android:id="@+id/moreSetting"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:text="更多设置"
-                android:textColor="@android:color/black" />
-
-
-            <Button
-                android:id="@+id/nextChapter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@android:color/transparent"
-                android:text="下一章"
-                android:textColor="@android:color/black" />
-
-        </LinearLayout>
-
-    </RelativeLayout>
 
 </FrameLayout>

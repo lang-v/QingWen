@@ -3,11 +3,11 @@ package com.novel.qingwen.view.activity
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
+import android.graphics.Point
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
@@ -15,8 +15,6 @@ import android.util.Log
 import android.view.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
@@ -24,7 +22,6 @@ import com.novel.qingwen.broadcast.BatteryChangeListener
 import com.novel.qingwen.broadcast.BatteryChangeReceiver
 import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.ConfigUtil
-import com.novel.qingwen.view.adapter.BookContentsListAdapter
 import com.novel.qingwen.view.adapter.ItemOnClickListener
 import com.novel.qingwen.view.adapter.ReadListAdapter
 import com.novel.qingwen.view.dialog.NoticeDialog
@@ -32,7 +29,6 @@ import com.novel.qingwen.view.widget.CustomLinearLayoutManager
 import com.novel.qingwen.view.widget.CustomSeekBar
 import com.novel.qingwen.viewmodel.ContentsVM
 import com.novel.qingwen.viewmodel.ReadVM
-import kotlinx.android.synthetic.main.activity_contents.*
 import kotlinx.android.synthetic.main.activity_read.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -94,40 +90,46 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     private var waitForRefresh = false
 
     override fun onResume() {
-        Log.e("life cycle","onResume")
+        Log.e("life cycle", "onResume")
 
         registerReceiver(broadcastReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         super.onResume()
     }
 
     override fun onPause() {
-        Log.e("life cycle","onPause")
+        Log.e("life cycle", "onPause")
         unregisterReceiver(broadcastReceiver)
         super.onPause()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.e("life cycle","onCreate")
+        Log.e("life cycle", "onCreate")
         super.onCreate(savedInstanceState)
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN
+        )
         setContentView(R.layout.activity_read)
-        dialog.show()
         init()
+        if (dialog.isShowing) {
+            dialog.dismiss()
+        }
         //设置小说id,后面才能根据此id获取章节内容
         contentViewModel.init(novelId)
         contentViewModel.attachView(this)
         //开始加载小说内容,这个方法是异步的,确认不是Activity重建后，开始加载数据
         if (savedInstanceState == null || savedInstanceState.getLong("chapterId", -1L) == -1L) {
+            dialog.show()
             contentViewModel.getChapter(chapterId, false, 1)//前中后三章
-        }
-        if (dialog.isShowing) {
-            dialog.dismiss()
         }
     }
 
+
+    //实时修改电量显示
     private fun checkBattery(level: Int) {
-        GlobalScope.launch (Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.Main) {
             readBattery.background = getDrawable(
-                when (level/20) {
+                when (level / 20) {
                     0 -> R.drawable.ic_battery_one
                     1 -> R.drawable.ic_battery_two
                     2 -> R.drawable.ic_battery_three
@@ -145,7 +147,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     override fun onRestart() {
-        Log.e("life cycle","onRestart")
+        Log.e("life cycle", "onRestart")
         if (waitForRefresh) {
             refreshLayout()
             waitForRefresh = false
@@ -154,13 +156,27 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     override fun onStart() {
-        Log.e("life cycle","onStart")
+        Log.e("life cycle", "onStart")
         super.onStart()
         contentViewModel.attachView(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
+            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+        } else {
+            // 全屏显示，隐藏状态栏
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+        }
     }
 
+
+    //保存阅读进度
     override fun onStop() {
-        Log.e("life cycle","onStop")
+        Log.e("life cycle", "onStop")
         super.onStop()
         contentViewModel.detachView()
         //设置返回值
@@ -190,7 +206,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 finish()
             }
             R.id.readMenuContents -> {
-                showSuccess("打开目录")
+                //showSuccess("打开目录")
 //                ContentsActivity.start(this,novelId,novelName,status)
 //                finish()
                 ContentsActivity.start(this, novelId, novelName, status)
@@ -214,6 +230,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             supportActionBar!!.title = novelName
             readToolbar.setNavigationIcon(R.drawable.back_btn_selector)
         }
+//        readSetting.y += (readSetting.height).toFloat()
         //文字大小进度条设置监听
         readTextSizeSeekBar.setOnSeekBarChangedListener(this)
         //此view继承自TextView 在生成时的所有属性保存在ConfigUtil管理的Config中
@@ -224,15 +241,32 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             keyCode == KeyEvent.KEYCODE_BACK
         }
         //设置属性全屏
-        window.decorView.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_FULLSCREEN
+//        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+//                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                or View.SYSTEM_UI_FLAG_FULLSCREEN
+//                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+//        window.decorView.systemUiVisibility =
+//        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
+            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+        } else {
+            // 全屏显示，隐藏状态栏
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             window.attributes.apply {
                 layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             }
         }
-        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
         //获取电量
         val manager =
@@ -439,16 +473,32 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     private val bottomOpen: ObjectAnimator by lazy {
-        ObjectAnimator.ofFloat(readSetting, "y", readSetting.y, readSetting.y - readSetting.height)
+        ObjectAnimator.ofFloat(readSetting, "y", readSetting.y, readSetting.y - readSetting.height - getNavigationBarHeight())
             .setDuration(300)
     }
     private val bottomClose: ObjectAnimator by lazy {
-        ObjectAnimator.ofFloat(readSetting, "y", readSetting.y, readSetting.y + readSetting.height)
+        ObjectAnimator.ofFloat(readSetting, "y", readSetting.y, readSetting.y + readSetting.height + getNavigationBarHeight())
             .setDuration(300)
     }
 
-    private val settingLock = ReentrantLock()
+    //获取导航栏高度
+    private fun getNavigationBarHeight():Int{
+        val display: Display = windowManager.defaultDisplay
+        val size = Point()
+        val realSize = Point()
+        display.getSize(size)
+        display.getRealSize(realSize)
+        val resources: Resources = resources
+        val resourceId: Int =
+            resources.getIdentifier("navigation_bar_height", "dimen", "android")
+        val height: Int = resources.getDimensionPixelSize(resourceId)
+        //超出系统默认的导航栏高度以上，则认为存在虚拟导航
+        return if (realSize.y - size.y > height - 10) {
+            height
+        } else 0
+    }
 
+    private val settingLock = ReentrantLock()
     //打开关闭  设置面板
     private fun openSetting() {
         if (settingLock.isLocked) {
@@ -458,8 +508,19 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         }
         settingLock.lock()
         isOpen = true
+
         topOpen.start()
         bottomOpen.start()
+        // 非全屏显示，显示状态栏和导航栏
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+//        getWindow().getDecorView().setSystemUiVisibility(
+//            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                    or View.SYSTEM_UI_FLAG_VISIBLE
+//                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//        )
+        window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+
+        //window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
     }
 
     private fun closeSetting() {
@@ -472,6 +533,23 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         isOpen = false
         topClose.start()
         bottomClose.start()
+        // 全屏展示
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
+            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+        } else {
+            // 全屏显示，隐藏状态栏
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+
+//        window.decorView.systemUiVisibility =
+//            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
     }
 
     //修改了字体 或者大小
