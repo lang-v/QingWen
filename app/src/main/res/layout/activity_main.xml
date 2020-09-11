@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
 
@@ -8,58 +10,83 @@
             type="com.novel.qingwen.viewmodel.MainVM" />
     </data>
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".view.activity.MainActivity">
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/tabLayout"
-            android:layout_alignParentTop="true" />
+            android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="5dp"
-            android:paddingTop="5dp"
-            android:background="#ffffff"
-            android:layout_alignParentBottom="true"
-            android:gravity="center"
-            android:orientation="horizontal">
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/tabLayout"
+                android:layout_alignParentTop="true" />
 
-            <TextView
-                android:id="@+id/mainBookShelfPageBtn"
-                android:layout_width="wrap_content"
+            <androidx.coordinatorlayout.widget.CoordinatorLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <include
+                    layout="@layout/fragment_book_shelf"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:behavior_hideable="false"
+                    app:behavior_peekHeight="108dp"
+                    app:layout_behavior="@string/bottom_sheet_behavior"/>
+
+            </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+            <LinearLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
+                android:layout_alignParentBottom="true"
+                android:background="@android:color/white"
                 android:gravity="center"
-                android:textSize="8sp"
-                android:text="书架"
-                android:textColor="@android:color/black"
-                app:drawableTopCompat="@drawable/main_page_bookshelf_btn_selector" />
+                android:orientation="horizontal"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp">
 
-            <View
-                android:layout_margin="5dp"
-                android:background="@android:color/darker_gray"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"/>
+                <TextView
+                    android:id="@+id/mainSearchPageBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="发现"
+                    android:textColor="@android:color/black"
+                    android:textSize="8sp"
+                    app:drawableTopCompat="@drawable/main_page_search_btn_selector" />
 
-            <TextView
-                android:id="@+id/mainSearchPageBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="8sp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="发现"
-                android:textColor="@android:color/black"
-                app:drawableTopCompat="@drawable/main_page_search_btn_selector" />
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:background="@android:color/darker_gray" />
 
-        </LinearLayout>
-    </RelativeLayout>
+                <TextView
+                    android:id="@+id/mainBookShelfPageBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="书架"
+                    android:textColor="@android:color/black"
+                    android:textSize="8sp"
+                    app:drawableTopCompat="@drawable/main_page_bookshelf_btn_selector" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <!--        欢迎页-->
+        <include
+            android:id="@+id/welcomePage"
+            layout="@layout/activity_welcome" />
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </layout>

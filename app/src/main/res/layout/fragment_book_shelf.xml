@@ -1,49 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottomBookShelf"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
-    tools:context=".view.fragment.BookShelf">
+    android:background="@android:color/transparent">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/bookShelfToolbar"
-        android:background="@color/colorPrimary"
+    <View
+        android:background="@drawable/shadow_shape"
         android:layout_width="match_parent"
-        android:layout_height="56dp"/>
+        android:layout_height="21dp"/>
 
-    <TextView
-        android:id="@+id/bookShelfTips"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/bookShelfToolbar"
-        android:layout_marginTop="25dp"
-        android:background="@android:color/white"
-        android:gravity="center"
-        android:text="@string/book_shelf_tips"
-        android:textColor="@android:color/black"
-        android:visibility="visible"
-        app:drawableTopCompat="@drawable/ic_inclusive" />
-
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/bookShelfRefresh"
-        android:layout_below="@id/bookShelfToolbar"
+    <FrameLayout
+        android:layout_marginTop="10dp"
+        android:background="@drawable/fragment_shape"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/bookShelfToolbar"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="20dp"
+            android:layout_height="5dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/dialog_background" />
+
+        <FrameLayout
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/bookShelfName"
+                android:text="我的书架"
+                android:layout_marginTop="5dp"
+                android:textSize="18sp"
+                android:layout_gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <LinearLayout
+                android:id="@+id/bookShelfTab"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:alpha="0"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/bookShelfUpdateTip"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/bookShelfUpdateBookName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="marquee"
+                    android:text="暂无更新"
+                    android:gravity="center"
+                    android:singleLine="true" />
+
+                <TextView
+                    android:id="@+id/bookShelfRefreshTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ellipsize="marquee"
+                    android:gravity="center"
+                    android:singleLine="true" />
+            </LinearLayout>
+        </FrameLayout>
+
+
+    </LinearLayout>
+
+
+    <sl.view.elasticviewlibrary.ElasticView
+        android:id="@+id/bookShelfRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="56dp"
+        android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/bookShelfList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="5dp"
+            android:background="@android:color/white"
+            android:overScrollMode="never"
             android:paddingStart="5dp"
             android:paddingEnd="5dp"
-            android:overScrollMode="never"
-            tools:listitem="@layout/fragment_book_shelf_list_item"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/fragment_book_shelf_list_item" />
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </sl.view.elasticviewlibrary.ElasticView>
 
+    <TextView
+        android:id="@+id/bookShelfTips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="95dp"
+        android:background="@android:color/white"
+        android:gravity="center"
+        android:text="@string/book_shelf_tips"
+        android:textColor="@android:color/black"
+        android:visibility="gone"
+        app:drawableTopCompat="@drawable/ic_inclusive" />
+    </FrameLayout>
 
-</RelativeLayout>
+</FrameLayout>

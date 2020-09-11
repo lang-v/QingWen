@@ -33,7 +33,7 @@ class BookShelf : Fragment(), IBaseView{
     override fun onStart() {
         super.onStart()
         viewModel.attachView(this)
-        bookShelfRefresh.isRefreshing = true
+//        bookShelfRefresh.isRefreshing = true
         viewModel.refresh()
         adapter.notifyDataSetChanged()
     }
@@ -44,11 +44,11 @@ class BookShelf : Fragment(), IBaseView{
     }
 
     private fun init(){
-        bookShelfRefresh.setColorSchemeColors(Color.GREEN,Color.BLUE,Color.YELLOW)
+//        bookShelfRefresh.setColorSchemeColors(Color.GREEN,Color.BLUE,Color.YELLOW)
         //刷新
-        bookShelfRefresh.setOnRefreshListener {
-            viewModel.refresh()
-        }
+//        bookShelfRefresh.setOnRefreshListener {
+//            viewModel.refresh()
+//        }
         adapter = BookShelfListAdapter(viewModel.getList())
         bookShelfList.adapter = adapter
         bookShelfList.layoutManager = LinearLayoutManager(context)
@@ -83,8 +83,8 @@ class BookShelf : Fragment(), IBaseView{
                 }
             }
             adapter.notifyDataSetChanged()
-            if (bookShelfRefresh.isRefreshing)
-                bookShelfRefresh.isRefreshing = false
+//            if (bookShelfRefresh.isRefreshing)
+//                bookShelfRefresh.isRefreshing = false
         }
     }
 }

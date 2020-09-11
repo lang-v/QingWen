@@ -19,10 +19,14 @@
         android:layout_height="5dp"
         android:background="@drawable/line_shape" />
 
-    <com.example.elasticviewlibrary.ElasticView
+    <sl.view.elasticviewlibrary.ElasticView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -137,5 +141,7 @@
                 android:layout_height="5dp"
                 android:background="@drawable/line_shape" />
         </LinearLayout>
-    </com.example.elasticviewlibrary.ElasticView>
+        </androidx.core.widget.NestedScrollView>
+
+    </sl.view.elasticviewlibrary.ElasticView>
 </LinearLayout>

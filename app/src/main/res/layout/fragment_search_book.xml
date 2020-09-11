@@ -25,6 +25,7 @@
             android:layout_marginTop="12dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
+            android:textSize="12sp"
             android:background="@drawable/search_box_shape"
             android:hint="@string/searchTextTips"
             android:imeOptions="actionSearch"

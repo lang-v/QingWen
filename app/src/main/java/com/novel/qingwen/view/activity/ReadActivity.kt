@@ -37,7 +37,6 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.abs
 
 
-//todo 交互优化
 class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressChanged,
     ItemOnClickListener, View.OnClickListener, BatteryChangeListener {
     companion object {
