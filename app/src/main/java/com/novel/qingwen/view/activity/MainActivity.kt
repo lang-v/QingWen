@@ -27,6 +27,7 @@ import com.novel.qingwen.view.fragment.SearchBook
 import com.novel.qingwen.viewmodel.MainVM
 import com.novel.qingwen.utils.Show
 import com.novel.qingwen.view.adapter.BookShelfListAdapter
+import com.novel.qingwen.view.fragment.MoreContent
 import com.novel.qingwen.viewmodel.BookShelfVM
 import com.tbruyelle.rxpermissions2.RxPermissions
 import com.tencent.bugly.Bugly
@@ -80,6 +81,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         val list = ArrayList<Fragment>()
 //        list.add(BookShelf())
         list.add(SearchBook())
+        list.add(MoreContent())
         val adapter = FragmentAdapter(this,list)
         window.statusBarColor = Color.parseColor("#669900")
         binding.lifecycleOwner = this@MainActivity
@@ -100,21 +102,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
                 super.onPageSelected(position)
                 when(position){
                     0->{
-                        if (mainSearchPageBtn.isActivated){
-                            mainSearchPageBtn.isActivated = false
-                            mainSearchPageBtn.setTextColor(Color.BLACK)
-                        }
-                        mainBookShelfPageBtn.isActivated = true
-                        mainBookShelfPageBtn.setTextColor(Color.parseColor("#669900"))
-                    }
-                    1->{
-                        if (mainBookShelfPageBtn.isActivated) {
-                            mainBookShelfPageBtn.isActivated = false
-                            mainBookShelfPageBtn.setTextColor(Color.BLACK)
+                        if (mainBookShelfMore.isActivated) {
+                            mainBookShelfMore.isActivated = false
+                            mainBookShelfMore.setTextColor(Color.BLACK)
                         }
                         mainSearchPageBtn.isActivated = true
                         mainSearchPageBtn.setTextColor(Color.parseColor("#669900"))
                     }
+                    1->{
+                        if (mainSearchPageBtn.isActivated){
+                            mainSearchPageBtn.isActivated = false
+                            mainSearchPageBtn.setTextColor(Color.BLACK)
+                        }
+                        mainBookShelfMore.isActivated = true
+                        mainBookShelfMore.setTextColor(Color.parseColor("#669900"))
+                    }
+
                 }
             }
         })
@@ -157,7 +160,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
             }
         })
 //        BottomBookShelf().show(supportFragmentManager,"BookShelf")
-        mainBookShelfPageBtn.setOnClickListener(this)
+        mainBookShelfMore.setOnClickListener(this)
         mainSearchPageBtn.setOnClickListener(this)
 //        bookShelfRefresh.setColorSchemeColors(Color.GREEN,Color.BLUE,Color.YELLOW)
         //刷新
@@ -197,12 +200,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
 
     override fun onClick(v: View?) {
         when(v?.id){
-            R.id.mainBookShelfPageBtn->{
-                viewPager.currentItem = 0
+            R.id.mainBookShelfMore->{
+                viewPager.currentItem = 1
             }
 
             R.id.mainSearchPageBtn->{
-//                viewPager.currentItem = 0
+                viewPager.currentItem = 0
             }
         }
     }

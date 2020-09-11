@@ -11,10 +11,12 @@ import android.graphics.Point
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
@@ -22,6 +24,7 @@ import com.novel.qingwen.broadcast.BatteryChangeListener
 import com.novel.qingwen.broadcast.BatteryChangeReceiver
 import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.ConfigUtil
+import com.novel.qingwen.view.adapter.BookContentsListAdapter
 import com.novel.qingwen.view.adapter.ItemOnClickListener
 import com.novel.qingwen.view.adapter.ReadListAdapter
 import com.novel.qingwen.view.dialog.NoticeDialog
@@ -29,7 +32,10 @@ import com.novel.qingwen.view.widget.CustomLinearLayoutManager
 import com.novel.qingwen.view.widget.CustomSeekBar
 import com.novel.qingwen.viewmodel.ContentsVM
 import com.novel.qingwen.viewmodel.ReadVM
+import kotlinx.android.synthetic.main.activity_contents.*
 import kotlinx.android.synthetic.main.activity_read.*
+import kotlinx.android.synthetic.main.activity_read.contentsList
+import kotlinx.android.synthetic.main.activity_read.headView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -38,7 +44,7 @@ import kotlin.math.abs
 
 
 class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressChanged,
-    ItemOnClickListener, View.OnClickListener, BatteryChangeListener {
+    View.OnClickListener, BatteryChangeListener {
     companion object {
         const val REQCODE = 100
         fun start(
@@ -89,20 +95,16 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     private var waitForRefresh = false
 
     override fun onResume() {
-        Log.e("life cycle", "onResume")
-
         registerReceiver(broadcastReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         super.onResume()
     }
 
     override fun onPause() {
-        Log.e("life cycle", "onPause")
         unregisterReceiver(broadcastReceiver)
         super.onPause()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.e("life cycle", "onCreate")
         super.onCreate(savedInstanceState)
         window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -146,7 +148,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     override fun onRestart() {
-        Log.e("life cycle", "onRestart")
         if (waitForRefresh) {
             refreshLayout()
             waitForRefresh = false
@@ -155,7 +156,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     override fun onStart() {
-        Log.e("life cycle", "onStart")
         super.onStart()
         contentViewModel.attachView(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -175,7 +175,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 
     //保存阅读进度
     override fun onStop() {
-        Log.e("life cycle", "onStop")
         super.onStop()
         contentViewModel.detachView()
         //设置返回值
@@ -205,11 +204,12 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 finish()
             }
             R.id.readMenuContents -> {
+                readDrawerLayout.openDrawer(Gravity.RIGHT)
                 //showSuccess("打开目录")
 //                ContentsActivity.start(this,novelId,novelName,status)
 //                finish()
-                ContentsActivity.start(this, novelId, novelName, status)
-                finish()
+//                ContentsActivity.start(this, novelId, novelName, status)
+//                finish()
 //                if (readDrawerLayout.isDrawerOpen(readBottomView)) {
 //                    readDrawerLayout.openDrawer(readBottomView)
 //                    if (contentsViewModel.getList().size == 0)
@@ -356,9 +356,163 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             }
             target
         }
-        //contentsInit()
+        contentsInit()
     }
 
+    //自定义  重写了smoothScrollToPosition方法 实现修改滑动时间
+    private val contentsManager = ContentsActivity.MyLinearLayoutManager(this)
+    private lateinit var contentsAdapter: BookContentsListAdapter
+    private val contentsViewModel: ContentsVM by viewModels()
+
+    /**记录当前悬浮头显示个是第几个，
+     * 悬浮头集合
+     * @see headList
+     */
+    private var currentHeadViewIndex: Int = 0
+
+    //数据由viewModel保管 数据视图分离
+    private val headList by lazy { contentsViewModel.getHeadList() }
+
+    //初始化右侧的目录页
+    private fun contentsInit() {
+        GlobalScope.launch {
+            //关闭DrawerLayout手势滑动
+            readDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
+            //列表适配器
+            contentsAdapter =
+                BookContentsListAdapter(contentsViewModel.getList(), object : ItemOnClickListener {
+                    override fun onClick(item: ContentsVM.ContentsInfo) {
+                        //清空小说缓存列表
+                        contentViewModel.clear()
+                        dialog.show()
+                        contentViewModel.getChapter(item.id)
+                        readDrawerLayout.closeDrawer(Gravity.RIGHT)
+                        closeSetting()
+                    }
+                })
+            //分割线
+            contentsList.addItemDecoration(
+                DividerItemDecoration(
+                    this@ReadActivity,
+                    LinearLayoutManager.VERTICAL
+                )
+            )
+            contentsList.layoutManager = contentsManager
+            contentsList.adapter = contentsAdapter
+            contentsList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+                /**
+                 * dy > 0 手指向上滑动
+                 * dy < 0 手指向下滑动
+                 * 现在存在的问题：
+                 *  快速滑动时，会导致代码无法捕捉到headView的交替
+                 *  从而出现headView的没有根据滑动变化，或者headView动画过程不完整
+                 *  Fix
+                 */
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    //Log.e("CA","current index=$currentHeadViewIndex")
+                    if (dy > 0) {
+                        //最后一个headView没有后继，不用处理
+                        if ((headList.size - 1) == currentHeadViewIndex) return
+                        //如果没有找到此View，说明还没出现在屏幕内
+                        //下一个headView
+                        val view =
+                            contentsManager.findViewByPosition(headList[currentHeadViewIndex + 1].id.toInt())
+                        if (view == null || dy >= headView.height * 2) {
+                            //当用户快速滑动时，会导致recyclerView中的headView快速滑过，被，从而导致这里的view为null
+                            //重新检测当前headView
+                            if (contentsManager.findFirstVisibleItemPosition() >= headList[currentHeadViewIndex + 1].id.toInt()) {
+                                headView.y = 0f
+                                headView.text = headList[++currentHeadViewIndex].name
+                            }
+                            return
+                        }
+                        //当下一个headView(在RecyclerView中)
+                        // 滑动到当前headView的底部（headView.height）时，
+                        // 当前headView将跟随下一个headView滑动
+                        // 这里的view.y获取到的是滑动之后的坐标
+                        if (view.y > 0f && view.y < headView.height) {
+                            headView.y = view.y - headView.height
+                        } else if (view.y <= 0f) {
+                            //当下一个headView滑动到当前headView的位置也就是0f处时
+                            //发生替换，下一个headView成为当前headView
+                            //回到原点
+                            headView.y = 0f
+                            headView.text = headList[++currentHeadViewIndex].name
+                        }
+                    } else {
+                        //第一个headView顺着滑动就行，不用处理
+                        if (0 != currentHeadViewIndex) {
+                            //当前headView
+                            val view =
+                                contentsManager.findViewByPosition(headList[currentHeadViewIndex].id.toInt())
+                            if (view != null) {
+                                if (view.y > 0 && view.y < headView.height) {
+                                    headView.text = headList[currentHeadViewIndex - 1].name
+                                    headView.y = view.y - headView.height
+                                    return
+                                } else if (view.y >= headView.height) {
+                                    headView.text = headList[--currentHeadViewIndex].name
+                                    headView.y = 0f
+                                    return
+                                }
+                            }
+
+                        }
+
+                        //下面是处理情况 ：当手指向上滑动到一半，又向下滑动
+                        //此时currentHeadViewIndex还没有变化
+                        //最后一个headView不会出现这种情况不考虑
+                        //Log.e("CA","index=$currentHeadViewIndex size=${headList.size-1}")
+                        if (currentHeadViewIndex == (headList.size - 1)) return
+                        val view2 =
+                            contentsManager.findViewByPosition(headList[currentHeadViewIndex + 1].id.toInt())
+                                ?: return
+                        if (view2.y > 0f && view2.y < headView.height) {
+                            headView.y = view2.y - headView.height
+                        } else if (view2.y >= headView.height) {
+                            //回到原位
+                            headView.y = 0f
+                        }
+                    }
+                    super.onScrolled(recyclerView, dx, dy)
+                }
+            })
+            contentsViewModel.attachView(object : IBaseView {
+                override fun showMsg(msg: String) {
+                    show(msg)
+                }
+
+                override fun onComplete(target: Int) {
+                    GlobalScope.launch(Dispatchers.Main) {
+
+                        contentsAdapter.notifyDataSetChanged()
+                        if (headList.size != 0) {
+                            headView.visibility = View.VISIBLE
+                            headView.text = headList[0].name
+                        }
+
+                        var index = 0
+                        contentsViewModel.getList().forEach {
+                            if (it.id == chapterId) {
+                                contentsList.scrollToPosition(index)
+                                return@forEach
+                            }
+                            index++
+                        }
+                    }
+                }
+            })
+            //滑动到顶部、底部
+            readTop.setOnClickListener {
+                contentsList.smoothScrollToPosition(0)
+            }
+            readBottom.setOnClickListener {
+                contentsList.smoothScrollToPosition(contentsAdapter.itemCount - 1)
+            }
+            contentsViewModel.load(novelId)
+        }
+    }
 
     //此锁用于避免短时间内连续加载相同章节
     private var loadLock = false
@@ -422,7 +576,9 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         if (loadLock)
             loadLock = false
         GlobalScope.launch(Dispatchers.Main) {
-            when (target) {
+            if (contentViewModel.getList().size <= 3)
+                contentAdapter.notifyDataSetChanged()
+            else when (target) {
                 1 -> {
                     contentAdapter.notifyItemInserted(0)
                 }
@@ -472,16 +628,26 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     private val bottomOpen: ObjectAnimator by lazy {
-        ObjectAnimator.ofFloat(readSetting, "y", readSetting.y, readSetting.y - readSetting.height - getNavigationBarHeight())
+        ObjectAnimator.ofFloat(
+            readSetting,
+            "y",
+            readSetting.y,
+            readSetting.y - readSetting.height - getNavigationBarHeight()
+        )
             .setDuration(300)
     }
     private val bottomClose: ObjectAnimator by lazy {
-        ObjectAnimator.ofFloat(readSetting, "y", readSetting.y, readSetting.y + readSetting.height + getNavigationBarHeight())
+        ObjectAnimator.ofFloat(
+            readSetting,
+            "y",
+            readSetting.y,
+            readSetting.y + readSetting.height + getNavigationBarHeight()
+        )
             .setDuration(300)
     }
 
     //获取导航栏高度
-    private fun getNavigationBarHeight():Int{
+    private fun getNavigationBarHeight(): Int {
         val display: Display = windowManager.defaultDisplay
         val size = Point()
         val realSize = Point()
@@ -498,6 +664,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     private val settingLock = ReentrantLock()
+
     //打开关闭  设置面板
     private fun openSetting() {
         if (settingLock.isLocked) {
@@ -561,6 +728,10 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     override fun onBackPressed() {
+        if (readDrawerLayout.isDrawerOpen(Gravity.RIGHT)) {
+            readDrawerLayout.closeDrawer(Gravity.RIGHT)
+            return
+        }
         if (!isInBookShelf) {
             AlertDialog.Builder(ContextThemeWrapper(this, R.style.CommonDialog))
                 .setTitle("喜欢这本书吗？")
@@ -580,12 +751,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         } else {
             super.onBackPressed()
         }
-    }
-
-
-    //目录页选中
-    override fun onClick(item: ContentsVM.ContentsInfo) {
-
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {

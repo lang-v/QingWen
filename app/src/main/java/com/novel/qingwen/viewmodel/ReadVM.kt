@@ -31,7 +31,7 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
     }
 
     fun clear(){
-        list = ArrayList<Chapter>()
+        list.clear()
     }
     /**
      * 小说文章加载时先从数据库中查找，没有缓存则网络请求,返回结果后将结果写入数据库

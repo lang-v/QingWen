@@ -69,12 +69,12 @@
                     android:background="@android:color/darker_gray" />
 
                 <TextView
-                    android:id="@+id/mainBookShelfPageBtn"
+                    android:id="@+id/mainBookShelfMore"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
-                    android:text="书架"
+                    android:text="更多"
                     android:textColor="@android:color/black"
                     android:textSize="8sp"
                     app:drawableTopCompat="@drawable/main_page_bookshelf_btn_selector" />
