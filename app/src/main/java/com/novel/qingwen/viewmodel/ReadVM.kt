@@ -30,7 +30,7 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         return list
     }
 
-    fun clear(){
+    fun clearContent(){
         list.clear()
     }
     /**

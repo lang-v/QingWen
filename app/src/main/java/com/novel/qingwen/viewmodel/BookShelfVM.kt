@@ -9,39 +9,42 @@ import com.novel.qingwen.utils.RoomUtil
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class BookShelfVM:BaseVM() {
+class BookShelfVM : BaseVM() {
     private val list = BookShelfListUtil.getList()
 
-    fun getList():ArrayList<BookInfo> = list
+    fun getList(): ArrayList<BookInfo> = list
 
-    fun refresh(){
-        if(list.size == 0){
+    fun refresh() {
+        if (list.size == 0 || (list.size == 1 && list[0].novelId == -1L)) {
             iView?.onComplete()
             return
         }
-        NetUtil.setInfo(object :ResponseCallback<com.novel.qingwen.net.bean.BookInfo>{
+        var size = 0
+        NetUtil.setInfo(object : ResponseCallback<com.novel.qingwen.net.bean.BookInfo> {
             override fun onFailure() {
             }
+
             override fun onSuccess(t: com.novel.qingwen.net.bean.BookInfo) {
-                list.forEach {
-                    if (it.novelId==t.data.Id){
-                        if (it.lastChapterId != t.data.LastChapterId){
-                            it.lastChapterId = t.data.LastChapterId
-                            it.lastChapterName = t.data.LastChapter
-                            it.lastUpdateTime = t.data.LastTime
-                            it.update = true
-                            iView?.onComplete()
-                            //写入数据库
-                            BookShelfListUtil.update(it)
+                size++
+                synchronized(list) {
+                    list.forEach {
+                        if (it.novelId == t.data.Id) {
+                            if (it.lastChapterId != t.data.LastChapterId) {
+                                it.lastChapterId = t.data.LastChapterId
+                                it.lastChapterName = t.data.LastChapter
+                                it.lastUpdateTime = t.data.LastTime
+                                it.update = true
+                                BookShelfListUtil.update(it)
+                            }
                         }
-                        return@forEach
                     }
+                    if (size == list.size)
+                        iView?.onComplete()
                 }
             }
         })
         for (bookInfo in list) {
             NetUtil.getBookInfo(bookInfo.novelId)
         }
-        iView?.onComplete()
     }
 }

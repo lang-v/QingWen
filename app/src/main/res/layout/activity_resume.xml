@@ -17,8 +17,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="false"
         android:clipToPadding="false"
+        android:fitsSystemWindows="false"
         tools:context=".view.activity.ResumeActivity">
 
         <ImageView
@@ -35,10 +35,10 @@
             android:id="@+id/resumeToolbar"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:minHeight="70dp"
-            android:gravity="center_vertical|start"
             android:layout_alignParentTop="true"
-            android:background="@android:color/transparent" />
+            android:background="@android:color/transparent"
+            android:gravity="center_vertical|start"
+            android:minHeight="70dp" />
 
 
         <ImageView
@@ -57,8 +57,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/resumeBg"
-            android:layout_marginTop="70dp"
             android:layout_marginStart="20dp"
+            android:layout_marginTop="70dp"
             android:layout_toEndOf="@id/resumeImg"
             android:orientation="vertical">
 
@@ -77,35 +77,49 @@
                 android:id="@+id/resumeAuthor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
                 android:layout_marginTop="10dp"
-                android:text="@{resumeVM.info.author}" />
+                android:text="@{resumeVM.info.author}"
+                android:textColor="@android:color/white" />
 
             <TextView
                 android:id="@+id/resumeType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
                 android:layout_marginTop="10dp"
-                android:text="@{resumeVM.info.type}" />
+                android:text="@{resumeVM.info.type}"
+                android:textColor="@android:color/white" />
 
             <TextView
                 android:id="@+id/resumeStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textColor="@android:color/white"
                 android:text="@{resumeVM.info.status}"
-                android:textAlignment="textStart" />
+                android:textAlignment="textStart"
+                android:textColor="@android:color/white" />
 
-            <TextView
-                android:id="@+id/resumeScore"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textColor="@android:color/white"
+                android:orientation="horizontal">
 
-                android:text="@{resumeVM.info.score}" />
+                <RatingBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="20dp"
+                    android:numStars="5"
+                    style="@style/Widget.AppCompat.RatingBar.Small"
+                    android:rating="@{resumeVM.info.score}" />
+
+                <TextView
+                    android:layout_marginStart="2dp"
+                    android:id="@+id/resumeRateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{resumeVM.info.scoreText}"
+                    android:textColor="@android:color/white" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -117,10 +131,10 @@
             android:background="@drawable/line_shape" />
 
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_below="@id/imageView2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_below="@id/imageView2"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/textView"
@@ -143,16 +157,16 @@
                 android:text="@{resumeVM.info.resumeText}" />
 
             <ImageView
-                android:background="@color/foreground"
                 android:layout_width="match_parent"
-                android:layout_height="2dp"/>
+                android:layout_height="2dp"
+                android:background="@color/foreground" />
 
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingStart="16dp"
                 android:layout_marginTop="10dp"
+                android:paddingStart="16dp"
                 android:text="@string/contents"
                 android:textColor="@android:color/black"
                 android:textSize="18sp" />

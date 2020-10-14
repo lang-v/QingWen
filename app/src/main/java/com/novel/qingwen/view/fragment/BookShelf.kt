@@ -75,13 +75,13 @@ class BookShelf : Fragment(), IBaseView{
 
     override fun onComplete(target: Int) {
         GlobalScope.launch (Dispatchers.Main){
-            if (adapter.itemCount == 0){
-                bookShelfTips.visibility = View.VISIBLE
-            }else {
-                if (bookShelfTips.visibility != View.GONE){
-                    bookShelfTips.visibility = View.GONE
-                }
-            }
+//            if (adapter.itemCount == 0){
+//                bookShelfTips.visibility = View.VISIBLE
+//            }else {
+//                if (bookShelfTips.visibility != View.GONE){
+//                    bookShelfTips.visibility = View.GONE
+//                }
+//            }
             adapter.notifyDataSetChanged()
 //            if (bookShelfRefresh.isRefreshing)
 //                bookShelfRefresh.isRefreshing = false

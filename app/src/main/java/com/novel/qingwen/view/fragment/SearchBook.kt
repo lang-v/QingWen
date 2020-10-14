@@ -11,6 +11,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -67,6 +68,7 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
         val manager = LinearLayoutManager(context)
         searchListView.adapter = adapter
         searchListView.layoutManager = manager
+        searchListView.itemAnimator = DefaultItemAnimator()
         //默认分割线
         searchListView.addItemDecoration(
             DividerItemDecoration(

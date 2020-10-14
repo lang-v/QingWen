@@ -4,6 +4,11 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorPrimary</item>
+        <item name="popupMenuStyle">@style/popupMenuStyle</item>
+    </style>
+
+    <style name="popupMenuStyle" parent="TextAppearance.AppCompat.Light.Widget.PopupMenu.Small">
+        <item name="colorOnBackground">#aaa</item>
     </style>
 
     <style name="transparent" parent="Theme.AppCompat.Light.NoActionBar">

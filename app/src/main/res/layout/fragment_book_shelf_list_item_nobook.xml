@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@android:color/white"
+    android:gravity="center"
+    android:text="@string/book_shelf_tips"
+    android:textColor="@android:color/black"
+    app:drawableTopCompat="@drawable/ic_inclusive"
+    android:padding="20dp"
+    android:layout_height="wrap_content">
+
+</TextView>

@@ -7,19 +7,16 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.databinding.ActivityResumeBinding
-import com.novel.qingwen.room.entity.BookInfo
 import com.novel.qingwen.utils.BookShelfListUtil
-import com.novel.qingwen.utils.RoomUtil
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.ResumeVM
 import kotlinx.android.synthetic.main.activity_resume.*
-import kotlinx.android.synthetic.main.fragment_search_list_item.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
@@ -31,10 +28,8 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
     }
     private val name by lazy {
         intent.getStringExtra("name")
-//        "重生之绝爱"
     }
 
-    //    val name = "青文"
     private val viewModel: ResumeVM by viewModels()
     private lateinit var dataBinding: ActivityResumeBinding
     private val dialog: NoticeDialog by lazy { NoticeDialog.build(this, "请稍候") }
@@ -43,6 +38,7 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
         fun start(context: Context, id: Long, name: String) {
             val intent = Intent(context, ResumeActivity::class.java)
             intent.putExtra("id", id)
+            BookShelfListUtil.currentBookInfo
             intent.putExtra("name", name)
             context.startActivity(intent)
         }
@@ -118,13 +114,17 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
         window.statusBarColor = Color.TRANSPARENT
     }
 
+    private lateinit var addToBookShelf :MenuItem
     //生成右上角菜单
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.resume_menu, menu)
-        val item = menu?.findItem(R.id.addToBookShelf)
+        addToBookShelf = menu?.findItem(R.id.addToBookShelf)!!
         BookShelfListUtil.getList().forEach {
-            if (it.novelId == BookShelfListUtil.currentBookInfo?.novelId)
-                item?.isEnabled = false
+            if (it.novelId == id){
+//                addToBookShelf.isEnabled = false
+                resumeToolbar.menu.setGroupVisible(0,false)
+                return@forEach
+            }
         }
         return true
     }
@@ -137,11 +137,12 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
                 finish()
             }
             R.id.addToBookShelf -> {
-                showSuccess("加入书架")
-                BookShelfListUtil.currentBookInfo?.let {
-                    BookShelfListUtil.insert(
-                        it
-                    )
+                if(!BookShelfListUtil.getList().contains(BookShelfListUtil.currentBookInfo)){
+//                    Log.e("ResumeActivity","加入书架")
+                    showSuccess("加入书架")
+                    BookShelfListUtil.currentBookInfo?.let { BookShelfListUtil.insert(it) }
+                    BookShelfListUtil.refresh()
+                    resumeToolbar.menu.setGroupVisible(0,false)
                 }
             }
         }
@@ -157,6 +158,12 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
     override fun onComplete(target: Int) {
         if (dialog.isShowing)
             dialog.dismiss()
+//        if (BookShelfListUtil.getList().contains(BookShelfListUtil.currentBookInfo)){
+//            Log.e("ResumeActivity","此书已在书架")
+//            GlobalScope.launch(Dispatchers.Main) {
+//                addToBookShelf.isEnabled = false
+//            }
+//        }
     }
 }
 

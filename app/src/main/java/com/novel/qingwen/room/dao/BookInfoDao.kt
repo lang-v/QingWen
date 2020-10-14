@@ -8,6 +8,9 @@ interface BookInfoDao {
     @Query("select * from book_info")
     fun loadAll():Array<BookInfo>
 
+    @Query("select * from book_info where novelId=:id")
+    fun contain(id: Long):Array<BookInfo>
+
     @Update
     fun update(vararg bookInfo: BookInfo):Int
 

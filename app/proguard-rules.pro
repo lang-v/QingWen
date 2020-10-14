@@ -63,7 +63,6 @@
 -keep public class * extends android.view.View
 
 
-
 # 保留我们自定义控件（继承自View）不被混淆
 -keep public class * extends android.view.View{
     *** get*();
@@ -104,26 +103,35 @@
 ##---------------End: proguard configuration for Gson  ----------
 # 使用Gson时需要配置Gson的解析对象及变量都不混淆。不然Gson会找不到变量。
 #实体类
--keep public class com.novel.qingwen.net.bean.*
--keep public class com.novel.qingwen.net.callback.ResponseCallback
--keep public class com.novel.qingwen.net.service.Novel
+-keep public class com.novel.qingwen.net.bean.*{*;}
+-keep public class com.novel.qingwen.net.callback.ResponseCallback {*;}
 
-###去除log和报错信息打印
-#-assumenosideeffects class android.util.Log {
-#    public static *** d(...);
-#    public static *** e(...);
-#    public static *** i(...);
-#    public static *** v(...);
-#    public static *** println(...);
-#    public static *** w(...);
-#    public static *** wtf(...);
-#}
+-keep public class com.novel.qingwen.net.service.Novel{*;}
+
+
+##去除log和报错信息打印
+-assumenosideeffects class android.util.Log {
+    public static *** d(...);
+    public static *** e(...);
+    public static *** i(...);
+    public static *** v(...);
+    public static *** println(...);
+    public static *** w(...);
+    public static *** wtf(...);
+}
     -keep class **.R$* { *; }
-    -keep public class com.novel.qingwen.utils.*
-    -keep public class com.novel.qingwen.base.*
+    -keep public class com.novel.qingwen.utils.*{*;}
+    -keep public class com.novel.qingwen.base.*{*;}
 
-###############################
-# retrofit
+
+
+-dontwarn android.databinding.**
+-keep class androidx.databinding*
+
+-keep class androidx.room**
+-keep class com.novel.qingwen.viewmodel.*{*;}
+
+
 # Retrofit does reflection on generic parameters. InnerClasses is required to use Signature and
 # EnclosingMethod is required to use InnerClasses.
 -keepattributes Signature, InnerClasses, EnclosingMethod
@@ -147,12 +155,13 @@
 
 # Top-level functions that can only be used by Kotlin.
 -dontwarn retrofit2.KotlinExtensions
+-dontwarn retrofit2.KotlinExtensions.*
 
 # With R8 full mode, it sees no subtypes of Retrofit interfaces since they are created with a Proxy
 # and replaces all potential values with null. Explicitly keeping the interfaces prevents this.
 -if interface * { @retrofit2.http.* <methods>; }
 -keep,allowobfuscation interface <1>
 
--dontwarn android.databinding.**
--keep class androidx.databinding.*
+# Okio
+-dontwarn org.codehaus.mojo.animal_sniffer.*
 

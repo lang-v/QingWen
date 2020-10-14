@@ -11,6 +11,7 @@ import android.graphics.Point
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -121,7 +122,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         //开始加载小说内容,这个方法是异步的,确认不是Activity重建后，开始加载数据
         if (savedInstanceState == null || savedInstanceState.getLong("chapterId", -1L) == -1L) {
             dialog.show()
-            contentViewModel.getChapter(chapterId, false, 1)//前中后三章
+            contentViewModel.getChapter(chapterId, false, 1)
         }
     }
 
@@ -181,12 +182,15 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         if (!isInBookShelf) return
         readOffset = readList.getChildAt(0).top
         //如果这本书是已经加入书架了的就更新阅读位置
-        BookShelfListUtil.getList().forEach {
-            if (it.novelId == novelId) {
-                it.lastReadId = currentReadID
-                it.lastReadOffset = readOffset
-                BookShelfListUtil.update(it)
-                return@forEach
+        synchronized(BookShelfListUtil.getList()){
+            BookShelfListUtil.getList().forEach {
+                if (it.novelId == novelId) {
+                    it.lastReadId = currentReadID
+                    it.lastReadOffset = readOffset
+                    it.update = false
+                    BookShelfListUtil.update(it)
+                    return@forEach
+                }
             }
         }
     }
@@ -204,20 +208,22 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 finish()
             }
             R.id.readMenuContents -> {
-                readDrawerLayout.openDrawer(Gravity.RIGHT)
-                //showSuccess("打开目录")
-//                ContentsActivity.start(this,novelId,novelName,status)
-//                finish()
-//                ContentsActivity.start(this, novelId, novelName, status)
-//                finish()
-//                if (readDrawerLayout.isDrawerOpen(readBottomView)) {
-//                    readDrawerLayout.openDrawer(readBottomView)
-//                    if (contentsViewModel.getList().size == 0)
-//                        contentsViewModel.load(novelId)
-//                }
+                //打开右侧目录
+                readDrawerLayout.openDrawer(Gravity.END)
+                //选中当前阅读章节所在目录中的item
+                selectChapterItem()
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    //将目录滚动到当前阅读章节的位置
+    private fun selectChapterItem(){
+        kotlin.runCatching {
+            val index = contentsAdapter.selected(currentReadID)
+            if (index < 0)return
+            contentsList.smoothScrollToPosition(index)
+        }
     }
 
     private fun init() {
@@ -296,10 +302,13 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         }
         readList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val item = contentViewModel.getList()[contentManager.findFirstVisibleItemPosition()]
-                readHead.text = item.name
-                currentReadID = item.chapterId
-                super.onScrolled(recyclerView, dx, dy)
+                val index = contentManager.findFirstVisibleItemPosition()
+                if (index in 0 until  contentViewModel.getList().size) {
+                    val item = contentViewModel.getList()[index]
+                    readHead.text = item.name
+                    currentReadID = item.chapterId
+                    super.onScrolled(recyclerView, dx, dy)
+                }
             }
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -383,7 +392,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 BookContentsListAdapter(contentsViewModel.getList(), object : ItemOnClickListener {
                     override fun onClick(item: ContentsVM.ContentsInfo) {
                         //清空小说缓存列表
-                        contentViewModel.clear()
+                        contentViewModel.clearContent()
                         dialog.show()
                         contentViewModel.getChapter(item.id)
                         readDrawerLayout.closeDrawer(Gravity.RIGHT)
@@ -400,7 +409,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             contentsList.layoutManager = contentsManager
             contentsList.adapter = contentsAdapter
             contentsList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-
                 /**
                  * dy > 0 手指向上滑动
                  * dy < 0 手指向下滑动
@@ -485,7 +493,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 
                 override fun onComplete(target: Int) {
                     GlobalScope.launch(Dispatchers.Main) {
-
                         contentsAdapter.notifyDataSetChanged()
                         if (headList.size != 0) {
                             headView.visibility = View.VISIBLE
@@ -503,12 +510,15 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     }
                 }
             })
-            //滑动到顶部、底部
+            //滑动到顶部、底部、当前位置
             readTop.setOnClickListener {
                 contentsList.smoothScrollToPosition(0)
             }
             readBottom.setOnClickListener {
                 contentsList.smoothScrollToPosition(contentsAdapter.itemCount - 1)
+            }
+            readLocation.setOnClickListener{
+                selectChapterItem()
             }
             contentsViewModel.load(novelId)
         }
@@ -576,19 +586,26 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         if (loadLock)
             loadLock = false
         GlobalScope.launch(Dispatchers.Main) {
-            if (contentViewModel.getList().size <= 3)
-                contentAdapter.notifyDataSetChanged()
-            else when (target) {
-                1 -> {
-                    contentAdapter.notifyItemInserted(0)
-                }
-                2 -> {
-                    contentAdapter.notifyItemInserted(contentAdapter.itemCount)
-                    if (contentAdapter.itemCount == 1) {
-//                        contentManager.scrollToPositionWithOffset(0, abs(readOffset))
-                        readList.scrollBy(0, -readOffset)
+            when {
+                contentViewModel.getList().size <= 3 -> contentAdapter.notifyDataSetChanged()
+                else -> when (target) {
+                    1 -> {
+                        contentAdapter.notifyItemInserted(0)
+                    }
+                    2 -> {
+                        contentAdapter.notifyItemInserted(contentAdapter.itemCount)
+                        if (contentAdapter.itemCount == 1) {
+                            Log.e("offset","offset "+-readOffset)
+        //                        contentManager.scrollToPositionWithOffset(0, abs(readOffset))
+                            readList.scrollBy(0, -readOffset)
+                        }
                     }
                 }
+            }
+
+            //滑动到上次阅读位置
+            if (contentViewModel.getList().size == 1){
+                readList.scrollBy(0, -readOffset)
             }
             if (dialog.isShowing)
                 dialog.dismiss()

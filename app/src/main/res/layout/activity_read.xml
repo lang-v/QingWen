@@ -208,6 +208,7 @@
                 android:layout_height="30dp"/>
 
         </RelativeLayout>
+
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -234,6 +235,19 @@
                 android:textSize="18sp"
                 android:visibility="gone"
                 tools:ignore="RtlSymmetry" />
+
+            <ImageView
+                android:layout_gravity="bottom|end"
+                android:id="@+id/readLocation"
+                android:gravity="center"
+                android:background="@drawable/radius_button_selector"
+                android:src="@drawable/ic_location"
+                android:layout_marginBottom="30dp"
+                android:layout_marginEnd="20dp"
+                android:padding="10dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"/>
+
         </FrameLayout>
 
 

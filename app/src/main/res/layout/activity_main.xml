@@ -28,6 +28,8 @@
 
             <androidx.coordinatorlayout.widget.CoordinatorLayout
                 android:layout_width="match_parent"
+                android:clipToPadding="false"
+                android:clipChildren="false"
                 android:layout_height="match_parent">
 
                 <include
@@ -35,7 +37,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:behavior_hideable="false"
-                    app:behavior_peekHeight="108dp"
+                    app:behavior_peekHeight="98dp"
                     app:layout_behavior="@string/bottom_sheet_behavior"/>
 
             </androidx.coordinatorlayout.widget.CoordinatorLayout>
@@ -53,7 +55,7 @@
 
                 <TextView
                     android:id="@+id/mainSearchPageBtn"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"
@@ -62,15 +64,9 @@
                     android:textSize="8sp"
                     app:drawableTopCompat="@drawable/main_page_search_btn_selector" />
 
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:layout_margin="5dp"
-                    android:background="@android:color/darker_gray" />
-
                 <TextView
                     android:id="@+id/mainBookShelfMore"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:gravity="center"

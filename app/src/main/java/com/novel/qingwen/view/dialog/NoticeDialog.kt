@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
+import android.widget.TextView
 import com.novel.qingwen.R
 import kotlinx.android.synthetic.main.process_dialog_layout.*
 import kotlinx.coroutines.Dispatchers
@@ -24,9 +25,12 @@ class NoticeDialog(context: Context) : Dialog(context,R.style.DialogTheme) {
     }
 
     private var msg:String = ""
+    private var dialogMsg:TextView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.process_dialog_layout)
+        dialogMsg = findViewById(R.id.dialogMsg)
+        dialogMsg?.text = msg
         //空白处无法取消
         setCancelable(false)
         setOnKeyListener { dialog, keyCode, _ ->
@@ -42,7 +46,7 @@ class NoticeDialog(context: Context) : Dialog(context,R.style.DialogTheme) {
     fun setMessage(msg:String){
         this.msg = msg
         GlobalScope.launch(Dispatchers.Main){
-            dialogMsg.text = msg
+            dialogMsg?.text = msg
         }
     }
 

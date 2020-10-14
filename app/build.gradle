@@ -4,6 +4,14 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
+    signingConfigs {
+        mysign {
+            keyAlias 'key_one'
+            storeFile file('C:\\Users\\18449\\android_key\\lang-v.jks')
+            storePassword 'wljsl+2240'
+            keyPassword 'wljsl+2240'
+        }
+    }
     compileSdkVersion 30
     buildToolsVersion "30.0.2"
 
@@ -22,22 +30,23 @@ android {
         applicationId "com.novel.qingwen"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0.3"
+        versionCode 2
+        versionName "1.1.0"
 
         ndk {
             //设置支持的SO库架构
             abiFilters 'armeabi' , 'x86', 'armeabi-v7a', 'x86_64', 'arm64-v8a'
         }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.mysign
     }
 
     buildTypes {
         release {
             buildConfigField "boolean", "LOG_DEBUG", "false" //不显示log
-            minifyEnabled false
+            minifyEnabled true
             //打开资源压缩
-            shrinkResources false
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -66,11 +75,11 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'
     implementation 'com.github.tbruyelle:rxpermissions:0.10.2'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.5'
-    implementation 'com.squareup.retrofit2:retrofit:2.7.1'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.7.1'
     implementation 'androidx.viewpager2:viewpager2:1.1.0-alpha01'
 //    implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.github.lang-v:ElasticView:1.0.1.u1'
+    implementation 'com.github.lang-v:ElasticView:1.0.3'
     //glide 高斯模糊
     implementation 'jp.wasabeef:glide-transformations:2.0.1'
 
@@ -97,7 +106,7 @@ dependencies {
     implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
 
     //bugly
-    implementation 'com.tencent.bugly:crashreport_upgrade:1.4.2'
+    //implementation 'com.tencent.bugly:crashreport_upgrade:1.4.2'
 
     //material design
     implementation 'com.google.android.material:material:1.2.1'

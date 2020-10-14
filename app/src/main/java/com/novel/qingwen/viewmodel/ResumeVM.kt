@@ -27,7 +27,8 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
         var author: String = ""
         var type: String = ""
         var status: String = ""
-        var score: String = ""
+        var score: Float = 0f
+        var scoreText: String = ""
 
         var resumeText: String = ""
         var lastChapterTime: String = ""
@@ -58,6 +59,8 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
                 .error(R.drawable.notfoundpic)
                 .into(imageView)
         }
+
+        fun getString(value:Float):String = value.toString()
 
         /**
          * 高斯模糊
@@ -94,7 +97,8 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
         info.name = t.data.Name
         info.author = "作者：${t.data.Author}"
         info.type = "类型：${t.data.CName}"
-        info.score = "评分：${t.data.BookVote.Score}"
+        info.score = (t.data.BookVote.Score/2).toFloat()
+        info.scoreText = "${t.data.BookVote.Score}分"
         info.status = "状态：${t.data.BookStatus}"
         info.resumeText = t.data.Desc
         info.lastChapterTime = t.data.LastTime
