@@ -11,7 +11,6 @@ import android.graphics.Point
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -33,7 +32,6 @@ import com.novel.qingwen.view.widget.CustomLinearLayoutManager
 import com.novel.qingwen.view.widget.CustomSeekBar
 import com.novel.qingwen.viewmodel.ContentsVM
 import com.novel.qingwen.viewmodel.ReadVM
-import kotlinx.android.synthetic.main.activity_contents.*
 import kotlinx.android.synthetic.main.activity_read.*
 import kotlinx.android.synthetic.main.activity_read.contentsList
 import kotlinx.android.synthetic.main.activity_read.headView
@@ -95,6 +93,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     //记录是否在等待刷新布局
     private var waitForRefresh = false
 
+    private var firstRun:Boolean = true
+
     override fun onResume() {
         registerReceiver(broadcastReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         super.onResume()
@@ -122,7 +122,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         //开始加载小说内容,这个方法是异步的,确认不是Activity重建后，开始加载数据
         if (savedInstanceState == null || savedInstanceState.getLong("chapterId", -1L) == -1L) {
             dialog.show()
-            contentViewModel.getChapter(chapterId, false, 1)
+            contentViewModel.getChapter(chapterId, false)
         }
     }
 
@@ -182,7 +182,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         if (!isInBookShelf) return
         readOffset = readList.getChildAt(0).top
         //如果这本书是已经加入书架了的就更新阅读位置
-        synchronized(BookShelfListUtil.getList()){
+        synchronized(BookShelfListUtil.getList()) {
             BookShelfListUtil.getList().forEach {
                 if (it.novelId == novelId) {
                     it.lastReadId = currentReadID
@@ -218,10 +218,10 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     //将目录滚动到当前阅读章节的位置
-    private fun selectChapterItem(){
+    private fun selectChapterItem() {
         kotlin.runCatching {
             val index = contentsAdapter.selected(currentReadID)
-            if (index < 0)return
+            if (index < 0) return
             contentsList.smoothScrollToPosition(index)
         }
     }
@@ -303,11 +303,19 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         readList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val index = contentManager.findFirstVisibleItemPosition()
-                if (index in 0 until  contentViewModel.getList().size) {
+                if (index in 0 until contentViewModel.getList().size) {
                     val item = contentViewModel.getList()[index]
                     readHead.text = item.name
                     currentReadID = item.chapterId
                     super.onScrolled(recyclerView, dx, dy)
+                    if (index == contentViewModel.getList().size - 1 && contentViewModel.getList()[index].nid != -1L) {
+                        contentViewModel.cancelPrepare()
+                        //提前加载下一章
+                        contentViewModel.prepareChapter(index)
+                    } else if (index == 0 && contentViewModel.getList()[0].pid != -1L) {
+                        contentViewModel.cancelPrepare()
+                        contentViewModel.prepareChapter(0)
+                    }
                 }
             }
 
@@ -315,6 +323,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 //设置界面处于开启状态 不处理滑动加载事件
                 if (isOpen) return
 //                        "now canScrollUp=${readList.canScrollVertically(-1)} canScrollDown=${readList.canScrollVertically(1)}")
+                //取消预加载
+                contentViewModel.cancelPrepare()
                 //加载下一章
                 if (contentManager.findLastVisibleItemPosition() == (contentAdapter.itemCount - 1)//屏幕最下面的完全可见的item是list中的最后一个
                     && newState == RecyclerView.SCROLL_STATE_IDLE//当前recyclerview停止滑动
@@ -517,7 +527,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             readBottom.setOnClickListener {
                 contentsList.smoothScrollToPosition(contentsAdapter.itemCount - 1)
             }
-            readLocation.setOnClickListener{
+            readLocation.setOnClickListener {
                 selectChapterItem()
             }
             contentsViewModel.load(novelId)
@@ -586,25 +596,21 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         if (loadLock)
             loadLock = false
         GlobalScope.launch(Dispatchers.Main) {
-            when {
-                contentViewModel.getList().size <= 3 -> contentAdapter.notifyDataSetChanged()
-                else -> when (target) {
-                    1 -> {
-                        contentAdapter.notifyItemInserted(0)
-                    }
-                    2 -> {
-                        contentAdapter.notifyItemInserted(contentAdapter.itemCount)
-                        if (contentAdapter.itemCount == 1) {
-                            Log.e("offset","offset "+-readOffset)
-        //                        contentManager.scrollToPositionWithOffset(0, abs(readOffset))
-                            readList.scrollBy(0, -readOffset)
-                        }
+            when (target) {
+                1 -> {
+                    contentAdapter.notifyItemInserted(0)
+                }
+                2 -> {
+                    contentAdapter.notifyItemInserted(contentAdapter.itemCount-1)
+                    if (firstRun && contentAdapter.itemCount == 1) {
+                        //                        contentManager.scrollToPositionWithOffset(0, abs(readOffset))
+                        readList.scrollBy(0, -readOffset)
                     }
                 }
             }
 
             //滑动到上次阅读位置
-            if (contentViewModel.getList().size == 1){
+            if (contentViewModel.getList().size == 1) {
                 readList.scrollBy(0, -readOffset)
             }
             if (dialog.isShowing)

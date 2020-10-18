@@ -22,39 +22,5 @@ class MyApplication: Application() {
                 ConfigUtil.init()
                 BookShelfListUtil.init()
             }
-//        GlobalScope.launch {
-//            RoomUtil.chapterDao.insertAll(Chapter(11L,"001 重生剑客","那一天，我重生了。",-1,-1))
-//            val t = RoomUtil.chapterDao.loadById(11L)
-//            Log.e("Application","t=$t")
-//        }
-//        CrashReport.testJavaCrash()
         }
-
-
-    /**
-     * 获取进程号对应的进程名
-     *
-     * @param pid 进程号
-     * @return 进程名
-     */
-    private fun getProcessName(pid: Int): String? {
-        var reader: BufferedReader? = null
-        try {
-            reader = BufferedReader(FileReader("/proc/$pid/cmdline"))
-            var processName: String = reader.readLine()
-            if (!TextUtils.isEmpty(processName)) {
-                processName = processName.trim { it <= ' ' }
-            }
-            return processName
-        } catch (throwable: Throwable) {
-            throwable.printStackTrace()
-        } finally {
-            try {
-                reader?.close()
-            } catch (exception: IOException) {
-                exception.printStackTrace()
-            }
-        }
-        return null
-    }
 }

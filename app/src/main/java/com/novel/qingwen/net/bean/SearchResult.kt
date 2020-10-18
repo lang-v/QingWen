@@ -6,6 +6,15 @@ data class SearchResult(
     val status: Int
 )
 
+/**
+ *  val Author: String,
+val CName: String,
+val Desc: String,
+val Id: Int,
+val Img: String,
+val Name: String,
+val Score: Double
+ */
 data class SearchResultItem(
     val Author: String,
     val BookStatus: String,

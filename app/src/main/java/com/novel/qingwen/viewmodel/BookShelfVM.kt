@@ -5,9 +5,6 @@ import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.room.entity.BookInfo
 import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.NetUtil
-import com.novel.qingwen.utils.RoomUtil
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class BookShelfVM : BaseVM() {
     private val list = BookShelfListUtil.getList()

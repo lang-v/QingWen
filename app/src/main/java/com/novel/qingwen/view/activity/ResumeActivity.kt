@@ -5,7 +5,6 @@ import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
@@ -16,9 +15,6 @@ import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.ResumeVM
 import kotlinx.android.synthetic.main.activity_resume.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 

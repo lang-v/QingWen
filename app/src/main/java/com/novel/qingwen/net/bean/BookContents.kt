@@ -13,11 +13,11 @@ data class VolumeData(
 )
 
 data class Volume(
-    val list: List<Chapter>,
+    val list: List<BookChapter>,
     val name: String
 )
 
-data class Chapter(
+data class BookChapter(
     val hasContent: Int,
     val id: Long,
     val name: String

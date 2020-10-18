@@ -1,6 +1,5 @@
 package com.novel.qingwen.viewmodel
 
-import android.util.Log
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.net.bean.ChapterContent
 import com.novel.qingwen.utils.NetUtil
@@ -30,42 +29,51 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         return list
     }
 
-    fun clearContent(){
+    fun clearContent() {
         list.clear()
     }
+
     /**
      * 小说文章加载时先从数据库中查找，没有缓存则网络请求,返回结果后将结果写入数据库
      * @param attachStart 是否将加载的小说内容添加到集合头部
      * @param count 加载几个章节 1：仅当前章节 2：当前章节和下一章 3：当前章节、上一章和下一章
      */
-    fun getChapter(chapterId: Long, attachStart: Boolean = false, count: Int = 2) {
+    fun getChapter(chapterId: Long, attachStart: Boolean = false,slient:Boolean = false) {
         GlobalScope.launch {
             val t = RoomUtil.chapterDao.loadById(novelId, chapterId)
             if (t != null) {
-                if (t.content.length < 200 || t.nid == -1L){
+                if (t.content.length < 200 || t.nid == -1L) {
                     RoomUtil.chapterDao.delete(t)
-                    getChapter(chapterId, attachStart, count)
+                    getChapter(chapterId, attachStart,slient)
                     return@launch
                 }
                 if (attachStart) {
                     list.add(0, t)
                     iView?.onComplete(1)
-                    if (count == 2 && t.pid != -1L) {
-                        getChapter(t.pid, attachStart, 1)
-                    }
                 } else {
                     list.add(t)
-                    iView?.onComplete(2) 
-                    if (count == 2 && t.nid != -1L) {
-                        getChapter(t.nid, attachStart, 1)
-                    }
+                    iView?.onComplete(2)
                 }
                 return@launch
             }
             this@ReadVM.attachStart = attachStart
-            NetUtil.getChapterContent(novelId, chapterId)
+            NetUtil.getChapterContent(novelId, chapterId,slient)
         }
-//        list.add(t)
+    }
+
+    //静默加载
+    fun prepareChapter(position:Int) {
+        if (position == 0 && list[0].pid != -1L)
+            getChapter(list[0].pid,true,slient = true)
+        else {
+            val chapterId: Long = list[list.size - 1].nid
+            getChapter(chapterId, false, slient = true)
+        }
+    }
+
+    //取消预加载
+    fun cancelPrepare(){
+        NetUtil.cancelLoadChapter()
     }
 
     override fun onFailure() {
@@ -73,6 +81,8 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
     }
 
     override fun onSuccess(t: ChapterContent) {
+        //避免重复加载
+        if (list.size != 0 && list[list.size-1].chapterId == t.data.cid)return
         val chapter =
             Chapter(t.data.id, t.data.cid, t.data.cname, t.data.content, t.data.nid, t.data.pid)
         if (attachStart) {

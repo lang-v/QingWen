@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="5dp"
     app:cardCornerRadius="20dp"
-    android:backgroundTint="@android:color/white"
+    android:backgroundTint="#daaa"
     android:elevation="5dp">
 
     <LinearLayout
@@ -24,12 +25,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
+            android:paddingEnd="5dp"
             android:layout_margin="5dp"
             android:layout_gravity="center_vertical"
             android:gravity="center"
             android:textAlignment="center"
-            android:textColor="@color/colorPrimary"
-            android:textStyle="bold" />
+            android:textColor="#fff"
+            android:textStyle="bold"
+            tools:ignore="RtlSymmetry" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

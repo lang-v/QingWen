@@ -39,18 +39,18 @@ object BookShelfListUtil {
         }
     }
 
-    fun update(new: BookInfo) {
+    fun update(aNew: BookInfo) {
         GlobalScope.launch {
             synchronized(list) {
                 for (bookInfo in list) {
-                    if (bookInfo.novelId == new.novelId) {
-                        bookInfo.update = new.update
-                        bookInfo.lastReadId = new.lastReadId
-                        bookInfo.lastReadOffset = new.lastReadOffset
-                        bookInfo.lastChapterName = new.lastChapterName
-                        bookInfo.lastChapterId = new.lastChapterId
-                        bookInfo.lastUpdateTime = new.lastUpdateTime
-                        bookInfoDao.update(new)
+                    if (bookInfo.novelId == aNew.novelId) {
+                        bookInfo.update = aNew.update
+                        bookInfo.lastReadId = aNew.lastReadId
+                        bookInfo.lastReadOffset = aNew.lastReadOffset
+                        bookInfo.lastChapterName = aNew.lastChapterName
+                        bookInfo.lastChapterId = aNew.lastChapterId
+                        bookInfo.lastUpdateTime = aNew.lastUpdateTime
+                        bookInfoDao.update(aNew)
                         return@launch
                     }
                 }

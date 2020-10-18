@@ -3,10 +3,7 @@ package com.novel.qingwen.utils
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
-import com.novel.qingwen.net.bean.BookContents
-import com.novel.qingwen.net.bean.BookInfo
-import com.novel.qingwen.net.bean.ChapterContent
-import com.novel.qingwen.net.bean.SearchResult
+import com.novel.qingwen.net.bean.*
 import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.net.service.Novel
 import okhttp3.ResponseBody
@@ -24,6 +21,7 @@ object NetUtil {
     var infoCallback: ResponseCallback<BookInfo>? = null
     var contentsCallback: ResponseCallback<BookContents>? = null
     var chapterContentCallback: ResponseCallback<ChapterContent>? = null
+    var categoryCallBack: ResponseCallback<BookStoreItem>? = null
 
     //搜索
     private val search: Retrofit = Retrofit.Builder()
@@ -46,12 +44,23 @@ object NetUtil {
         .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
         .build()
 
+
+    //分类小说
+    private val category = Retrofit.Builder()
+        .baseUrl("https://scxs.pysmei.com/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
     fun setInfo(callback: ResponseCallback<BookInfo>) {
         infoCallback = callback
     }
 
     fun setSearch(callback: ResponseCallback<SearchResult>) {
         searchCallback = callback
+    }
+
+    fun setCategory(callback: ResponseCallback<BookStoreItem>) {
+        categoryCallBack = callback
     }
 
     fun setContents(callback: ResponseCallback<BookContents>) {
@@ -64,6 +73,7 @@ object NetUtil {
             searchCallback -> searchCallback = null
             contentsCallback -> contentsCallback = null
             chapterContentCallback -> chapterContentCallback = null
+            categoryCallBack -> categoryCallBack = null
         }
     }
 
@@ -114,7 +124,7 @@ object NetUtil {
                 else {
                     try {
                         infoCallback?.onSuccess(response.body()!!)
-                    }catch (e:JsonSyntaxException){
+                    } catch (e: JsonSyntaxException) {
                         infoCallback?.onFailure()
                     }
                 }
@@ -150,15 +160,19 @@ object NetUtil {
         })
     }
 
+
+    var chapterCall: Call<ChapterContent>? = null
+
     /**
      * 章节内容
      */
-    fun getChapterContent(novelId: Long, chapterId: Long) {
+    fun getChapterContent(novelId: Long, chapterId: Long, slient: Boolean = false) {
         val request = chapterContent.create(Novel::class.java)
-        val call: Call<ChapterContent> = request.getChapterContent(novelId, chapterId)
-        call.enqueue(object : Callback<ChapterContent> {
+        chapterCall = request.getChapterContent(novelId, chapterId)
+        chapterCall?.enqueue(object : Callback<ChapterContent> {
             override fun onFailure(call: Call<ChapterContent>, t: Throwable) {
-                chapterContentCallback?.onFailure()
+                if (!slient)
+                    chapterContentCallback?.onFailure()
             }
 
             override fun onResponse(
@@ -169,13 +183,55 @@ object NetUtil {
                     try {
                         chapterContentCallback?.onSuccess(response.body()!!)
                     } catch (e: JsonSyntaxException) {
+                        if (!slient)
+                            chapterContentCallback?.onFailure()
+                    }
+                } else {
+                    if (!slient)
                         chapterContentCallback?.onFailure()
+                }
+            }
+        })
+    }
+
+    //取消加载章节
+    fun cancelLoadChapter() {
+        chapterCall?.cancel()
+    }
+
+
+
+    private var categoryCall: Call<BookStoreItem>? = null
+    fun cancelGetCategory(){
+        categoryCall?.cancel()
+    }
+    /**
+     * @param categoryId 分类ID
+     * @param status 状态
+     * @param page 页数
+     */
+    fun getCategory(categoryId:Int,status:String,page:Int){
+        val request = category.create(Novel::class.java)
+        categoryCall = request.getCategory(categoryId, status, page)
+        categoryCall?.enqueue(object : Callback<BookStoreItem> {
+            override fun onFailure(call: Call<BookStoreItem>, t: Throwable) {
+                categoryCallBack?.onFailure()
+            }
+
+            override fun onResponse(call: Call<BookStoreItem>, response: Response<BookStoreItem>) {
+                if (response.body() == null)
+                    categoryCallBack?.onFailure()
+                else {
+                    try {
+                        response.body()?.let {
+                            categoryCallBack?.onSuccess(it)
+                        }
+                    } catch (e: JsonSyntaxException) {
+                        categoryCallBack?.onFailure()
                     }
                 }
-                else
-                    chapterContentCallback?.onFailure()
-
             }
+
         })
     }
 }

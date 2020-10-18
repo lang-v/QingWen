@@ -98,6 +98,8 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
 
     override fun onComplete(target: Int) {
         GlobalScope.launch(Dispatchers.Main) {
+            if(searchListView.visibility != View.VISIBLE)
+                searchListView.visibility = View.VISIBLE
             adapter.notifyDataSetChanged()
             if (dialog.isShowing)
             dialog.dismiss()

@@ -95,6 +95,7 @@
                     android:singleLine="true"
                     android:visibility="invisible"
                     app:drawableStartCompat="@drawable/ic_time" />
+
                 </LinearLayout>
 
             </RelativeLayout>
@@ -108,14 +109,14 @@
         android:id="@+id/bookShelfRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="55dp"
+        android:background="#1aaa"
+        android:layout_marginTop="60dp"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/bookShelfList"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="5dp"
+            android:layout_height="wrap_content"
             android:background="@android:color/white"
             android:overScrollMode="never"
             android:paddingStart="5dp"

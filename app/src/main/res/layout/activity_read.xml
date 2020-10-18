@@ -132,7 +132,8 @@
                         android:layout_weight="1"
                         android:background="@android:color/transparent"
                         android:text="上一章"
-                        android:textColor="@android:color/black" />
+                        android:textColor="@android:color/black"
+                        android:visibility="invisible" />
 
                     <Button
                         android:id="@+id/moreSetting"
@@ -151,7 +152,8 @@
                         android:layout_weight="1"
                         android:background="@android:color/transparent"
                         android:text="下一章"
-                        android:textColor="@android:color/black" />
+                        android:textColor="@android:color/black"
+                        android:visibility="invisible" />
 
                 </LinearLayout>
 
@@ -171,41 +173,41 @@
     </FrameLayout>
 
     <LinearLayout
-        android:background="#D3D3D3"
         android:layout_width="250dp"
-        android:orientation="vertical"
         android:layout_height="match_parent"
-        android:layout_gravity="end">
+        android:layout_gravity="end"
+        android:background="#D3D3D3"
+        android:orientation="vertical">
 
         <RelativeLayout
-            android:gravity="center"
-            android:background="@color/colorPrimary"
             android:layout_width="match_parent"
-            android:layout_height="80dp">
+            android:layout_height="80dp"
+            android:background="@color/colorPrimary"
+            android:gravity="center">
 
             <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
                 android:text="目录"
                 android:textColor="@android:color/black"
-                android:gravity="center"
-                android:textSize="25sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:textSize="25sp" />
 
             <Button
                 android:id="@+id/readTop"
-                android:background="@drawable/top_selector"
-                android:layout_toStartOf="@id/readBottom"
-                android:layout_marginEnd="10dp"
                 android:layout_width="30dp"
-                android:layout_height="30dp"/>
+                android:layout_height="30dp"
+                android:layout_marginEnd="10dp"
+                android:layout_toStartOf="@id/readBottom"
+                android:background="@drawable/top_selector" />
 
             <Button
                 android:id="@+id/readBottom"
-                android:background="@drawable/bottom_selector"
-                android:layout_marginEnd="10dp"
-                android:layout_alignParentEnd="true"
                 android:layout_width="30dp"
-                android:layout_height="30dp"/>
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/bottom_selector" />
 
         </RelativeLayout>
 
@@ -237,16 +239,16 @@
                 tools:ignore="RtlSymmetry" />
 
             <ImageView
-                android:layout_gravity="bottom|end"
                 android:id="@+id/readLocation"
-                android:gravity="center"
-                android:background="@drawable/radius_button_selector"
-                android:src="@drawable/ic_location"
-                android:layout_marginBottom="30dp"
-                android:layout_marginEnd="20dp"
-                android:padding="10dp"
                 android:layout_width="40dp"
-                android:layout_height="40dp"/>
+                android:layout_height="40dp"
+                android:layout_gravity="bottom|end"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="30dp"
+                android:background="@drawable/radius_button_selector"
+                android:gravity="center"
+                android:padding="10dp"
+                android:src="@drawable/ic_location" />
 
         </FrameLayout>
 

@@ -44,7 +44,7 @@ object Show{
         val toast = Toast(context)
         toast.view = view
         toast.duration = Toast.LENGTH_SHORT
-        toast.setGravity(Gravity.CENTER,0,0)
+//        toast.setGravity(Gravity.CENTER or Gravity.BOTTOM,0,0)
         toast.show()
     }
 

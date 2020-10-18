@@ -1,15 +1,13 @@
 package com.novel.qingwen.room.entity
 
-import androidx.annotation.NonNull
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
 /**
  * 后期发现小说的章节ID可能重复，所以增加小说id判断
  * 以小说id 和 章节id 作为联合主键
  */
-@Entity(tableName = "Chapter",primaryKeys = ["novelId","chapterId"])
+@Entity(tableName = "BookChapter",primaryKeys = ["novelId","chapterId"])
 data class Chapter(
     //章节id
     @ColumnInfo(name = "novelId") val novelId:Long,

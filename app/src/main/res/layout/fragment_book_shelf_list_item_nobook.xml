@@ -2,7 +2,7 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@android:color/white"
+    android:background="@android:color/transparent"
     android:gravity="center"
     android:text="@string/book_shelf_tips"
     android:textColor="@android:color/black"

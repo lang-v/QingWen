@@ -3,18 +3,10 @@ package com.novel.qingwen.view.activity
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.graphics.Color
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.Settings
 import android.view.View
-import android.webkit.DownloadListener
 import android.widget.RelativeLayout
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -22,21 +14,20 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.databinding.ActivityMainBinding
-import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.Show
 import com.novel.qingwen.view.adapter.BookShelfListAdapter
 import com.novel.qingwen.view.adapter.FragmentAdapter
-import com.novel.qingwen.view.fragment.MoreContent
+import com.novel.qingwen.view.fragment.BookStore
 import com.novel.qingwen.view.fragment.SearchBook
 import com.novel.qingwen.viewmodel.BookShelfVM
 import com.novel.qingwen.viewmodel.MainVM
 import com.tbruyelle.rxpermissions2.RxPermissions
+import com.tencent.bugly.Bugly
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_book_shelf.*
 import kotlinx.coroutines.Dispatchers
@@ -45,7 +36,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import sl.view.elasticviewlibrary.ElasticLayout
 import sl.view.elasticviewlibrary.base.BaseHeader
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -63,19 +53,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        RxPermissions(this)
-//            .request(
-//                Manifest.permission.ACCESS_NETWORK_STATE,
-//                Manifest.permission.ACCESS_WIFI_STATE,
-//                Manifest.permission.READ_PHONE_STATE,
-//                Manifest.permission.WRITE_EXTERNAL_STORAGE
-//            )
-//            .subscribe {
-//                if (!it){
-//                    showError("没有此权限App无法正常运行")
-//                    finish()
-//                }
-//            }
+        RxPermissions(this)
+            .request(
+                Manifest.permission.ACCESS_NETWORK_STATE,
+                Manifest.permission.ACCESS_WIFI_STATE,
+                Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            .subscribe {
+                if (!it){
+                    showError("没有此权限App无法正常运行")
+                    finish()
+                }
+            }
 
         //启动页
         val binding:ActivityMainBinding = DataBindingUtil.setContentView(
@@ -87,11 +77,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
             delay(500)
             welcomePage.visibility = View.GONE
         }
-        //initBugly()
+        initBugly()
         val list = ArrayList<Fragment>()
 //        list.add(BookShelf())
         list.add(SearchBook())
-        list.add(MoreContent())
+        list.add(BookStore())
         val adapter = FragmentAdapter(this, list)
         window.statusBarColor = Color.parseColor("#669900")
         binding.lifecycleOwner = this@MainActivity
@@ -101,102 +91,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         init()
     }
 
-//    private fun initBugly(){
-//        Bugly.init(applicationContext, "20fec18d0c", false)
-//        Beta.autoCheckUpgrade = true
-//        Beta.storageDir = cacheDir
-//        Beta.autoInstallApk = true
-//        Beta.downloadListener = object :com.tencent.bugly.beta.download.DownloadListener{
-//            override fun onReceive(p0: DownloadTask?) {
-//
-//            }
-//
-//            override fun onCompleted(p0: DownloadTask?) {
-//
-//            }
-//
-//            override fun onFailed(p0: DownloadTask?, p1: Int, p2: String?) {
-//
-//            }
-//        }
-//        Beta.upgradeStateListener = object :UpgradeStateListener{
-//            override fun onUpgradeFailed(p0: Boolean) {
-//
-//            }
-//
-//            override fun onUpgradeSuccess(p0: Boolean) {
-//
-//            }
-//
-//            override fun onUpgradeNoVersion(p0: Boolean) {
-//
-//            }
-//
-//            override fun onUpgrading(p0: Boolean) {
-//
-//            }
-//
-//            override fun onDownloadCompleted(p0: Boolean) {
-//                Toast.makeText(this@MainActivity,"下载${if (p0) "成功" else "失败"}",Toast.LENGTH_SHORT).show()
-//            }
-//
-//        }
-//        //Beta.storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-////        Beta.autoCheckUpgrade = true
-////        Beta.autoInit = true
-////        Beta.autoInstallApk = true
-////        Beta.smallIconId = R.mipmap.ic_launcher
-////        Beta.largeIconId = R.mipmap.ic_launcher
-////        Beta.enableNotification = true//显示系统通知
-////        Beta.storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-////        Beta.registerDownloadListener(object :DownloadListener{
-////            override fun onReceive(p0: DownloadTask?) {}
-////
-////            override fun onCompleted(p0: DownloadTask?) {
-////                if (p0 != null)
-////                    Beta.installApk(p0.saveFile)
-////                Beta.unregisterDownloadListener()
-////            }
-////
-////            override fun onFailed(p0: DownloadTask?, p1: Int, p2: String?) {
-////                Beta.unregisterDownloadListener()
-////            }
-////
-////        })
-//        //只在主页显示更新弹窗
-//        Beta.canShowUpgradeActs.add(MainActivity::class.java)
-//    }
-
-    fun haveInstallPermission():Boolean{
-        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            this.packageManager.canRequestPackageInstalls()
-        } else {
-            return true
-        }
+    private fun initBugly(){
+        Bugly.init(applicationContext, "20fec18d0c", false)
     }
 
-    /**
-     * 开启设置安装未知来源应用权限界面
-     */
-    fun startInstallPermissionSettingActivity(context: Context) {
-        val intent = Intent()
-        //获取当前apk包URI，并设置到intent中（这一步设置，可让“未知应用权限设置界面”只显示当前应用的设置项）
-        val packageURI: Uri = Uri.parse("package:" + context.packageName)
-        intent.data = packageURI
-        //设置不同版本跳转未知应用的动作
-        if (Build.VERSION.SDK_INT >= 26) {
-            //intent = new Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,packageURI);
-            intent.action = Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES
-        } else {
-            intent.action = Settings.ACTION_SECURITY_SETTINGS
-        }
-        (context as Activity).startActivityForResult(
-            intent,
-            100
-        )
-        show("请开启未知应用安装权限")
-    }
 
+    //确认是打开书架还是开始加载
+    var scrollTarget= false
 
     private fun init(){
         viewPager.isUserInputEnabled = false
@@ -225,9 +126,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         })
         viewPager.currentItem = 0
 
-//        val bottomSheetBehavior = BottomBookShelfBehavior<CardView>().fromCopy(bottomBookShelf)
+        //底部书架的初始化
         bottomSheetBehavior = BottomSheetBehavior.from(bottomBookShelf)
         var tabLayoutHeight = 0
+
+        //加入消息队列 展开底部书架并获取高度
         tabLayout.post {
             tabLayoutHeight = tabLayout.measuredHeight
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -267,17 +170,41 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
                 tabLayout.layoutParams = layoutParams
             }
         })
-//        BottomBookShelf().show(supportFragmentManager,"BookShelf")
+        //加载更多
         mainBookShelfMore.setOnClickListener(this)
         mainSearchPageBtn.setOnClickListener(this)
-//        bookShelfRefresh.setColorSchemeColors(Color.GREEN,Color.BLUE,Color.YELLOW)
-        //刷新
-//        bookShelfRefresh.setOnRefreshListener {
-//            viewModel.refresh()
-//        }
+
+        //设置刷新加载事件监听
         bookShelfRefresh.setOnElasticViewEventListener(this)
-        bookShelfRefresh.setHeaderAdapter(refreshHeader)
-        bookShelfRefresh.setAnimTime(300L)
+        bookShelfRefresh.setHeaderAdapter(object :BaseHeader(this,200){
+            override fun scrollProgress(progress: Int) {
+                super.scrollProgress(progress)
+                 scrollTarget =(progress > offset+50)
+            }
+
+            override fun releaseToDo() {
+                super.releaseToDo()
+                if(scrollTarget)text.text = "释放关闭书架"
+            }
+
+            override fun onDo() {
+                if (scrollTarget) {
+                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                    overDo("")
+                }
+                else super.onDo()
+            }
+
+            override fun overDo(msg: String) {
+                super.overDo(msg)
+                if(scrollTarget){
+                    text.text = ""
+                    progressBar.visibility = View.INVISIBLE
+                    icon.visibility = View.VISIBLE
+                }
+            }
+        })
+        bookShelfRefresh.setAnimTime(500L)
         adapter = BookShelfListAdapter(viewModel.getList())
         bookShelfList.adapter = adapter
         bookShelfList.layoutManager = LinearLayoutManager(this)
@@ -387,16 +314,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
     override fun onRefresh() {
         viewModel.refresh()
     }
-
-
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        if (resultCode == RESULT_OK){
-//            if (requestCode == 100){
-//                Beta.installApk(File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)))
-//            }
-//        }
-//        super.onActivityResult(requestCode, resultCode, data)
-//    }
 }
 infix fun Activity.showError(msg: String){
     Show.show(this, msg, Show.ERROR)

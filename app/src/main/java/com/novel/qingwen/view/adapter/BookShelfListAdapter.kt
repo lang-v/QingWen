@@ -1,12 +1,10 @@
 package com.novel.qingwen.view.adapter
 
-import android.view.Gravity
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.PopupMenu
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.novel.qingwen.R

@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="mainVM"
             type="com.novel.qingwen.viewmodel.MainVM" />
@@ -23,6 +22,7 @@
                 android:id="@+id/viewPager"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:paddingBottom="40dp"
                 android:layout_above="@id/tabLayout"
                 android:layout_alignParentTop="true" />
 
