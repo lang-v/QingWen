@@ -95,10 +95,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         Bugly.init(applicationContext, "20fec18d0c", false)
     }
 
-
-    //确认是打开书架还是开始加载
-    var scrollTarget= false
-
     private fun init(){
         viewPager.isUserInputEnabled = false
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
@@ -174,34 +170,30 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         mainBookShelfMore.setOnClickListener(this)
         mainSearchPageBtn.setOnClickListener(this)
 
+        //确认是打开书架还是开始加载
+        var scrollTarget= 0
         //设置刷新加载事件监听
         bookShelfRefresh.setOnElasticViewEventListener(this)
         bookShelfRefresh.setHeaderAdapter(object :BaseHeader(this,200){
             override fun scrollProgress(progress: Int) {
                 super.scrollProgress(progress)
-                 scrollTarget =(progress > offset+50)
+                scrollTarget = if (progress<offset) 0 else if (progress in offset until offset+100) 1 else 2
             }
 
             override fun releaseToDo() {
                 super.releaseToDo()
-                if(scrollTarget)text.text = "释放关闭书架"
+                if(scrollTarget == 1)text.text = "继续下拉关闭书架"
+                else if(scrollTarget == 2)text.text = "释放关闭书架"
             }
 
-            override fun onDo() {
-                if (scrollTarget) {
-                    bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-                    overDo("")
-                }
-                else super.onDo()
+            override fun onRelease() {
+                super.onRelease()
+                if(scrollTarget == 2)bookShelfRefresh.cancelLoading(150L)
             }
 
-            override fun overDo(msg: String) {
-                super.overDo(msg)
-                if(scrollTarget){
-                    text.text = ""
-                    progressBar.visibility = View.INVISIBLE
-                    icon.visibility = View.VISIBLE
-                }
+            override fun onCancel() {
+                super.onCancel()
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             }
         })
         bookShelfRefresh.setAnimTime(500L)

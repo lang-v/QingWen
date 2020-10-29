@@ -18,7 +18,6 @@ import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.view.adapter.BookStoreCategoryAdapter
 import com.novel.qingwen.view.adapter.BookStoreListAdapter
-import com.novel.qingwen.view.adapter.BookStoreRefreshHeader
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.BookStoreVM
 import kotlinx.android.synthetic.main.fragment_book_store.*
@@ -29,7 +28,6 @@ import kotlinx.coroutines.launch
 import sl.view.elasticviewlibrary.ElasticLayout
 import sl.view.elasticviewlibrary.base.BaseFooter
 import sl.view.elasticviewlibrary.base.BaseHeader
-import kotlin.math.roundToInt
 
 class BookStore : Fragment(), IBaseView {
     /**
@@ -90,19 +88,22 @@ class BookStore : Fragment(), IBaseView {
         val categoryManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         categoryList.adapter = categoryAdapter
         categoryList.layoutManager = categoryManager
-        categoryList.addOnScrollListener(object :RecyclerView.OnScrollListener(){
+        categoryList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 lineOne.x -= dx
             }
         })
-        bookStoreRefresh1.setOnScrollListener(object :ElasticLayout.OnScrollListener{
+        bookStoreRefresh1.setOnScrollListener(object : ElasticLayout.OnScrollListener {
             override fun onScrolled(dx: Int, dy: Int) {
                 lineOne.x -= dx
             }
+
+            override fun preOnScrolled(scrollX: Int, scrollY: Int, dx: Int, dy: Int): Boolean {
+                return false
+            }
         })
         categoryAdapter.notifyDataSetChanged()
-
 
         val tmp = arrayListOf("最新", "最热", "评分", "完结")
         val statusManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -133,22 +134,27 @@ class BookStore : Fragment(), IBaseView {
         statusList.adapter = statusAdapter
         statusList.layoutManager = statusManager
         statusAdapter.notifyDataSetChanged()
-        statusList.addOnScrollListener(object :RecyclerView.OnScrollListener(){
+        statusList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 lineTwo.x -= dx
             }
         })
-        bookStoreRefresh2.setOnScrollListener(object :ElasticLayout.OnScrollListener{
+        bookStoreRefresh2.setOnScrollListener(object : ElasticLayout.OnScrollListener {
             override fun onScrolled(dx: Int, dy: Int) {
                 lineTwo.x -= dx
+            }
+
+            override fun preOnScrolled(scrollX: Int, scrollY: Int, dx: Int, dy: Int): Boolean {
+                return false
             }
         })
         //设置弹回动画的执行时间
         bookStoreRefresh2.setAnimTime(500L)
         bookStoreRefresh1.setAnimTime(500L)
 
-        bookStoreList.layoutManager = LinearLayoutManager(context)
+        val manager = LinearLayoutManager(context)
+        bookStoreList.layoutManager = manager
         bookStoreAdapter = BookStoreListAdapter(viewModel.getList())
         bookStoreList.adapter = bookStoreAdapter
         bookStoreList.addItemDecoration(
@@ -159,25 +165,34 @@ class BookStore : Fragment(), IBaseView {
         )
         bookStoreAdapter.notifyDataSetChanged()
         bookStoreRefresh.setAnimTime(450L)
-        bookStoreRefresh.setHeaderAdapter(object: BaseHeader(requireContext(), 150){
+        bookStoreRefresh.setHeaderAdapter(object : BaseHeader(requireContext(), 150) {
             override fun onDo() {
                 super.onDo()
                 text.text = "请稍候..."
             }
         })
-        bookStoreRefresh.setFooterAdapter(BaseFooter(requireContext(), 150))
         bookStoreRefresh.setOnElasticViewEventListener(object : ElasticLayout.OnEventListener {
-            override fun onLoad() {
-                viewModel.cancel()
-                viewModel.getNextPage()
-            }
-
+            override fun onLoad() {}
             override fun onRefresh() {
                 viewModel.cancel()
                 viewModel.getContent(selectedId, selectedStatus)
             }
         })
+        bookStoreList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_SETTLING
+                    && manager.findLastVisibleItemPosition() == viewModel.getList().size - 1)
+                {
+                    getNextContent()
+                }
+            }
+        })
         getContent()
+    }
+
+    private fun getNextContent() {
+        viewModel.getNextPage()
     }
 
     private fun getContent() {
@@ -191,8 +206,6 @@ class BookStore : Fragment(), IBaseView {
         GlobalScope.launch(Dispatchers.Main) {
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             delay(200L)
-            if (bookStoreRefresh.isLoading)
-                bookStoreRefresh.isLoading = false
             if (bookStoreRefresh.isRefreshing)
                 bookStoreRefresh.isRefreshing = false
         }
@@ -201,11 +214,8 @@ class BookStore : Fragment(), IBaseView {
     override fun onComplete(target: Int) {
         GlobalScope.launch(Dispatchers.Main) {
             delay(200L)
-            if (bookStoreRefresh.isLoading)
-                bookStoreRefresh.isLoading = false
             if (bookStoreRefresh.isRefreshing)
                 bookStoreRefresh.isRefreshing = false
-            delay(200L)
             bookStoreAdapter.notifyDataSetChanged()
         }
     }

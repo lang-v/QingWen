@@ -2,6 +2,7 @@ package com.novel.qingwen.view.activity
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.app.ActionBar
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -11,6 +12,7 @@ import android.graphics.Point
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +28,7 @@ import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.ConfigUtil
 import com.novel.qingwen.view.adapter.BookContentsListAdapter
 import com.novel.qingwen.view.adapter.ItemOnClickListener
+import com.novel.qingwen.view.adapter.PageScrollController
 import com.novel.qingwen.view.adapter.ReadListAdapter
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.view.widget.CustomLinearLayoutManager
@@ -83,7 +86,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     //内容
     private val contentViewModel: ReadVM by viewModels()
     private lateinit var contentAdapter: ReadListAdapter
-    private var contentManager = CustomLinearLayoutManager(this)
+    private var contentManager =
+        CustomLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
     private val dialog: NoticeDialog by lazy { NoticeDialog.build(this, "请稍候") }
 
@@ -93,7 +97,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     //记录是否在等待刷新布局
     private var waitForRefresh = false
 
-    private var firstRun:Boolean = true
+    private var firstRun: Boolean = true
 
     override fun onResume() {
         registerReceiver(broadcastReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
@@ -159,6 +163,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     override fun onStart() {
         super.onStart()
         contentViewModel.attachView(this)
+        PageScrollController.attachView(readList)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
             window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -178,9 +183,14 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     override fun onStop() {
         super.onStop()
         contentViewModel.detachView()
+        PageScrollController.detachView()
         //设置返回值
         if (!isInBookShelf) return
-        readOffset = readList.getChildAt(0).top
+        readOffset = if (contentViewModel.getList().size != 0) {
+            readList.getChildAt(0).top
+        } else {
+            return
+        }
         //如果这本书是已经加入书架了的就更新阅读位置
         synchronized(BookShelfListUtil.getList()) {
             BookShelfListUtil.getList().forEach {
@@ -200,6 +210,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         return true
     }
 
+    private var autoScrollRunning = false
+
     @SuppressLint("WrongConstant")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -212,6 +224,19 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 readDrawerLayout.openDrawer(Gravity.END)
                 //选中当前阅读章节所在目录中的item
                 selectChapterItem()
+            }
+            R.id.readAutoScroll -> {
+                autoScrollRunning = if (autoScrollRunning) {
+                    PageScrollController.stop()
+                    item.title = "自动翻页"
+                    false
+                } else {
+                    PageScrollController.start()
+                    item.title = "关闭翻页"
+                    show("音量键调节滚动速度")
+                    true
+                }
+                closeSetting()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -241,6 +266,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         //此view继承自TextView 在生成时的所有属性保存在ConfigUtil管理的Config中
         // 所以在xml中无法直接修改其属性，需要代码修改
         readHead.textSize = 12f
+        //设置自动阅读滚动速度
+        PageScrollController.setV(ConfigUtil.getConfig().autoScrollV)
         //捕捉dialog弹出时的返回按钮
         dialog.setOnKeyListener { _, keyCode, _ ->
             keyCode == KeyEvent.KEYCODE_BACK
@@ -351,9 +378,24 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         var target = false
         var oldX = 0f
         var oldY = 0f
+
+
+
+        parentLayout.setOnTouchListener { v, e ->
+            isOpen
+        }
+
+//        parentLayout.setOnClickListener{
+//            pageOnClick()
+//        }
+
+        readToolbar.setOnClickListener { _ -> }
+        readSetting.setOnClickListener { _ -> }
+
         readList.setOnTouchListener { v, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    //处理所有消息
                     target = true
                     oldX = event.x
                     oldY = event.y
@@ -366,10 +408,17 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 }
                 //如果这个过程移动幅度过大就过滤掉本次点击事件
                 else -> {
-                    if (abs(event.x - oldX) > 5f
-                        || abs(event.y - oldY) > 5f
-                    ) {
+                    //设置界面处于关闭时由readlist处理滑动事件
+                    //开启状态由设置界面处理消息
+                    if (isOpen) {
                         target = false
+                    } else {
+                        if (abs(event.x - oldX) > 5f
+                            || abs(event.y - oldY) > 5f
+                        ) {
+                            target = false
+
+                        }
                     }
                 }
             }
@@ -403,6 +452,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     override fun onClick(item: ContentsVM.ContentsInfo) {
                         //清空小说缓存列表
                         contentViewModel.clearContent()
+                        contentAdapter.notifyDataSetChanged()
                         dialog.show()
                         contentViewModel.getChapter(item.id)
                         readDrawerLayout.closeDrawer(Gravity.RIGHT)
@@ -525,7 +575,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 contentsList.smoothScrollToPosition(0)
             }
             readBottom.setOnClickListener {
-                contentsList.smoothScrollToPosition(contentsAdapter.itemCount - 1)
+                if (contentsAdapter.itemCount > 0)
+                    contentsList.smoothScrollToPosition(contentsAdapter.itemCount - 1)
             }
             readLocation.setOnClickListener {
                 selectChapterItem()
@@ -548,7 +599,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         }
         val pid = list[0].pid
         if (pid == -1L) {
-            showError("这是第一章哦")
             loadLock = false
             return
         }
@@ -572,8 +622,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             if (status == "状态：完结")
                 showSuccess("恭喜你又读完一本书。")
             else
-                showError("已经是最后一章了。")
-            loadLock = false
+                loadLock = false
             return
         }
         //加载下一章
@@ -601,18 +650,18 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     contentAdapter.notifyItemInserted(0)
                 }
                 2 -> {
-                    contentAdapter.notifyItemInserted(contentAdapter.itemCount-1)
-                    if (firstRun && contentAdapter.itemCount == 1) {
-                        //                        contentManager.scrollToPositionWithOffset(0, abs(readOffset))
-                        readList.scrollBy(0, -readOffset)
-                    }
+                    contentAdapter.notifyItemInserted(contentAdapter.itemCount - 1)
+                }
+                3 -> {
+                    contentAdapter.notifyItemInserted(contentAdapter.itemCount - 1)
+                    readList.scrollBy(0, -readOffset)
                 }
             }
 
-            //滑动到上次阅读位置
-            if (contentViewModel.getList().size == 1) {
-                readList.scrollBy(0, -readOffset)
-            }
+//            //滑动到上次阅读位置
+//            if (contentViewModel.getList().size == 1) {
+//                readList.scrollBy(0, -readOffset)
+//            }
             if (dialog.isShowing)
                 dialog.dismiss()
         }
@@ -697,7 +746,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         }
         settingLock.lock()
         isOpen = true
-
+        PageScrollController.pause()
         topOpen.start()
         bottomOpen.start()
         // 非全屏显示，显示状态栏和导航栏
@@ -722,6 +771,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         isOpen = false
         topClose.start()
         bottomClose.start()
+        PageScrollController.resume()
         // 全屏展示
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
@@ -776,10 +826,16 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         }
     }
 
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (isOpen) return super.onKeyDown(keyCode, event)
         when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP -> {
+                if (autoScrollRunning){
+                    ConfigUtil.getConfig().autoScrollV = PageScrollController.addV()
+                    ConfigUtil.update()
+                    return true
+                }
                 readList.scrollBy(0, -readList.height)
                 if (!readList.canScrollVertically(-1)) {
                     preChapter()
@@ -787,6 +843,11 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 return true
             }
             KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                if (autoScrollRunning){
+                    ConfigUtil.getConfig().autoScrollV = PageScrollController.reduceV()
+                    ConfigUtil.update()
+                    return true
+                }
                 readList.scrollBy(0, readList.height)
                 if (!readList.canScrollVertically(1)) {
                     nextChapter()

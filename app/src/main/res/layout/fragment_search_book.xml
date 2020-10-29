@@ -4,7 +4,7 @@
     <data>
 
         <import type="com.novel.qingwen.viewmodel.SearchVM" />
-
+        <import type="android.view.View"/>
         <variable
             name="searchVM"
             type="com.novel.qingwen.viewmodel.SearchVM" />
@@ -35,28 +35,24 @@
                 android:hint="@string/searchTextTips"
                 android:imeOptions="actionSearch"
                 android:maxLines="1"
-                android:paddingEnd="48dp"
+                android:paddingEnd="28dp"
                 android:singleLine="true"
                 android:text="@={searchVM.searchText}"
                 android:textSize="12sp" />
 
             <ImageButton
-                android:id="@+id/searchBtn"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:id="@+id/closeBtn"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_alignEnd="@id/searchET"
-                android:layout_marginTop="14dp"
+                android:visibility="gone"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="10dp"
-                android:background="@drawable/search_button_selector" />
+                android:background="@drawable/close_button_selector" />
+
 
         </RelativeLayout>
 
-        <!--        <ImageView-->
-        <!--            android:id="@+id/imageView1"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="5dp"-->
-        <!--            android:layout_below="@id/searchET"-->
-        <!--            android:background="@drawable/line_shape" />-->
 
         <LinearLayout
             android:layout_below="@id/temp"

@@ -1,5 +1,14 @@
 package com.novel.qingwen.viewmodel
 
+import android.util.Log
+import android.view.View
+import android.widget.Toast
+import androidx.databinding.BaseObservable
+import androidx.databinding.Bindable
+import androidx.databinding.library.baseAdapters.BR
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.net.bean.SearchResult
@@ -8,29 +17,47 @@ import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.net.callback.ResponseCallback
 
 class SearchVM : BaseVM(), ResponseCallback<SearchResult> {
-    var searchText: MutableLiveData<String> = MutableLiveData()
+    var searchText: String = ""
+    var visibility = Visibility()
     private val list = ArrayList<SearchResultItem>()
-    //var adapter: SearchBookListAdapter = SearchBookListAdapter(list)
-//    private val clickListener = View.OnClickListener {
-//        doSearch()
-//    }
-
-    fun getList():ArrayList<SearchResultItem>{
-        return list
+    class Visibility : BaseObservable() {
+        @Bindable
+        var visibility:Int = View.GONE
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.searchVM)
+        }
     }
 
     init {
         NetUtil.setSearch(this)
     }
 
+    fun getList():ArrayList<SearchResultItem>{
+        return list
+    }
+
+    fun isEmpty(str:String):Boolean{
+        return str == ""
+    }
+
     fun doSearch() {
-        if (searchText.value == "" || searchText.value==null) {
+        if (searchText == "") {
             return
         }
         //清空列表重新搜索
 //        list.clear()
 //        adapter.notifyDataSetChanged()
-        NetUtil.search(searchText.value!!)
+        NetUtil.search(searchText)
+    }
+
+
+
+    fun visibility(){
+        visibility.visibility = if(searchText == " " || searchText == "")
+            View.GONE
+        else View.VISIBLE
+        Log.e("SearchVM", searchText+"visiblity=$visibility")
     }
 
 //    val onEditorActionListener: TextView.OnEditorActionListener =

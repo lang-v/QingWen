@@ -60,7 +60,7 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
                 .into(imageView)
         }
 
-        fun getString(value:Float):String = value.toString()
+//        fun getString(value:Float):String = value.toString()
 
         /**
          * 高斯模糊

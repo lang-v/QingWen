@@ -20,6 +20,8 @@ interface ChapterDao {
     @Query("update BookChapter set nextChapter=:nextId ,content=:newContent where novelId=:novelId and chapterId=:chapterId")
     fun update(novelId:Long,chapterId: Long,newContent: String,nextId:Long)
 
+    @Query("update BookChapter set nextChapter=:nextId , preChapter =:preId, content=:newContent where novelId=:novelId and chapterId=:chapterId")
+    fun update(novelId:Long,chapterId: Long,newContent: String,nextId:Long,preId:Long)
     @Delete
     fun delete(chapter: Chapter)
 

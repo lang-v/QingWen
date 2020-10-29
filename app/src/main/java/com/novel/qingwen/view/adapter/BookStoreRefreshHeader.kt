@@ -51,10 +51,10 @@ class BookStoreRefreshHeader(private val context: Context, offset: Int) : Elasti
         icon.visibility = View.INVISIBLE
         super.onDo()
     }
-    override fun overDo(msg:String) {
+    override fun onDone(msg:String) {
         progressBar.visibility = View.INVISIBLE
         icon.visibility = View.VISIBLE
         direction = DIRECTION_DOWN
-        super.overDo(msg)
+        super.onDone(msg)
     }
 }

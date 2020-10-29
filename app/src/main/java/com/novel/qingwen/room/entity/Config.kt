@@ -15,5 +15,6 @@ data class Config(
      * 1 :楷体 (正楷)
      */
     @ColumnInfo(name = "text_style") var textStyle: Int,
-    @ColumnInfo(name = "back_ground") var backGround: Int
+    @ColumnInfo(name = "back_ground") var backGround: Int,
+    @ColumnInfo(name = "auto_scroll_v",defaultValue = "0") var autoScrollV:Int
 )

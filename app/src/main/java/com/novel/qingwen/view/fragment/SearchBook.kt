@@ -1,6 +1,8 @@
 package com.novel.qingwen.view.fragment
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.KeyEvent
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -31,9 +33,10 @@ import kotlinx.coroutines.launch
 class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.OnClickListener {
     private val viewModel: SearchVM by viewModels()
     private lateinit var adapter: SearchBookListAdapter
-    private val dialog:NoticeDialog by lazy {
-        NoticeDialog.build(requireContext(),"搜索中...")
+    private val dialog: NoticeDialog by lazy {
+        NoticeDialog.build(requireContext(), "搜索中...")
     }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,6 +58,7 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
         super.onStop()
         viewModel.detachView()
     }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         init()
@@ -63,7 +67,17 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
 
     private fun init() {
         searchET.setOnEditorActionListener(this)
-        searchBtn.setOnClickListener(this)
+        searchET.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                s.isNullOrEmpty()
+                closeBtn.visibility = if (s.isNullOrEmpty())
+                    View.GONE
+                else View.VISIBLE
+            }
+        })
+        closeBtn.setOnClickListener(this)
         adapter = SearchBookListAdapter(viewModel.getList())
         val manager = LinearLayoutManager(context)
         searchListView.adapter = adapter
@@ -80,7 +94,9 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE
                     && manager.findLastVisibleItemPosition() == (adapter.itemCount - 1)
-                    && (searchListView.canScrollVertically(-1) != searchListView.canScrollVertically(1))
+                    && (searchListView.canScrollVertically(-1) != searchListView.canScrollVertically(
+                        1
+                    ))
                 ) {
                     NetUtil.searchNext()//下一页内容
                 }
@@ -90,6 +106,7 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
 
     override fun showMsg(msg: String) {
         GlobalScope.launch(Dispatchers.Main) {
+            searchListView.visibility = if(viewModel.getList().size == 0)View.GONE else View.VISIBLE
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             if (dialog.isShowing)
                 dialog.dismiss()
@@ -98,11 +115,10 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
 
     override fun onComplete(target: Int) {
         GlobalScope.launch(Dispatchers.Main) {
-            if(searchListView.visibility != View.VISIBLE)
-                searchListView.visibility = View.VISIBLE
+            searchListView.visibility = if(viewModel.getList().size == 0)View.GONE else View.VISIBLE
             adapter.notifyDataSetChanged()
             if (dialog.isShowing)
-            dialog.dismiss()
+                dialog.dismiss()
         }
     }
 
@@ -113,19 +129,23 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
     }
 
     override fun onClick(v: View?) {
-        doSearch()
+        (searchET as TextView).text = ""
+        viewModel.getList().clear()
+        adapter.notifyDataSetChanged()
+        closeBtn.visibility = View.GONE
+        searchListView.visibility = View.GONE
     }
 
     private fun doSearch() {
         if (searchET.text.toString() == "") {
-            Show.show(requireContext(), "请输入后再尝试",Show.ERROR)
+            Show.show(requireContext(), "请输入后再尝试", Show.ERROR)
             searchET.isFocusable = true
             return
         }
         //清空内容
         viewModel.getList().clear()
         viewModel.doSearch()
-        if (dialog.isShowing)dialog.dismiss()
+        if (dialog.isShowing) dialog.dismiss()
         dialog.show()
     }
 }

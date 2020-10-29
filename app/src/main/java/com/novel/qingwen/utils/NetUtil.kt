@@ -123,7 +123,9 @@ object NetUtil {
                     infoCallback?.onFailure()
                 else {
                     try {
-                        infoCallback?.onSuccess(response.body()!!)
+                        response.body()?.let {
+                            infoCallback?.onSuccess(it)
+                        }
                     } catch (e: JsonSyntaxException) {
                         infoCallback?.onFailure()
                     }
@@ -181,7 +183,9 @@ object NetUtil {
             ) {
                 if (response.body() != null) {
                     try {
-                        chapterContentCallback?.onSuccess(response.body()!!)
+                        response.body()?.let {
+                            chapterContentCallback?.onSuccess(it)
+                        }
                     } catch (e: JsonSyntaxException) {
                         if (!slient)
                             chapterContentCallback?.onFailure()

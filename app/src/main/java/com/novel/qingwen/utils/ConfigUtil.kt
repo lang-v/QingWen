@@ -13,7 +13,7 @@ object ConfigUtil {
         var temp :Config? = RoomUtil.configDao.loadById()
         if (temp == null){
             //默认字体大小20 字体黑色 系统默认字体 背景米白色
-            temp = Config(0,2, 0, 0, 0)
+            temp = Config(0,2, 0, 0, 0,50)
             RoomUtil.configDao.insert(temp)//更新数据
         }
         appConfig = temp
@@ -78,7 +78,8 @@ object ConfigUtil {
                 appConfig.textSize,
                 appConfig.textColor,
                 appConfig.textStyle,
-                appConfig.backGround
+                appConfig.backGround,
+                appConfig.autoScrollV
             )
             listener?.updateFinish()
         }
