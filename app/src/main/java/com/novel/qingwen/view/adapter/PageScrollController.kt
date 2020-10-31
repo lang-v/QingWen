@@ -1,5 +1,6 @@
 package com.novel.qingwen.view.adapter
 
+import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -8,7 +9,6 @@ import kotlinx.coroutines.launch
 object PageScrollController {
     private var view: RecyclerView? = null
     private var v = 10
-
     /**
      * -1 : 无状态
      *  0 : start
@@ -27,9 +27,13 @@ object PageScrollController {
                     0 -> {
                         if (view == null) return@launch
                         view?.post {
-                            view?.scrollY = view?.scrollY?.plus(1)!!
+                            view?.scrollBy(0,2)
                         }
-                        delay((32 * ((200 - v) / 200)).toLong())
+//                        val time = (32 * ((200f - v) / 200f)).toLong()
+                        val time = ((100-v)/2).toLong()
+//                        Log.e("Time", time.toString())
+//                        delay((32 * ((200 - v) / 200)).toLong())
+                        delay(5+time)
                     }
                     1 -> {
                         Thread.yield()
@@ -53,21 +57,21 @@ object PageScrollController {
 
     fun setV(value: Int) {
         v = if (value in 1..100)
-            100 - value
+            value
         else 50
     }
 
     //加速
     fun addV(): Int {
-        v -= 2
-        if (v <= 50) v = 0
-        return 100 - v
+        v += 2
+        if (v >= 100) v = 100
+        return v
     }
 
     fun reduceV(): Int {
-        v += 2
-        if (v >= 100) v = 100
-        return 100 - v
+        v -= 2
+        if (v <=0 ) v = 1
+        return v
     }
 
     fun start() {

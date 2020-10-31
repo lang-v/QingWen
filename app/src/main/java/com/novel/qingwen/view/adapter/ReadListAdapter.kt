@@ -24,24 +24,13 @@ class ReadListAdapter(
         )
     }
 
+
     override fun getItemCount(): Int = list.size
 
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: VH, position: Int) {
-//        holder.text.setText(list[position].content,TextView.BufferType.SPANNABLE)
         holder.text.text = list[position].content
         holder.title.text = list[position].name
         holder.title.textSize = ConfigUtil.getTextSize().toFloat() + 5
-        //不拦截所有事件
-//        holder.itemView.setOnTouchListener { _, _ -> false}
-        //点击事件给activity处理
-//        holder.itemView.setOnTouchListener { v, event ->
-//            Log.e("item","onTouch")
-//            false
-//        }
-//        holder.text.setOnClickListener{
-////            onClickListener.onClick(it)
-//            Log.e("item","onClick")
-//        }
     }
 }

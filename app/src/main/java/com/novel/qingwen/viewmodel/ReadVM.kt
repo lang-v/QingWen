@@ -44,8 +44,9 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
             val t = RoomUtil.chapterDao.loadById(novelId, chapterId)
             if (t != null) {
                 if (t.content.length < 200 || t.nid == -1L) {
-                    RoomUtil.chapterDao.delete(t)
-                    getChapter(chapterId, attachStart, slient)
+                    //RoomUtil.chapterDao.delete(t)
+                    //重新在网络上加载
+                    NetUtil.getChapterContent(novelId, chapterId, slient)
                     return@launch
                 }
                 if (attachStart) {
@@ -53,7 +54,7 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
                     iView?.onComplete(1)
                 } else {
                     list.add(t)
-                    iView?.onComplete(2)
+                    iView?.onComplete( if (list.size == 1) 3 else 2)
                 }
                 return@launch
             }
@@ -93,12 +94,12 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
                 iView?.onComplete(1)
             }
         } else {
-            if (list.size > 0 && chapter.chapterId != list[list.size - 1].chapterId && chapter.chapterId == list[list.size - 1].nid) {
+            if (list.size == 0) {
                 list.add(chapter)
-                iView?.onComplete(
-                    if (list.size == 1) 3
-                    else 2
-                )
+                iView?.onComplete(3)
+            } else if (list.size > 0 && chapter.chapterId != list[list.size - 1].chapterId && chapter.chapterId == list[list.size - 1].nid) {
+                list.add(chapter)
+                iView?.onComplete(2)
             }
         }
         GlobalScope.launch {
