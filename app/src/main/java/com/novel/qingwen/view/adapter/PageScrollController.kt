@@ -101,4 +101,8 @@ object PageScrollController {
         }
     }
 
+    fun isRunning():Boolean{
+        return runState > 2 && runState != 2
+    }
+
 }

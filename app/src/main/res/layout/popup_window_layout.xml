@@ -9,7 +9,7 @@
     <TextView
         android:gravity="top"
         android:background="@drawable/popup_layout_shape"
-        android:textColor="@android:color/white"
+        android:textColor="?attr/backgroundColor"
         android:textSize="12sp"
         android:padding="5dp"
         android:paddingStart="10dp"

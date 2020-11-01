@@ -13,7 +13,6 @@
 
         <TextView
             android:text="分类"
-            android:textColor="@android:color/white"
             android:textSize="20sp"
             android:textAlignment="gravity"
             android:layout_gravity="center_vertical"
@@ -26,6 +25,7 @@
     <sl.view.elasticviewlibrary.ElasticLayout
         android:id="@+id/bookStoreRefresh1"
         android:layout_width="match_parent"
+        android:background="?attr/backgroundColor"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
@@ -52,6 +52,7 @@
         android:id="@+id/bookStoreRefresh2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?attr/backgroundColor"
         android:orientation="horizontal">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -74,6 +75,7 @@
         android:layout_marginTop="2dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="?attr/backgroundColor"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView

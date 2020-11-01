@@ -37,7 +37,6 @@ class BookStore : Fragment(), IBaseView {
     private var selectedId = 1
     private val viewModel: BookStoreVM by viewModels()
     private lateinit var bookStoreAdapter: BookStoreListAdapter
-    private val dialog: NoticeDialog by lazy { NoticeDialog.build(requireContext(), "请稍候") }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -46,6 +45,7 @@ class BookStore : Fragment(), IBaseView {
     ): View? {
         return LayoutInflater.from(context).inflate(R.layout.fragment_book_store, container, false)
     }
+
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -61,7 +61,6 @@ class BookStore : Fragment(), IBaseView {
         super.onStop()
         viewModel.detachView()
     }
-
 
     private fun init() {
         val temp = arrayListOf("玄幻", "武侠", "都市", "历史", "科幻", "网游", "女生", "同人")

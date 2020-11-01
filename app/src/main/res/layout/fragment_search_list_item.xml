@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?attr/itemFillColor"
     android:layout_marginLeft="5dp"
     android:layout_marginRight="5dp"
     android:layout_marginBottom="5dp">
@@ -24,9 +25,9 @@
 
         <TextView
             android:id="@+id/title"
-            android:textColor="@android:color/black"
             android:text="@string/app_name"
             android:layout_marginTop="5dp"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="14sp"
             android:maxLines="1"
             android:layout_width="wrap_content"
@@ -35,6 +36,7 @@
         <TextView
             android:id="@+id/author"
             android:textSize="12sp"
+            android:textColor="?android:attr/textColorPrimary"
             android:text="@string/app_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -43,6 +45,7 @@
             android:id="@+id/resume"
             android:text="@string/app_name"
             android:textSize="12sp"
+            android:textColor="?android:attr/textColorPrimary"
             android:layout_marginTop="5dp"
             android:maxLines="2"
             android:ellipsize="end"

@@ -5,7 +5,7 @@
     android:id="@+id/bottomBookShelf"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent">
+    android:background="?attr/backgroundColor">
 
     <View
         android:background="@drawable/shadow_shape"
@@ -34,12 +34,14 @@
         <FrameLayout
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
+            android:background="?attr/backgroundColor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/bookShelfName"
                 android:text="我的书架"
+                android:textColor="?android:attr/textColorPrimary"
                 android:alpha="0"
                 android:layout_marginTop="5dp"
                 android:textSize="18sp"
@@ -59,6 +61,7 @@
                     android:id="@+id/bookShelfUpdateTip"
                     android:layout_width="wrap_content"
                     android:textSize="8sp"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:layout_alignParentTop="true"
                     android:layout_alignParentStart="true"
                     android:layout_height="wrap_content"
@@ -75,6 +78,7 @@
                     android:id="@+id/bookShelfUpdateBookName"
                     android:layout_width="0dp"
                     android:layout_weight="4"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:layout_height="wrap_content"
                     android:ellipsize="marquee"
                     android:marqueeRepeatLimit="marquee_forever"
@@ -91,6 +95,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:textAlignment="textStart"
                     android:singleLine="true"
                     android:visibility="invisible"
@@ -109,7 +114,7 @@
         android:id="@+id/bookShelfRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#1aaa"
+        android:background="?attr/backgroundColor"
         android:layout_marginTop="60dp"
         android:orientation="vertical">
 
@@ -117,7 +122,7 @@
             android:id="@+id/bookShelfList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
+            android:background="?attr/backgroundColor"
             android:overScrollMode="never"
             android:paddingStart="5dp"
             android:paddingEnd="5dp"

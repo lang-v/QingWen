@@ -3,12 +3,16 @@ package com.novel.qingwen.view.activity
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -18,14 +22,12 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
-import com.novel.qingwen.databinding.ActivityMainBinding
 import com.novel.qingwen.utils.Show
 import com.novel.qingwen.view.adapter.BookShelfListAdapter
 import com.novel.qingwen.view.adapter.FragmentAdapter
 import com.novel.qingwen.view.fragment.BookStore
 import com.novel.qingwen.view.fragment.SearchBook
 import com.novel.qingwen.viewmodel.BookShelfVM
-import com.novel.qingwen.viewmodel.MainVM
 import com.tbruyelle.rxpermissions2.RxPermissions
 import com.tencent.bugly.Bugly
 import kotlinx.android.synthetic.main.activity_main.*
@@ -41,53 +43,29 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, ElasticLayout.OnEventListener {
-    private val mainVM:MainVM by viewModels()
     private val viewModel: BookShelfVM by viewModels()
     private lateinit var adapter: BookShelfListAdapter
     private lateinit var bottomSheetBehavior:BottomSheetBehavior<*>
-    private val refreshHeader :BaseHeader by lazy {
-        BaseHeader(this, 200)
-    }
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        RxPermissions(this)
-            .request(
-                Manifest.permission.ACCESS_NETWORK_STATE,
-                Manifest.permission.ACCESS_WIFI_STATE,
-                Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            .subscribe {
-                if (!it){
-                    showError("没有此权限App无法正常运行")
-                    finish()
+        setContentView(R.layout.activity_main)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            RxPermissions(this)
+                .requestEach(
+                    Manifest.permission.ACCESS_NETWORK_STATE,
+                    Manifest.permission.ACCESS_WIFI_STATE,
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .subscribe{
+                    Log.e("rx",it.toString())
+                    if (it.name == Manifest.permission.WRITE_EXTERNAL_STORAGE && !it.granted){
+                        showError("没有存储权限App无法正常运行")
+                        finish()
+                    }
                 }
-            }
-
-        //启动页
-        val binding:ActivityMainBinding = DataBindingUtil.setContentView(
-            this@MainActivity,
-            R.layout.activity_main
-        )
-        window.statusBarColor = Color.WHITE
-        GlobalScope.launch(Dispatchers.Main) {
-            delay(500)
-            welcomePage.visibility = View.GONE
         }
-        initBugly()
-        val list = ArrayList<Fragment>()
-//        list.add(BookShelf())
-        list.add(SearchBook())
-        list.add(BookStore())
-        val adapter = FragmentAdapter(this, list)
-        window.statusBarColor = Color.parseColor("#669900")
-        binding.lifecycleOwner = this@MainActivity
-        binding.mainVM = mainVM
-        viewPager.adapter = adapter
-        adapter.notifyDataSetChanged()
         init()
     }
 
@@ -96,6 +74,19 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
     }
 
     private fun init(){
+        window.statusBarColor = Color.TRANSPARENT
+        GlobalScope.launch(Dispatchers.Main) {
+            delay(500)
+            welcomePage.visibility = View.GONE
+        }
+        initBugly()
+        val list = ArrayList<Fragment>()
+        list.add(SearchBook())
+        list.add(BookStore())
+        window.statusBarColor = Color.parseColor("#669900")
+        val fragmentAdapter = FragmentAdapter(this, list)
+        viewPager.adapter = fragmentAdapter
+        fragmentAdapter.notifyDataSetChanged()
         viewPager.isUserInputEnabled = false
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
@@ -104,7 +95,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
                     0 -> {
                         if (mainBookShelfMore.isActivated) {
                             mainBookShelfMore.isActivated = false
-                            mainBookShelfMore.setTextColor(Color.BLACK)
+                            mainBookShelfMore.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
                         }
                         mainSearchPageBtn.isActivated = true
                         mainSearchPageBtn.setTextColor(Color.parseColor("#669900"))
@@ -112,7 +103,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
                     1 -> {
                         if (mainSearchPageBtn.isActivated) {
                             mainSearchPageBtn.isActivated = false
-                            mainSearchPageBtn.setTextColor(Color.BLACK)
+                            mainSearchPageBtn.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
                         }
                         mainBookShelfMore.isActivated = true
                         mainBookShelfMore.setTextColor(Color.parseColor("#669900"))
@@ -134,6 +125,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         bottomSheetBehavior.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
+                //随着bottomsheet的滑动改变tabtitle的大小和透明度
                 when (newState) {
                     BottomSheetBehavior.STATE_EXPANDED -> {
                         bookShelfTab.alpha = 0f
@@ -174,23 +166,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         var scrollTarget= 0
         //设置刷新加载事件监听
         bookShelfRefresh.setOnElasticViewEventListener(this)
+        //关闭递增阻尼，list滑动不会感受阻力
+        bookShelfRefresh.setDamping(0.7f,false)
         bookShelfRefresh.setHeaderAdapter(object :BaseHeader(this,200){
             override fun scrollProgress(progress: Int) {
                 super.scrollProgress(progress)
-                scrollTarget = if (progress<offset) 0 else if (progress in offset until offset+100) 1 else 2
+                scrollTarget = if (progress<offset) 0 else if (progress in offset until offset+200) 1 else 2
             }
-
             override fun releaseToDo() {
                 super.releaseToDo()
-                if(scrollTarget == 1)text.text = "继续下拉关闭书架"
+                if(scrollTarget == 1)text.text = "继续下拉关闭书架,或者释放刷新"
                 else if(scrollTarget == 2)text.text = "释放关闭书架"
             }
-
             override fun onRelease() {
                 super.onRelease()
                 if(scrollTarget == 2)bookShelfRefresh.cancelLoading(150L)
             }
-
             override fun onCancel() {
                 super.onCancel()
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -218,12 +209,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
     override fun onStart() {
         super.onStart()
         viewModel.attachView(this)
-        //刷新
-//        adapter.refresh()
+        viewModel
+        //刷新书架
         bookInfoUpdate()
-//        bookShelfRefresh.headerRefresh()
-//        bookShelfRefresh.isRefreshing = true
-        //viewModel.refresh()
     }
 
     override fun onStop() {
@@ -254,7 +242,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
             bookShelfRefreshTime.visibility = View.VISIBLE
         }
     }
-
 
     override fun onClick(v: View?) {
         when(v?.id){

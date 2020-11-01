@@ -4,8 +4,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="5dp"
-    app:cardCornerRadius="20dp"
+    app:cardCornerRadius="10dp"
     android:backgroundTint="#daaa"
     android:elevation="5dp">
 
@@ -24,13 +23,11 @@
             android:id="@+id/showMsg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="5dp"
             android:paddingEnd="5dp"
             android:layout_margin="5dp"
             android:layout_gravity="center_vertical"
             android:gravity="center"
             android:textAlignment="center"
-            android:textColor="#fff"
             android:textStyle="bold"
             tools:ignore="RtlSymmetry" />
     </LinearLayout>

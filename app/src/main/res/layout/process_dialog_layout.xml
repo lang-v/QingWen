@@ -16,8 +16,8 @@
     <TextView
         android:id="@+id/dialogMsg"
         android:layout_marginTop="10dp"
+        android:textColor="?android:attr/textColorPrimary"
         android:textAlignment="center"
-        android:textColor="@android:color/white"
         android:ellipsize="marquee"
         android:textSize="18sp"
         android:singleLine="true"

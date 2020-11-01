@@ -107,6 +107,7 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
     override fun showMsg(msg: String) {
         GlobalScope.launch(Dispatchers.Main) {
             searchListView.visibility = if(viewModel.getList().size == 0)View.GONE else View.VISIBLE
+            tips.visibility = if(viewModel.getList().size == 0)View.VISIBLE else View.GONE
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             if (dialog.isShowing)
                 dialog.dismiss()
@@ -116,6 +117,7 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
     override fun onComplete(target: Int) {
         GlobalScope.launch(Dispatchers.Main) {
             searchListView.visibility = if(viewModel.getList().size == 0)View.GONE else View.VISIBLE
+            tips.visibility = if(viewModel.getList().size == 0)View.VISIBLE else View.GONE
             adapter.notifyDataSetChanged()
             if (dialog.isShowing)
                 dialog.dismiss()
@@ -134,6 +136,7 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
         adapter.notifyDataSetChanged()
         closeBtn.visibility = View.GONE
         searchListView.visibility = View.GONE
+        tips.visibility = View.VISIBLE
     }
 
     private fun doSearch() {

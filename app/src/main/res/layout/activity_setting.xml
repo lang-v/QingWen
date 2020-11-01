@@ -22,7 +22,6 @@
     <sl.view.elasticviewlibrary.ElasticLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#1aaa"
         android:layout_marginTop="-5dp"
         android:orientation="vertical">
 

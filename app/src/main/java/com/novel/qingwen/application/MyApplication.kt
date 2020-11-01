@@ -22,5 +22,6 @@ class MyApplication: Application() {
                 ConfigUtil.init()
                 BookShelfListUtil.init()
             }
+
         }
 }

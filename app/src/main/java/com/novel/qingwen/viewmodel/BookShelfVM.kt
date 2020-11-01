@@ -44,4 +44,5 @@ class BookShelfVM : BaseVM() {
             NetUtil.getBookInfo(bookInfo.novelId)
         }
     }
+
 }

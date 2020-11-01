@@ -19,6 +19,7 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:fitsSystemWindows="false"
+        android:background="?attr/backgroundColor"
         tools:context=".view.activity.ResumeActivity">
 
         <ImageView
@@ -58,6 +59,7 @@
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/resumeBg"
             android:layout_marginStart="20dp"
+            android:background="@android:color/transparent"
             android:layout_marginTop="70dp"
             android:layout_toEndOf="@id/resumeImg"
             android:orientation="vertical">
@@ -69,34 +71,34 @@
                 android:layout_marginTop="5dp"
                 android:ellipsize="end"
                 android:lines="1"
-                android:text="@{resumeVM.info.name}"
                 android:textColor="@android:color/white"
+                android:text="@{resumeVM.info.name}"
                 android:textSize="20sp" />
 
             <TextView
                 android:id="@+id/resumeAuthor"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
                 android:layout_marginTop="10dp"
-                android:text="@{resumeVM.info.author}"
-                android:textColor="@android:color/white" />
+                android:text="@{resumeVM.info.author}" />
 
             <TextView
                 android:id="@+id/resumeType"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
                 android:layout_marginTop="10dp"
-                android:text="@{resumeVM.info.type}"
-                android:textColor="@android:color/white" />
+                android:text="@{resumeVM.info.type}" />
 
             <TextView
                 android:id="@+id/resumeStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:textColor="@android:color/white"
                 android:text="@{resumeVM.info.status}"
-                android:textAlignment="textStart"
-                android:textColor="@android:color/white" />
+                android:textAlignment="textStart" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -107,6 +109,7 @@
                 <RatingBar
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
+                    android:background="@android:color/transparent"
                     android:numStars="5"
                     style="@style/Widget.AppCompat.RatingBar.Small"
                     android:rating="@{resumeVM.info.score}" />
@@ -114,10 +117,10 @@
                 <TextView
                     android:layout_marginStart="2dp"
                     android:id="@+id/resumeRateText"
+                    android:textColor="@android:color/white"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{resumeVM.info.scoreText}"
-                    android:textColor="@android:color/white" />
+                    android:text="@{resumeVM.info.scoreText}" />
 
             </LinearLayout>
 
@@ -133,6 +136,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="?attr/backgroundColor"
             android:layout_below="@id/imageView2"
             android:orientation="vertical">
 
@@ -143,7 +147,7 @@
                 android:layout_marginTop="10dp"
                 android:paddingStart="16dp"
                 android:text="@string/resume"
-                android:textColor="@android:color/black"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="18sp"
                 tools:ignore="RtlSymmetry" />
 
@@ -152,6 +156,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
+                android:textColor="?android:attr/textColorPrimary"
                 android:padding="5dp"
                 android:text="@{resumeVM.info.resumeText}" />
 
@@ -166,8 +171,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:paddingStart="16dp"
+                android:textColor="?android:attr/textColorPrimary"
                 android:text="@string/contents"
-                android:textColor="@android:color/black"
                 android:textSize="18sp" />
 
             <RelativeLayout
@@ -191,6 +196,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:layout_toEndOf="@id/resumeContentsIcon"
                     android:text="@{resumeVM.info.lastChapterTime}" />
 
@@ -202,7 +208,7 @@
                     android:layout_marginStart="10dp"
                     android:layout_toEndOf="@id/resumeContentsIcon"
                     android:text="@{resumeVM.info.lastChapterName}"
-                    android:textColor="@android:color/black" />
+                    />
             </RelativeLayout>
         </LinearLayout>
 

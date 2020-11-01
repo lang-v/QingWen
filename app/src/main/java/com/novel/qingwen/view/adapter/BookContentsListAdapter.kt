@@ -24,8 +24,8 @@ class BookContentsListAdapter(
             LayoutInflater.from(parent.context)
                 .inflate(
                     when (viewType) {
-                        2 -> R.layout.simple_list_sub_item
-                        else -> R.layout.simple_list_item
+                        2 -> R.layout.activity_contents_list_sub_item
+                        else -> R.layout.activity_contents_list_item
                     }, parent, false
                 )
         )
@@ -42,6 +42,7 @@ class BookContentsListAdapter(
             }
             if (item.isSelect) {
                 holder.itemView.setBackgroundColor(ConfigUtil.getBackgroundColor())
+                holder.name.setTextColor(ConfigUtil.getTextColor())
             }else{
                 holder.itemView.setBackgroundColor(Color.TRANSPARENT)
             }
@@ -49,7 +50,7 @@ class BookContentsListAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        //小于零为以及目录
+        //小于零为一级目录
         return if (list[position].id < 0L) 1
         else 2
     }

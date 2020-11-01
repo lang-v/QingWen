@@ -55,12 +55,10 @@ class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
     private val subActivity :Boolean by lazy {
         intent.getBooleanExtra("subActivity",false)
     }
-
     //小说状态，为了方便后面判断小说是否完结
     private val status: String by lazy {
         intent.getStringExtra("status")!!
     }
-
 
     //自定义  重写了smoothScrollToPosition方法 实现修改滑动时间
     private val manager = MyLinearLayoutManager(this)
@@ -251,11 +249,6 @@ class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
             position: Int
         ) {
             val scroller = object : LinearSmoothScroller(recyclerView!!.context) {
-//                override fun calculateTimeForScrolling(dx: Int): Int {
-//                    Log.e("SL","dx=$dx")
-//                    return super.calculateTimeForScrolling(if (dx > 500) 500 else dx)
-//                }
-
                 override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics?): Float {
                     return super.calculateSpeedPerPixel(displayMetrics) * calc(recyclerView!!.adapter!!.itemCount)
                 }
@@ -270,43 +263,6 @@ class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
             }
             scroller.targetPosition = position
             startSmoothScroll(scroller)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == ReadActivity.REQCODE) {
-            if (data == null) return
-            val currentReadId = data.getLongExtra("currentReadID", -1L)
-            if (currentReadId == -1L)return
-            AlertDialog.Builder(ContextThemeWrapper(this, R.style.CommonDialog))
-                .setTitle("喜欢这本书吗？")
-                .setMessage("加入书架吧！")
-                .setPositiveButton(
-                    "好的"
-                ) { _, _ ->
-                    BookShelfListUtil.currentBookInfo?.apply { lastReadId=currentReadId }?.let {
-                        BookShelfListUtil.insert(
-                            it
-                        )
-                    }
-                    /*
-                    val vm: ResumeVM by viewModels()
-                    val info = vm.info
-                        info.id,
-                        info.img,
-                        info.name,
-                        info.status,
-                        false,
-                        if (currentReadId == -1L) info.firstChapterID else currentReadId,
-                        info.name,
-                        info.firstChapterID,
-                        info.lastChapterID,
-                        info.lastChapterTime,
-                        info.lastChapterName
-                    )
-                    BookShelfListUtil.insert(item)*/
-                }.setNegativeButton("算了") { _, _ -> }.show()
         }
     }
 

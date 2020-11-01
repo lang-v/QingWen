@@ -44,13 +44,19 @@ class BookStoreVM:BaseVM() ,ResponseCallback<BookStoreItem>{
         getContent(categoryId, status,page)
     }
 
+    private var prepareCancel = false
     fun cancel(){
+        prepareCancel = true
         NetUtil.cancelGetCategory()
     }
 
     override fun onFailure() {
-        iView?.showMsg("加载错误")
         isLoading = false
+        if (prepareCancel) {
+            prepareCancel = false
+            return
+        }
+        iView?.showMsg("加载错误")
     }
 
     override fun onSuccess(t: BookStoreItem) {

@@ -43,6 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.abs
 
@@ -315,7 +316,13 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 
 //        window.statusBarColor = Color.TRANSPARENT
 //        window.setTitleColor(Color.TRANSPARENT)
-        //设置背景色
+        //时钟
+        readClock.setTextColor(ConfigUtil.getTextColor())
+        //head
+        readHead.setTextColor(ConfigUtil.getTextColor())
+        //阅读进度
+        readProgress.setTextColor(ConfigUtil.getTextColor())
+        //设置背景
         readLayout.setBackgroundColor(ConfigUtil.getBackgroundColor())
         contentAdapter = ReadListAdapter(contentViewModel.getList())
         readList.adapter = contentAdapter
@@ -329,9 +336,15 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             readOffset = intent.getIntExtra("offset", 0)
 //            contentManager.scrollToPositionWithOffset(1,readOffset)
         }
+        val decimalFormat = DecimalFormat("0.00")
         readList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val index = contentManager.findFirstVisibleItemPosition()
+                if (contentAdapter.itemCount != 0) {
+                    val tempItem = readList.getChildAt(0)
+                    readProgress.text =
+                        decimalFormat.format(abs(-tempItem.y / tempItem.height * 100)) + "%"
+                }
                 if (index in 0 until contentViewModel.getList().size) {
                     val item = contentViewModel.getList()[index]
                     readHead.text = item.name
@@ -433,10 +446,11 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             }
 
             override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
-               if (e.action == MotionEvent.ACTION_UP){
-                   closeSetting()
-               }
+                if (e.action == MotionEvent.ACTION_UP) {
+                    closeSetting()
+                }
             }
+
             override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
         })
         contentsInit()
@@ -744,7 +758,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     //打开关闭  设置面板
     private fun openSetting() {
         if (settingLock.isLocked) {
-            if (isOpen)return
+            if (isOpen) return
             topClose.cancel()
             bottomClose.cancel()
             settingLock.unlock()
@@ -765,7 +779,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 
     private fun closeSetting() {
         if (settingLock.isLocked) {
-            if (!isOpen)return
+            if (!isOpen) return
             topOpen.cancel()
             bottomOpen.cancel()
             settingLock.unlock()
@@ -774,7 +788,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         isOpen = false
         topClose.start()
         bottomClose.start()
-        PageScrollController.resume()
+        if (PageScrollController.isRunning())
+            PageScrollController.resume()
         GlobalScope.launch(Dispatchers.Main) {
             delay(150)
             // 全屏展示
@@ -804,14 +819,16 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     override fun onBackPressed() {
+        if (readDrawerLayout.isDrawerOpen(Gravity.END)) {
+            readDrawerLayout.closeDrawer(Gravity.END)
+            return
+        }
+
         if (isOpen) {
             closeSetting()
             return
         }
-        if (readDrawerLayout.isDrawerOpen(Gravity.RIGHT)) {
-            readDrawerLayout.closeDrawer(Gravity.RIGHT)
-            return
-        }
+
         if (!isInBookShelf) {
             AlertDialog.Builder(ContextThemeWrapper(this, R.style.CommonDialog))
                 .setTitle("喜欢这本书吗？")
@@ -912,6 +929,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             readClock.setTextColor(ConfigUtil.getTextColor())
             //head
             readHead.setTextColor(ConfigUtil.getTextColor())
+            //阅读进度
+            readProgress.setTextColor(ConfigUtil.getTextColor())
             //设置背景
             readLayout.setBackgroundColor(ConfigUtil.getBackgroundColor())
         }

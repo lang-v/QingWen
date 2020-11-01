@@ -46,22 +46,33 @@
                     android:id="@+id/readBattery"
                     android:layout_width="25dp"
                     android:layout_height="18dp"
+                    android:layout_marginTop="2dp"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentBottom="true"
                     android:layout_marginStart="30dp"
                     android:background="@drawable/ic_battery_five" />
 
-                <com.novel.qingwen.view.widget.CustomTextClock
-                    android:id="@+id/readClock"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <TextView
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
+                    android:id="@+id/readProgress"
                     android:layout_marginEnd="30dp"
+                    android:textSize="12sp"
+                    android:textColor="@android:color/black"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <com.novel.qingwen.view.widget.CustomTextClock
+                    android:id="@+id/readClock"
+                    android:layout_toRightOf="@id/readBattery"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
                     android:format12Hour="hh:mm"
                     android:format24Hour="HH:mm"
                     android:textColor="@android:color/black"
                     android:textSize="12sp" />
+
 
             </RelativeLayout>
 
@@ -214,6 +225,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
+            android:background="?attr/backgroundColor"
             android:layout_height="match_parent">
 
             <androidx.recyclerview.widget.RecyclerView
