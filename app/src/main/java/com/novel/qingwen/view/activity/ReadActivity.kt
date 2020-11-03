@@ -2,7 +2,6 @@ package com.novel.qingwen.view.activity
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.app.ActionBar
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -12,9 +11,7 @@ import android.graphics.Point
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.*
-import android.widget.Button
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -167,6 +164,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         super.onStart()
         contentViewModel.attachView(this)
         PageScrollController.attachView(readList)
+        if (PageScrollController.isPause())
+            PageScrollController.resume()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
             window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -186,6 +185,9 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     override fun onStop() {
         super.onStop()
         contentViewModel.detachView()
+        contentsViewModel.detachView()
+        if (PageScrollController.isRunning())
+            PageScrollController.pause()
         PageScrollController.detachView()
         //设置返回值
         if (!isInBookShelf) return
@@ -590,14 +592,18 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                             headView.text = headList[0].name
                         }
 
-                        var index = 0
-                        contentsViewModel.getList().forEach {
-                            if (it.id == chapterId) {
-                                contentsList.scrollToPosition(index)
-                                return@forEach
-                            }
-                            index++
-                        }
+                        //选中当前章节位置
+                        selectChapterItem()
+//                        var index = 0
+//                        contentsViewModel.getList().forEach {
+//                            if (it.id == chapterId) {
+////                                contentsList.scrollToPosition(index)
+//                                selectChapterItem()
+//                                //contentsList.smoothScrollToPosition()
+//                                return@forEach
+//                            }
+//                            index++
+//                        }
                     }
                 }
             })
@@ -765,7 +771,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         }
         settingLock.lock()
         isOpen = true
-        PageScrollController.pause()
+        if (PageScrollController.isRunning())
+            PageScrollController.pause()
 
         // 非全屏显示，显示状态栏和导航栏
         window.decorView.systemUiVisibility =
@@ -788,7 +795,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         isOpen = false
         topClose.start()
         bottomClose.start()
-        if (PageScrollController.isRunning())
+        if (PageScrollController.isPause())
             PageScrollController.resume()
         GlobalScope.launch(Dispatchers.Main) {
             delay(150)
@@ -828,6 +835,9 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             closeSetting()
             return
         }
+
+        if (PageScrollController.isRunning() || PageScrollController.isPause())
+            PageScrollController.stop()
 
         if (!isInBookShelf) {
             AlertDialog.Builder(ContextThemeWrapper(this, R.style.CommonDialog))

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.utils.ConfigUtil
@@ -45,6 +46,7 @@ class BookContentsListAdapter(
                 holder.name.setTextColor(ConfigUtil.getTextColor())
             }else{
                 holder.itemView.setBackgroundColor(Color.TRANSPARENT)
+                holder.name.setTextColor(ContextCompat.getColor(holder.itemView.context,R.color.textColorPrimary))
             }
         }
     }

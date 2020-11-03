@@ -75,10 +75,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
 
     private fun init(){
         window.statusBarColor = Color.TRANSPARENT
-        GlobalScope.launch(Dispatchers.Main) {
-            delay(500)
-            welcomePage.visibility = View.GONE
-        }
         initBugly()
         val list = ArrayList<Fragment>()
         list.add(SearchBook())
@@ -167,7 +163,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         //设置刷新加载事件监听
         bookShelfRefresh.setOnElasticViewEventListener(this)
         //关闭递增阻尼，list滑动不会感受阻力
-        bookShelfRefresh.setDamping(0.7f,false)
+        bookShelfRefresh.setDamping(0.4f,false)
         bookShelfRefresh.setHeaderAdapter(object :BaseHeader(this,200){
             override fun scrollProgress(progress: Int) {
                 super.scrollProgress(progress)
@@ -204,12 +200,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
             delay(1000)
             bookShelfRefresh.isRefreshing = true
         }
+        GlobalScope.launch(Dispatchers.Main) {
+            delay(500)
+            //当所有内容加载完毕，关闭欢迎页面
+            welcomePage.visibility = View.GONE
+        }
+
     }
 
     override fun onStart() {
         super.onStart()
         viewModel.attachView(this)
-        viewModel
         //刷新书架
         bookInfoUpdate()
     }

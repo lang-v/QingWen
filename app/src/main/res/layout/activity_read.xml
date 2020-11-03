@@ -134,7 +134,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
-                    android:layout_marginBottom="30dp"
+                    android:layout_marginBottom="35dp"
                     android:orientation="horizontal">
 
                     <Button
@@ -175,9 +175,10 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/readToolbar"
+            android:theme="@style/ToolbarTheme"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:layout_marginTop="-70dp"
+            android:layout_marginTop="-72dp"
             android:background="@color/colorPrimary"
             android:gravity="center_vertical|start"
             android:minHeight="70dp" />

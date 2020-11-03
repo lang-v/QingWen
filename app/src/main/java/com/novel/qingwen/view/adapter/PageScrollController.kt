@@ -9,10 +9,11 @@ import kotlinx.coroutines.launch
 object PageScrollController {
     private var view: RecyclerView? = null
     private var v = 10
+
     /**
      * -1 : 无状态
      *  0 : start
-     *  1 : pause
+     *  1 : pause running
      *  2 : stop
      */
     private var runState = -1
@@ -27,19 +28,16 @@ object PageScrollController {
                     0 -> {
                         if (view == null) return@launch
                         view?.post {
-                            view?.scrollBy(0,2)
+                            view?.scrollBy(0, 2)
                         }
 //                        val time = (32 * ((200f - v) / 200f)).toLong()
-                        val time = ((100-v)/2).toLong()
+                        val time = ((100 - v) / 2).toLong()
 //                        Log.e("Time", time.toString())
 //                        delay((32 * ((200 - v) / 200)).toLong())
-                        delay(5+time)
-                    }
-                    1 -> {
-                        Thread.yield()
+                        delay(5 + time)
                     }
 
-                    2 -> {
+                    1, 2 -> {
                         return@launch
                     }
                 }
@@ -70,7 +68,7 @@ object PageScrollController {
 
     fun reduceV(): Int {
         v -= 2
-        if (v <=0 ) v = 1
+        if (v <= 0) v = 1
         return v
     }
 
@@ -83,6 +81,12 @@ object PageScrollController {
         }
     }
 
+    fun stop() {
+        synchronized(runState) {
+            runState = 2
+        }
+    }
+
     fun pause() {
         synchronized(runState) {
             runState = 1
@@ -90,19 +94,15 @@ object PageScrollController {
     }
 
     fun resume() {
-        synchronized(runState) {
-            runState = 0
-        }
+        start()
     }
 
-    fun stop() {
-        synchronized(runState) {
-            runState = 2
-        }
+    fun isPause(): Boolean {
+        return runState == 1
     }
 
-    fun isRunning():Boolean{
-        return runState > 2 && runState != 2
+    fun isRunning(): Boolean {
+        return runState == 0
     }
 
 }
