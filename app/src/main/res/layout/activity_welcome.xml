@@ -17,4 +17,19 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingEnd="50dp"
+        android:text="@string/author"
+        android:textAlignment="viewEnd"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintVertical_bias="0.848"
+        tools:ignore="RtlSymmetry" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

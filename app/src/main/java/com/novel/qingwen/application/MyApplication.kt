@@ -13,15 +13,15 @@ import java.io.FileReader
 import java.io.IOException
 
 
-class MyApplication: Application() {
+class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-            //初始化SQLite
-            RoomUtil.init(this)
-            GlobalScope.launch(Dispatchers.Default) {
-                ConfigUtil.init()
-                BookShelfListUtil.init()
-            }
-
+        //初始化SQLite
+        RoomUtil.init(this)
+        GlobalScope.launch(Dispatchers.Default) {
+            ConfigUtil.init()
+            BookShelfListUtil.init()
         }
+
+    }
 }

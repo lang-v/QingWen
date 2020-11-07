@@ -11,7 +11,9 @@ import android.graphics.Point
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.*
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -29,10 +31,12 @@ import com.novel.qingwen.view.adapter.ItemOnClickListener
 import com.novel.qingwen.view.adapter.PageScrollController
 import com.novel.qingwen.view.adapter.ReadListAdapter
 import com.novel.qingwen.view.dialog.NoticeDialog
+import com.novel.qingwen.view.widget.CenterLayoutManager
 import com.novel.qingwen.view.widget.CustomLinearLayoutManager
 import com.novel.qingwen.view.widget.CustomSeekBar
 import com.novel.qingwen.viewmodel.ContentsVM
 import com.novel.qingwen.viewmodel.ReadVM
+import kotlinx.android.synthetic.main.activity_contents.*
 import kotlinx.android.synthetic.main.activity_read.*
 import kotlinx.android.synthetic.main.activity_read.contentsList
 import kotlinx.android.synthetic.main.activity_read.headView
@@ -164,7 +168,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         super.onStart()
         contentViewModel.attachView(this)
         PageScrollController.attachView(readList)
-        if (PageScrollController.isPause())
+        if (PageScrollController.isPause() && !isOpen)
             PageScrollController.resume()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
@@ -241,7 +245,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     show("音量键调节滚动速度")
                     true
                 }
-                closeSetting()
+                if (isOpen)
+                    closeSetting()
             }
         }
         return super.onOptionsItemSelected(item)
@@ -252,7 +257,9 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         kotlin.runCatching {
             val index = contentsAdapter.selected(currentReadID)
             if (index < 0) return
-            contentsList.smoothScrollToPosition(index)
+            //让列表更加快速的定位
+            contentsManager.scrollToPosition(index)
+            contentsManager.smoothScrollToPosition(contentsList,RecyclerView.State(),index)
         }
     }
 
@@ -338,7 +345,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             readOffset = intent.getIntExtra("offset", 0)
 //            contentManager.scrollToPositionWithOffset(1,readOffset)
         }
-        val decimalFormat = DecimalFormat("0.00")
+        val decimalFormat = DecimalFormat("0")
         readList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val index = contentManager.findFirstVisibleItemPosition()
@@ -356,7 +363,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                         if (contentViewModel.getList()[index].nid != -1L) {
                             contentViewModel.cancelPrepare()
                             //提前加载下一章
-                            contentViewModel.prepareChapter(index)
+                            if (!firstRun)
+                                contentViewModel.prepareChapter(index)
                         } else {
                             if (autoScrollRunning && !readList.canScrollVertically(1)) {
                                 PageScrollController.stop()
@@ -366,7 +374,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                         }
                     } else if (index == 0 && contentViewModel.getList()[0].pid != -1L) {
                         contentViewModel.cancelPrepare()
-                        contentViewModel.prepareChapter(0)
+                        if (!firstRun)
+                            contentViewModel.prepareChapter(0)
                     }
                 }
             }
@@ -459,7 +468,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     //自定义  重写了smoothScrollToPosition方法 实现修改滑动时间
-    private val contentsManager = ContentsActivity.MyLinearLayoutManager(this)
+//    private val contentsManager = ContentsActivity.MyLinearLayoutManager(this)
+    private val contentsManager = CenterLayoutManager(this)
     private lateinit var contentsAdapter: BookContentsListAdapter
     private val contentsViewModel: ContentsVM by viewModels()
 
@@ -609,11 +619,19 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             })
             //滑动到顶部、底部、当前位置
             readTop.setOnClickListener {
-                contentsList.smoothScrollToPosition(0)
+                if (headList.size > 0)
+                    headView.text = headList[0].name
+                if (contentsViewModel.getList().size > 0)
+//                    contentsManager.scrollToPosition(0)
+                    contentsList.scrollToPosition(0)
+//                contentsList.smoothScrollToPosition(0)
             }
             readBottom.setOnClickListener {
+                if (headList.size > 0)
+                    headView.text = headList[headList.size - 1].name
                 if (contentsAdapter.itemCount > 0)
-                    contentsList.smoothScrollToPosition(contentsAdapter.itemCount - 1)
+//                    contentsManager.scrollToPosition(contentsAdapter.itemCount - 1)
+                contentsList.scrollToPosition(contentsAdapter.itemCount - 1)
             }
             readLocation.setOnClickListener {
                 selectChapterItem()
@@ -689,9 +707,16 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 2 -> {
                     contentAdapter.notifyItemInserted(contentAdapter.itemCount - 1)
                 }
+
                 3 -> {
-                    contentAdapter.notifyItemInserted(contentAdapter.itemCount - 1)
+                    contentAdapter.notifyItemChanged(contentAdapter.itemCount - 1)
+//                    contentAdapter.notifyItemChanged()
+                    //contentManager.scrollToPositionWithOffset(0, readOffset)
                     readList.scrollBy(0, -readOffset)
+                    firstRun = false
+                    //加载上下章节
+                    contentViewModel.prepareChapter(0)
+                    contentViewModel.prepareChapter(contentAdapter.itemCount-1)
                 }
             }
             if (dialog.isShowing)
@@ -888,6 +913,10 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 }
                 return true
             }
+            //vivo 手机特殊按键
+            308 -> {
+                findViewById<TextView>(R.id.readAutoScroll).callOnClick()
+            }
         }
         return super.onKeyDown(keyCode, event)
     }
@@ -934,7 +963,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             readList.adapter = contentAdapter
             readList.layoutManager = contentManager
             contentAdapter.notifyDataSetChanged()
-            contentManager.scrollToPositionWithOffset(position, readOffset)
+//            contentManager.scrollToPositionWithOffset(position, readOffset)
             //时钟
             readClock.setTextColor(ConfigUtil.getTextColor())
             //head

@@ -54,7 +54,7 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
                     iView?.onComplete(1)
                 } else {
                     list.add(t)
-                    iView?.onComplete( if (list.size == 1) 3 else 2)
+                    iView?.onComplete(if (list.size == 1) 3 else 2)
                 }
                 return@launch
             }

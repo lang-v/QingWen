@@ -196,10 +196,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
             )
         )
         viewModel.attachView(this)
-        GlobalScope.launch (Dispatchers.Main){
-            delay(1000)
-            bookShelfRefresh.isRefreshing = true
-        }
+        //自动刷新
+//        GlobalScope.launch (Dispatchers.Main){
+//            delay(1000)
+//            bookShelfRefresh.isRefreshing = true
+//        }
         GlobalScope.launch(Dispatchers.Main) {
             delay(500)
             //当所有内容加载完毕，关闭欢迎页面
@@ -211,6 +212,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
     override fun onStart() {
         super.onStart()
         viewModel.attachView(this)
+        //自动刷新，但是不调用下拉框架
+        viewModel.refresh()
         //刷新书架
         bookInfoUpdate()
     }
