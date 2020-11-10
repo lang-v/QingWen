@@ -356,9 +356,10 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 }
                 if (index in 0 until contentViewModel.getList().size) {
                     val item = contentViewModel.getList()[index]
+                    //避免重复加载
                     readHead.text = item.name
+                    if (item.chapterId == currentReadID)return
                     currentReadID = item.chapterId
-                    super.onScrolled(recyclerView, dx, dy)
                     if (index == contentViewModel.getList().size - 1) {
                         if (contentViewModel.getList()[index].nid != -1L) {
                             contentViewModel.cancelPrepare()
@@ -373,6 +374,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                             }
                         }
                     } else if (index == 0 && contentViewModel.getList()[0].pid != -1L) {
+                        if (item.chapterId == currentReadID)return
                         contentViewModel.cancelPrepare()
                         if (!firstRun)
                             contentViewModel.prepareChapter(0)
@@ -704,19 +706,20 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 1 -> {
                     contentAdapter.notifyItemInserted(0)
                 }
+
                 2 -> {
                     contentAdapter.notifyItemInserted(contentAdapter.itemCount - 1)
                 }
 
                 3 -> {
-                    contentAdapter.notifyItemChanged(contentAdapter.itemCount - 1)
+                    contentAdapter.notifyItemInserted(contentAdapter.itemCount - 1)
 //                    contentAdapter.notifyItemChanged()
                     //contentManager.scrollToPositionWithOffset(0, readOffset)
                     readList.scrollBy(0, -readOffset)
-                    firstRun = false
                     //加载上下章节
                     contentViewModel.prepareChapter(0)
                     contentViewModel.prepareChapter(contentAdapter.itemCount-1)
+                    firstRun = false
                 }
             }
             if (dialog.isShowing)

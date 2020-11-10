@@ -37,7 +37,6 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
     /**
      * 小说文章加载时先从数据库中查找，没有缓存则网络请求,返回结果后将结果写入数据库
      * @param attachStart 是否将加载的小说内容添加到集合头部
-     * @param count 加载几个章节 1：仅当前章节 2：当前章节和下一章 3：当前章节、上一章和下一章
      */
     fun getChapter(chapterId: Long, attachStart: Boolean = false, slient: Boolean = false) {
         GlobalScope.launch {
