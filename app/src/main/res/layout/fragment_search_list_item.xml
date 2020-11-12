@@ -8,14 +8,14 @@
     android:layout_marginBottom="5dp">
 
     <ImageView
-        android:id="@+id/img"
+        android:id="@+id/novelImg"
         android:layout_width="90dp"
         android:padding="5dp"
         android:layout_height="120dp"
         android:src="@mipmap/ic_launcher"/>
 
     <LinearLayout
-        android:layout_toEndOf="@id/img"
+        android:layout_toEndOf="@id/novelImg"
         android:layout_width="wrap_content"
         android:layout_height="120dp"
         android:layout_marginLeft="10dp"

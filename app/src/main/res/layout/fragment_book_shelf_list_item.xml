@@ -6,7 +6,7 @@
     android:layout_height="100dp">
 
         <ImageView
-            android:id="@+id/img"
+            android:id="@+id/novelImg"
             android:layout_width="80dp"
             android:padding="6.5dp"
             android:layout_height="100dp"
@@ -16,7 +16,7 @@
             android:id="@+id/update"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignEnd="@id/img"
+            android:layout_alignEnd="@id/novelImg"
             android:layout_alignParentTop="true"
             android:background="@drawable/ic_new"
             android:gravity="center"
@@ -32,7 +32,7 @@
             android:layout_height="100dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
-            android:layout_toEndOf="@id/img"
+            android:layout_toEndOf="@id/novelImg"
             android:orientation="vertical">
 
             <TextView

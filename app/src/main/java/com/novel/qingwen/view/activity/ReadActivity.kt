@@ -259,7 +259,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             if (index < 0) return
             //让列表更加快速的定位
             contentsManager.scrollToPosition(index)
-            contentsManager.smoothScrollToPosition(contentsList,RecyclerView.State(),index)
+            contentsManager.smoothScrollToPosition(contentsList, RecyclerView.State(), index)
         }
     }
 
@@ -358,7 +358,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     val item = contentViewModel.getList()[index]
                     //避免重复加载
                     readHead.text = item.name
-                    if (item.chapterId == currentReadID)return
+                    if (item.chapterId == currentReadID) return
                     currentReadID = item.chapterId
                     if (index == contentViewModel.getList().size - 1) {
                         if (contentViewModel.getList()[index].nid != -1L) {
@@ -374,7 +374,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                             }
                         }
                     } else if (index == 0 && contentViewModel.getList()[0].pid != -1L) {
-                        if (item.chapterId == currentReadID)return
+                        if (item.chapterId == currentReadID) return
                         contentViewModel.cancelPrepare()
                         if (!firstRun)
                             contentViewModel.prepareChapter(0)
@@ -385,7 +385,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 //设置界面处于开启状态 不处理滑动加载事件
                 if (isOpen) return
-//                        "now canScrollUp=${readList.canScrollVertically(-1)} canScrollDown=${readList.canScrollVertically(1)}")
                 //取消预加载
                 contentViewModel.cancelPrepare()
                 //加载下一章
@@ -393,6 +392,9 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     && newState == RecyclerView.SCROLL_STATE_IDLE//当前recyclerview停止滑动
                     && !readList.canScrollVertically(1) //recyclerview无法向上滑动时
                 ) {
+                    if (loadLock && autoScrollRunning){
+                        return
+                    }
                     nextChapter()
                     super.onScrollStateChanged(recyclerView, newState)
                     return
@@ -468,7 +470,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         })
         contentsInit()
     }
-
     //自定义  重写了smoothScrollToPosition方法 实现修改滑动时间
 //    private val contentsManager = ContentsActivity.MyLinearLayoutManager(this)
     private val contentsManager = CenterLayoutManager(this)
@@ -482,7 +483,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     private var currentHeadViewIndex: Int = 0
 
     //数据由viewModel保管 数据视图分离
-    private val headList by lazy { contentsViewModel.getHeadList() }
+    private val headList by lazy { contentsViewModel.getHeadList()}
 
     //初始化右侧的目录页
     private fun contentsInit() {
@@ -499,6 +500,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                         //清空阅读位置记录
                         readOffset = 0
                         dialog.show()
+                        firstRun = true
                         contentViewModel.getChapter(item.id)
                         readDrawerLayout.closeDrawer(Gravity.RIGHT)
                         closeSetting()
@@ -606,16 +608,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 
                         //选中当前章节位置
                         selectChapterItem()
-//                        var index = 0
-//                        contentsViewModel.getList().forEach {
-//                            if (it.id == chapterId) {
-////                                contentsList.scrollToPosition(index)
-//                                selectChapterItem()
-//                                //contentsList.smoothScrollToPosition()
-//                                return@forEach
-//                            }
-//                            index++
-//                        }
                     }
                 }
             })
@@ -633,7 +625,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     headView.text = headList[headList.size - 1].name
                 if (contentsAdapter.itemCount > 0)
 //                    contentsManager.scrollToPosition(contentsAdapter.itemCount - 1)
-                contentsList.scrollToPosition(contentsAdapter.itemCount - 1)
+                    contentsList.scrollToPosition(contentsAdapter.itemCount - 1)
             }
             readLocation.setOnClickListener {
                 selectChapterItem()
@@ -678,8 +670,9 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         if (nid == -1L) {
             if (status == "状态：完结")
                 showSuccess("恭喜你又读完一本书。")
-            else
+            else {
                 loadLock = false
+            }
             return
         }
         //加载下一章
@@ -689,8 +682,14 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 
     override fun showMsg(msg: String) {
         showError(msg)
-        if (loadLock)
+        if (loadLock) {
             loadLock = false
+            if (autoScrollRunning) {
+                PageScrollController.stop()
+                findViewById<TextView>(R.id.readAutoScroll).callOnClick()
+                show("阅读结束")
+            }
+        }
         if (dialog.isShowing)
             dialog.dismiss()
     }
@@ -718,7 +717,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     readList.scrollBy(0, -readOffset)
                     //加载上下章节
                     contentViewModel.prepareChapter(0)
-                    contentViewModel.prepareChapter(contentAdapter.itemCount-1)
+                    contentViewModel.prepareChapter(contentAdapter.itemCount - 1)
                     firstRun = false
                 }
             }

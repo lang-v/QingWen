@@ -12,7 +12,7 @@ import sl.view.elasticviewlibrary.ElasticLayout
 
 class BookStoreRefreshHeader(private val context: Context, offset: Int) : ElasticLayout.HeaderAdapter(offset) {
     private lateinit var view: View
-    private val icon by lazy { view.findViewById<ImageView>(R.id.img) }
+    private val icon by lazy { view.findViewById<ImageView>(R.id.novelImg) }
     private val progressBar by lazy { view.findViewById<ProgressBar>(R.id.progressBar) }
     private val text by lazy { view.findViewById<TextView>(R.id.text) }
 

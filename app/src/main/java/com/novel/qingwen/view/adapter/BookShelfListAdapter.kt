@@ -126,7 +126,7 @@ class BookShelfListAdapter(
     override fun getItemCount(): Int = values.size
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val img: ImageView = view.findViewById(R.id.img)
+        val img: ImageView = view.findViewById(R.id.novelImg)
         val title: TextView = view.findViewById(R.id.title)
         val update: TextView = view.findViewById(R.id.update)
 

@@ -25,6 +25,7 @@ import com.novel.qingwen.view.adapter.SearchBookListAdapter
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.SearchVM
 import com.novel.qingwen.utils.Show
+import com.novel.qingwen.view.activity.ResumeActivity
 import kotlinx.android.synthetic.main.fragment_search_book.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -78,7 +79,10 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
             }
         })
         closeBtn.setOnClickListener(this)
-        adapter = SearchBookListAdapter(viewModel.getList())
+        adapter = SearchBookListAdapter(viewModel.getList()){
+                item,view->
+        ResumeActivity.start(this,item.Id.toLong(),item.Name,view)
+    }
         val manager = LinearLayoutManager(context)
         searchListView.adapter = adapter
         searchListView.layoutManager = manager
@@ -106,8 +110,9 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
 
     override fun showMsg(msg: String) {
         GlobalScope.launch(Dispatchers.Main) {
-            searchListView.visibility = if(viewModel.getList().size == 0)View.GONE else View.VISIBLE
-            tips.visibility = if(viewModel.getList().size == 0)View.VISIBLE else View.GONE
+            searchListView.visibility =
+                if (viewModel.getList().size == 0) View.GONE else View.VISIBLE
+            tips.visibility = if (viewModel.getList().size == 0) View.VISIBLE else View.GONE
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
             if (dialog.isShowing)
                 dialog.dismiss()
@@ -116,8 +121,9 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
 
     override fun onComplete(target: Int) {
         GlobalScope.launch(Dispatchers.Main) {
-            searchListView.visibility = if(viewModel.getList().size == 0)View.GONE else View.VISIBLE
-            tips.visibility = if(viewModel.getList().size == 0)View.VISIBLE else View.GONE
+            searchListView.visibility =
+                if (viewModel.getList().size == 0) View.GONE else View.VISIBLE
+            tips.visibility = if (viewModel.getList().size == 0) View.VISIBLE else View.GONE
             adapter.notifyDataSetChanged()
             if (dialog.isShowing)
                 dialog.dismiss()

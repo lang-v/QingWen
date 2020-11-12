@@ -8,14 +8,15 @@
     android:layout_marginBottom="5dp">
 
     <ImageView
-        android:id="@+id/img"
+        android:id="@+id/novelImg"
         android:layout_width="90dp"
         android:padding="10dp"
+        android:transitionName="novelPic"
         android:layout_height="120dp"
         android:src="@mipmap/ic_launcher"/>
 
     <LinearLayout
-        android:layout_toEndOf="@id/img"
+        android:layout_toEndOf="@id/novelImg"
         android:layout_toStartOf="@id/booksStoreVote"
         android:layout_width="wrap_content"
         android:layout_height="120dp"

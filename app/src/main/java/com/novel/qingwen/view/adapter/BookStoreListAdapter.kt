@@ -10,14 +10,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.novel.qingwen.R
 import com.novel.qingwen.net.bean.Book
-import com.novel.qingwen.view.activity.ResumeActivity
 
-class BookStoreListAdapter(private val list: ArrayList<Book>) :
+class BookStoreListAdapter(private val list: ArrayList<Book>,private val block:(item:Book,view:View)->Unit) :
     RecyclerView.Adapter<BookStoreListAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.title)
-        val img: ImageView = view.findViewById(R.id.img)
+        val img: ImageView = view.findViewById(R.id.novelImg)
         val author: TextView = view.findViewById(R.id.author)
         val resume: TextView = view.findViewById(R.id.resume)
         val tags: LinearLayout = view.findViewById(R.id.tags)
@@ -49,7 +48,8 @@ class BookStoreListAdapter(private val list: ArrayList<Book>) :
         holder.vote.text = list[position].Score.toString()
 
         holder.itemView.setOnClickListener {
-            ResumeActivity.start(holder.itemView.context, item.Id.toLong(), item.Name)
+            block.invoke(item,holder.img)
+//            ResumeActivity.start(holder.itemView.context, item.Id.toLong(), item.Name)
         }
     }
 }

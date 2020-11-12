@@ -29,11 +29,13 @@ object PageScrollController {
                         if (view == null) return@launch
                         view?.post {
                             view?.scrollBy(0, 2)
+                            //发送已经停止滑动的消息，让自动加载下一章的监听生效
+//                            view?.scrollTo(0,2)
+//                            view?.setScrollState(RecyclerView.SCROLL_STATE_IDLE)
+//                            view?.dispatchOnScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE)
+//                            view?.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE)
                         }
-//                        val time = (32 * ((200f - v) / 200f)).toLong()
                         val time = ((100 - v) / 2).toLong()
-//                        Log.e("Time", time.toString())
-//                        delay((32 * ((200 - v) / 200)).toLong())
                         delay(5 + time)
                     }
 

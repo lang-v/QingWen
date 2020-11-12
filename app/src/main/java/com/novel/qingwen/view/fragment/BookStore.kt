@@ -16,9 +16,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
+import com.novel.qingwen.view.activity.ResumeActivity
 import com.novel.qingwen.view.adapter.BookStoreCategoryAdapter
 import com.novel.qingwen.view.adapter.BookStoreListAdapter
 import com.novel.qingwen.view.dialog.NoticeDialog
+import com.novel.qingwen.view.widget.CenterLayoutManager
 import com.novel.qingwen.viewmodel.BookStoreVM
 import kotlinx.android.synthetic.main.fragment_book_store.*
 import kotlinx.coroutines.Dispatchers
@@ -64,6 +66,7 @@ class BookStore : Fragment(), IBaseView {
 
     private fun init() {
         val temp = arrayListOf("玄幻", "武侠", "都市", "历史", "科幻", "网游", "女生", "同人")
+        val categoryManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         val categoryAdapter = BookStoreCategoryAdapter(
             R.layout.fragment_book_store_item,
             temp
@@ -84,7 +87,6 @@ class BookStore : Fragment(), IBaseView {
             }
             getContent()
         }
-        val categoryManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         categoryList.adapter = categoryAdapter
         categoryList.layoutManager = categoryManager
         categoryList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -154,7 +156,10 @@ class BookStore : Fragment(), IBaseView {
 
         val manager = LinearLayoutManager(context)
         bookStoreList.layoutManager = manager
-        bookStoreAdapter = BookStoreListAdapter(viewModel.getList())
+        bookStoreAdapter = BookStoreListAdapter(viewModel.getList()){
+            item,view->
+            ResumeActivity.start(this,item.Id.toLong(),item.Name,view)
+        }
         bookStoreList.adapter = bookStoreAdapter
         bookStoreList.addItemDecoration(
             DividerItemDecoration(

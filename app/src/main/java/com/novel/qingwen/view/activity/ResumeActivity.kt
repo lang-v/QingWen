@@ -1,13 +1,15 @@
 package com.novel.qingwen.view.activity
 
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
+import android.widget.ImageView
 import androidx.activity.viewModels
+import androidx.core.app.ActivityOptionsCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.databinding.ActivityResumeBinding
@@ -31,12 +33,17 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
     private val dialog: NoticeDialog by lazy { NoticeDialog.build(this, "请稍候") }
 
     companion object {
-        fun start(context: Context, id: Long, name: String) {
-            val intent = Intent(context, ResumeActivity::class.java)
+        fun start(context: Fragment, id: Long, name: String,view:View) {
+            val intent = Intent(context.requireContext(), ResumeActivity::class.java)
             intent.putExtra("id", id)
             BookShelfListUtil.currentBookInfo
+            val bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                context.requireActivity(),
+                view,
+                "novelPic"
+            ).toBundle()
             intent.putExtra("name", name)
-            context.startActivity(intent)
+            context.startActivity(intent,bundle)
         }
     }
 
@@ -130,7 +137,8 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
         when (item.itemId) {
             android.R.id.home -> {
                 //返回按钮
-                finish()
+//                finish()
+                onBackPressed()
             }
             R.id.addToBookShelf -> {
                 if(!BookShelfListUtil.getList().contains(BookShelfListUtil.currentBookInfo)){
