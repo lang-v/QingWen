@@ -71,7 +71,7 @@ object ConfigUtil {
         )
     }
 
-    fun update(listener: ConfigUpdateListener? = null){
+    fun update(listener: RoomUpdateListener? = null){
         GlobalScope.launch {
             RoomUtil.configDao.update(
                 appConfig.id,
@@ -85,7 +85,7 @@ object ConfigUtil {
         }
     }
 
-    interface ConfigUpdateListener {
+    interface RoomUpdateListener {
         fun updateFinish()
     }
 }

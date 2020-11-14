@@ -27,4 +27,7 @@ interface ChapterDao {
 
     @Insert
     fun insertAll(vararg chapter: Chapter)
+
+    @Query("delete from BookChapter")
+    fun deleteAll():Int
 }

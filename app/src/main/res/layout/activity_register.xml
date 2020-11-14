@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.activity.Register">
+
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/colorPrimary"
+        app:contentInsetStart="0dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/registerBack"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:background="@android:color/transparent"
+            android:padding="5dp"
+            android:src="@drawable/ic_back" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="注册"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <TextView
+        android:id="@+id/registerTips"
+        android:gravity="center"
+        android:textColor="@android:color/holo_red_light"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/username"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintVertical_bias="0.919" />
+
+    <EditText
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="用户名"
+        android:layout_marginTop="256dp"
+        android:layout_marginStart="30dp"
+        android:textColor="@android:color/black"
+        android:lines="1"
+        android:imeOptions="actionNext"
+        android:layout_marginEnd="30dp"
+        app:layout_constraintTop_toTopOf="parent"
+        android:drawableStart="@drawable/ic_user"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@drawable/button_radius_shape"
+        tools:layout_editor_absoluteX="16dp" />
+
+    <EditText
+        android:id="@+id/password"
+        android:imeOptions="actionNext"
+        android:layout_width="match_parent"
+        android:background="@drawable/button_radius_shape"
+        android:layout_height="50dp"
+        android:nextFocusDown="@id/login"
+        android:textColor="@android:color/black"
+        android:hint="密码"
+        android:lines="1"
+        android:inputType="textPassword"
+        android:layout_marginTop="70dp"
+        android:layout_marginStart="30dp"
+        android:drawableStart="@drawable/ic_password"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:layout_marginEnd="30dp"
+        app:layout_constraintTop_toTopOf="@id/username"
+        tools:layout_editor_absoluteX="16dp" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginBottom="150dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <Button
+            android:id="@+id/register"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/button_radius_shape"
+            android:backgroundTint="@color/colorPrimary"
+            android:text="注册"
+            android:textColor="@android:color/white"
+            android:transitionName="loginBtn" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/registerText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="70dp"
+        android:gravity="center"
+        android:paddingEnd="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:layout_constraintVertical_bias="0.716" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

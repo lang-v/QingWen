@@ -8,10 +8,12 @@ import com.novel.qingwen.utils.NetUtil
 
 class BookShelfVM : BaseVM() {
     private val list = BookShelfListUtil.getList()
-
     fun getList(): ArrayList<BookInfo> = list
-
     fun refresh() {
+        BookShelfListUtil.pullData {
+            BookShelfListUtil.pushData()
+            iView?.onComplete()
+        }
         if (list.size == 0 || (list.size == 1 && list[0].novelId == -1L)) {
             iView?.onComplete()
             return

@@ -19,7 +19,6 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:fitsSystemWindows="false"
-        android:background="?attr/backgroundColor"
         tools:context=".view.activity.ResumeActivity">
 
         <ImageView
@@ -137,7 +136,6 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="?attr/backgroundColor"
             android:layout_below="@id/imageView2"
             android:orientation="vertical">
 
@@ -146,9 +144,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
+                android:textColor="?android:attr/textColorSecondary"
                 android:paddingStart="16dp"
                 android:text="@string/resume"
-                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="18sp"
                 tools:ignore="RtlSymmetry" />
 
@@ -157,7 +155,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:textColor="?android:attr/textColorPrimary"
                 android:padding="5dp"
                 android:text="@{resumeVM.info.resumeText}" />
 
@@ -172,8 +169,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:paddingStart="16dp"
-                android:textColor="?android:attr/textColorPrimary"
                 android:text="@string/contents"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="18sp" />
 
             <RelativeLayout
@@ -197,7 +194,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
-                    android:textColor="?android:attr/textColorPrimary"
                     android:layout_toEndOf="@id/resumeContentsIcon"
                     android:text="@{resumeVM.info.lastChapterTime}" />
 

@@ -5,6 +5,7 @@ import android.text.TextUtils
 import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.ConfigUtil
 import com.novel.qingwen.utils.RoomUtil
+import com.novel.qingwen.utils.UserDataUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -20,6 +21,7 @@ class MyApplication : Application() {
         RoomUtil.init(this)
         GlobalScope.launch(Dispatchers.Default) {
             ConfigUtil.init()
+            UserDataUtil.init()
             BookShelfListUtil.init()
         }
 

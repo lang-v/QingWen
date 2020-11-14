@@ -89,7 +89,6 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
 //            resumeToolbar.setPadding(0, statusHeight/2, 0, 0)
 //            resumeToolbar.textAlignment = TextView.
 //            resumeToolbar.titleMarginTop = (statusHeight*1.5).toInt()
-
             resumeToolbar.layoutParams.apply {
                 height += statusHeight
             }

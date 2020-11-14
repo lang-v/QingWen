@@ -8,6 +8,7 @@
     android:background="@android:color/transparent">
 
     <View
+        android:id="@+id/bookShelfBackground"
         android:background="@drawable/shadow_shape"
         android:layout_width="match_parent"
         android:layout_marginTop="-20dp"

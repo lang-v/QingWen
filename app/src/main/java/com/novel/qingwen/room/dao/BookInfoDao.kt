@@ -23,4 +23,7 @@ interface BookInfoDao {
     @Query("delete from book_info where novelId=:id")
     fun deleteById(id:Long)
 
+    @Query("delete from book_info")
+    fun deleteAll():Int
+
 }

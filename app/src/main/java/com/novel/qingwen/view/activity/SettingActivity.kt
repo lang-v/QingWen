@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.activity_setting.*
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
-class SettingActivity : AppCompatActivity(), ConfigUtil.ConfigUpdateListener {
+class SettingActivity : AppCompatActivity(), ConfigUtil.RoomUpdateListener {
 
     private val config = ConfigUtil.getConfig()
     private val dialog:NoticeDialog by lazy { NoticeDialog.build(this,"请稍候") }

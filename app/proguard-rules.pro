@@ -129,6 +129,10 @@
 -keep class androidx.databinding*
 
 -keep class androidx.room**
+-keep class com.novel.qingwen.room.entity.*{*;}
+-keep class com.novel.qingwen.room.dao.*{*;}
+-keep class com.novel.qingwen.room.*{*;}
+-keep class com.novel.qingwen.utils.*{*;}
 -keep class com.novel.qingwen.viewmodel.*{*;}
 
 

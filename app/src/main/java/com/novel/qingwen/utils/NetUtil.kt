@@ -1,11 +1,13 @@
 package com.novel.qingwen.utils
 
+import android.text.Editable
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
 import com.novel.qingwen.net.bean.*
 import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.net.service.Novel
+import com.novel.qingwen.room.entity.UserData
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -22,6 +24,10 @@ object NetUtil {
     var contentsCallback: ResponseCallback<BookContents>? = null
     var chapterContentCallback: ResponseCallback<ChapterContent>? = null
     var categoryCallBack: ResponseCallback<BookStoreItem>? = null
+    var userDataCallback: ResponseCallback<LoginResult>? = null
+    var avatarCallback: ResponseCallback<Avatar>? = null
+    var bookShelfCallback: ResponseCallback<BookShelf>? = null
+    var usernameCallback: ResponseCallback<BaseResponse>? = null
 
     //搜索
     private val search: Retrofit = Retrofit.Builder()
@@ -44,10 +50,17 @@ object NetUtil {
         .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
         .build()
 
-
     //分类小说
     private val category = Retrofit.Builder()
         .baseUrl("https://scxs.pysmei.com/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+//        .baseUrl("http://localhost:8080/Gradle___com_novel_qingwen___QingWen_1_0_war/")
+
+    private val userData = Retrofit.Builder()
+        .baseUrl("http://39.97.127.33/qingwen/")
+//        .baseUrl("http://127.0.0.1:8080/Gradle___com_novel_qingwen___QingWen_1_0_war/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -67,6 +80,22 @@ object NetUtil {
         contentsCallback = callback
     }
 
+    fun setUserData(callback: ResponseCallback<LoginResult>) {
+        userDataCallback = callback
+    }
+
+    fun setAvatar(callback: ResponseCallback<Avatar>) {
+        avatarCallback = callback
+    }
+
+    fun setBookShelf(callback: ResponseCallback<BookShelf>) {
+        bookShelfCallback = callback
+    }
+
+    fun setUserName(callback: ResponseCallback<BaseResponse>) {
+        usernameCallback = callback
+    }
+
     fun clear(callback: ResponseCallback<*>) {
         when (callback) {
             infoCallback -> infoCallback = null
@@ -74,6 +103,10 @@ object NetUtil {
             contentsCallback -> contentsCallback = null
             chapterContentCallback -> chapterContentCallback = null
             categoryCallBack -> categoryCallBack = null
+            userDataCallback -> userDataCallback = null
+            avatarCallback -> avatarCallback = null
+            bookShelfCallback -> bookShelfCallback = null
+            usernameCallback -> usernameCallback = null
         }
     }
 
@@ -204,17 +237,17 @@ object NetUtil {
     }
 
 
-
     private var categoryCall: Call<BookStoreItem>? = null
-    fun cancelGetCategory(){
+    fun cancelGetCategory() {
         categoryCall?.cancel()
     }
+
     /**
      * @param categoryId 分类ID
      * @param status 状态
      * @param page 页数
      */
-    fun getCategory(categoryId:Int,status:String,page:Int){
+    fun getCategory(categoryId: Int, status: String, page: Int) {
         val request = category.create(Novel::class.java)
         categoryCall = request.getCategory(categoryId, status, page)
         categoryCall?.enqueue(object : Callback<BookStoreItem> {
@@ -236,6 +269,184 @@ object NetUtil {
                 }
             }
 
+        })
+    }
+
+    fun login(username: String, password: String) {
+        val request = userData.create(Novel::class.java)
+        val call = request.login(username.encode(1), password)
+        call.enqueue(object : Callback<LoginResult> {
+            override fun onResponse(call: Call<LoginResult>, response: Response<LoginResult>) {
+                response.body()?.let {
+                    if (it.code == 200)
+                        userDataCallback?.onSuccess(it.apply {
+                            this.username = this.username?.decode(2)
+                            this.nick = this.nick?.decode(2)
+                            this.token = this.token?.decode(1)
+                        })
+                    else
+                        userDataCallback?.onFailure()
+                }
+            }
+
+            override fun onFailure(call: Call<LoginResult>, t: Throwable) {
+                userDataCallback?.onFailure()
+            }
+        })
+    }
+
+    fun register(username: String, password: String) {
+        val request = userData.create(Novel::class.java)
+        val call = request.register(username.encode(1), password)
+        call.enqueue(object : Callback<LoginResult> {
+            override fun onResponse(call: Call<LoginResult>, response: Response<LoginResult>) {
+                response.body()?.let {
+                    if (it.code == 200)
+                        userDataCallback?.onSuccess(it.apply {
+                            this.username = this.username?.decode(2)
+                            this.token = this.token?.decode(1)
+                        })
+                    else
+                        userDataCallback?.onFailure()
+                }
+            }
+
+            override fun onFailure(call: Call<LoginResult>, t: Throwable) {
+                userDataCallback?.onFailure()
+            }
+        })
+    }
+
+    fun pullAvatar(token: String) {
+        val request = userData.create(Novel::class.java)
+        val call = request.pullAvatar(token.decode(2))
+        call.enqueue(object : Callback<Avatar> {
+            override fun onResponse(call: Call<Avatar>, response: Response<Avatar>) {
+                response.body()?.let {
+                    avatarCallback?.onSuccess(it)
+                }
+            }
+
+            override fun onFailure(call: Call<Avatar>, t: Throwable) {
+                avatarCallback?.onFailure()
+            }
+        })
+    }
+
+    fun pushAvatar(token: String, avatar: String) {
+        val request = userData.create(Novel::class.java)
+        val call = request.pushAvatar(token.decode(2), avatar)
+        call.enqueue(object : Callback<Avatar> {
+            override fun onResponse(call: Call<Avatar>, response: Response<Avatar>) {
+                response.body()?.let {
+                    avatarCallback?.onSuccess(it)
+                }
+            }
+
+            override fun onFailure(call: Call<Avatar>, t: Throwable) {
+                avatarCallback?.onFailure()
+            }
+        })
+    }
+
+    fun pushBookShelf(token: String, data: String) {
+        val request = userData.create(Novel::class.java)
+        val call = request.pushData(token.decode(2), data.encode(1))
+        call.enqueue(object : Callback<BookShelf> {
+            override fun onResponse(call: Call<BookShelf>, response: Response<BookShelf>) {
+                response.body()?.let {
+                    if (it.code == 200)
+                        bookShelfCallback?.onSuccess(it)
+                    else bookShelfCallback?.onFailure()
+                }
+            }
+
+            override fun onFailure(call: Call<BookShelf>, t: Throwable) {
+                bookShelfCallback?.onFailure()
+            }
+        })
+    }
+
+    fun pullBookShelf(token: String) {
+        val request = userData.create(Novel::class.java)
+        val call = request.pullData(token.decode(2))
+        call.enqueue(object : Callback<BookShelf> {
+            override fun onResponse(call: Call<BookShelf>, response: Response<BookShelf>) {
+                response.body()?.let {
+                    if (it.code == 200) {
+                        it.data = it.data?.decode(2)
+                        bookShelfCallback?.onSuccess(it)
+                    } else
+                        bookShelfCallback?.onFailure()
+                }
+            }
+
+            override fun onFailure(call: Call<BookShelf>, t: Throwable) {
+                bookShelfCallback?.onFailure()
+            }
+        })
+    }
+
+    fun change(username: String, password: String, newPassword: String) {
+        val request = userData.create(Novel::class.java)
+        val call = request.change(username.encode(1), password, newPassword)
+        call.enqueue(object : Callback<LoginResult> {
+            override fun onResponse(call: Call<LoginResult>, response: Response<LoginResult>) {
+                response.body()?.let {
+                    if (it.code == 200)
+                        userDataCallback?.onSuccess(it.apply {
+                            this.username = this.username?.decode(2)
+                        })
+                    else
+                        userDataCallback?.onFailure()
+                }
+            }
+
+            override fun onFailure(call: Call<LoginResult>, t: Throwable) {
+                userDataCallback?.onFailure()
+            }
+        })
+    }
+
+    fun change(token: String, nick: String, email: String, avatar: String) {
+        val request = userData.create(Novel::class.java)
+        val call = request.change(token.decode(2), nick.encode(1), email, avatar)
+        call.enqueue(object : Callback<LoginResult> {
+            override fun onResponse(call: Call<LoginResult>, response: Response<LoginResult>) {
+                response.body()?.let {
+                    if (it.code == 200) {
+                        userDataCallback?.onSuccess(it.apply {
+                            this.nick = this.nick?.decode(1)
+                        })
+                    } else {
+                        userDataCallback?.onFailure()
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<LoginResult>, t: Throwable) {
+                userDataCallback?.onFailure()
+            }
+        })
+    }
+
+    fun checkName(username: String) {
+        val request = userData.create(Novel::class.java)
+        val call = request.checkName(username.encode(1))
+
+        call.enqueue(object : Callback<BaseResponse> {
+            override fun onResponse(call: Call<BaseResponse>, response: Response<BaseResponse>) {
+                response.body()?.let {
+                    if (it.code == 200)
+                        usernameCallback?.onSuccess(it)
+                    else
+                        usernameCallback?.onFailure()
+                }
+            }
+
+            override fun onFailure(call: Call<BaseResponse>, t: Throwable) {
+                usernameCallback?.onFailure()
+            }
         })
     }
 }

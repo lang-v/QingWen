@@ -3,10 +3,7 @@ package com.novel.qingwen.net.service
 import com.novel.qingwen.net.bean.*
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.GET
-import retrofit2.http.HTTP
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface Novel {
     @HTTP(method = "GET", path = "BookFiles/Html/{pageid}/{novelid}/info.html", hasBody = false)
@@ -54,4 +51,44 @@ interface Novel {
         @Path("status") status: String,
         @Path("page") page: Int
     ):Call<BookStoreItem>
+
+    @FormUrlEncoded
+    @POST("login")
+    fun login(@Field("username") username:String,@Field("password") password:String):Call<LoginResult>
+
+    @FormUrlEncoded
+    @POST("register")
+    fun register(@Field("username") username:String,@Field("password") password:String):Call<LoginResult>
+
+    @FormUrlEncoded
+    @POST("pullavatar")
+    fun pullAvatar(@Field("token") token:String):Call<Avatar>
+
+    @FormUrlEncoded
+    @POST("pushavatar")
+    fun pushAvatar(@Field("token")token:String,@Field("avatar")avatar:String):Call<Avatar>
+
+    @FormUrlEncoded
+    @POST("pushdata")
+    fun pushData(@Field("token")token: String,@Field("data") data:String):Call<BookShelf>
+
+    @FormUrlEncoded
+    @POST("pulldata")
+    fun pullData(@Field("token")token: String):Call<BookShelf>
+
+    @FormUrlEncoded
+    @POST("changepassword")
+    fun change(@Field("username") username:String,
+               @Field("password") password: String,
+               @Field("newPassword") newPassword: String):Call<LoginResult>
+
+    @FormUrlEncoded
+    @POST("changeuserinfo")
+    fun change(@Field("token") token:String?,
+               @Field("nick") nick: String?,
+               @Field("email") email:String?,
+               @Field("avatar") avatar:String?):Call<LoginResult>
+
+    @GET("checkname")
+    fun checkName(@Query("username")username: String):Call<BaseResponse>
 }

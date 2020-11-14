@@ -22,10 +22,13 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
+import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.Show
+import com.novel.qingwen.utils.UserDataUtil
 import com.novel.qingwen.view.adapter.BookShelfListAdapter
 import com.novel.qingwen.view.adapter.FragmentAdapter
 import com.novel.qingwen.view.fragment.BookStore
+import com.novel.qingwen.view.fragment.MinePage
 import com.novel.qingwen.view.fragment.SearchBook
 import com.novel.qingwen.viewmodel.BookShelfVM
 import com.tbruyelle.rxpermissions2.RxPermissions
@@ -79,6 +82,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         val list = ArrayList<Fragment>()
         list.add(SearchBook())
         list.add(BookStore())
+        list.add(MinePage())
         window.statusBarColor = Color.parseColor("#669900")
         val fragmentAdapter = FragmentAdapter(this, list)
         viewPager.adapter = fragmentAdapter
@@ -93,6 +97,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
                             mainBookShelfMore.isActivated = false
                             mainBookShelfMore.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
                         }
+                        if (mainMine.isActivated){
+                            mainMine.isActivated = false
+                            mainMine.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
+                        }
                         mainSearchPageBtn.isActivated = true
                         mainSearchPageBtn.setTextColor(Color.parseColor("#669900"))
                     }
@@ -101,8 +109,24 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
                             mainSearchPageBtn.isActivated = false
                             mainSearchPageBtn.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
                         }
+                        if (mainMine.isActivated){
+                            mainMine.isActivated = false
+                            mainMine.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
+                        }
                         mainBookShelfMore.isActivated = true
                         mainBookShelfMore.setTextColor(Color.parseColor("#669900"))
+                    }
+                    2->{
+                        if (mainSearchPageBtn.isActivated) {
+                            mainSearchPageBtn.isActivated = false
+                            mainSearchPageBtn.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
+                        }
+                        if (mainBookShelfMore.isActivated) {
+                            mainBookShelfMore.isActivated = false
+                            mainBookShelfMore.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
+                        }
+                        mainMine.isActivated = true
+                        mainMine.setTextColor(Color.parseColor("#669900"))
                     }
                 }
             }
@@ -128,6 +152,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
                         bookShelfTab.scaleX = 0f
                         bookShelfTab.scaleY = 0f
                         bookShelfName.alpha = 1f
+                        bookShelfBackground.alpha = 0f
                     }
 
                     BottomSheetBehavior.STATE_COLLAPSED -> {
@@ -135,6 +160,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
                         bookShelfTab.scaleX = 1f
                         bookShelfTab.scaleY = 1f
                         bookShelfName.alpha = 0f
+                        bookShelfBackground.alpha = 1f
                     }
                 }
             }
@@ -144,6 +170,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
                 bookShelfTab.alpha = 1 - slideOffset
                 bookShelfTab.scaleX = 1 - slideOffset
                 bookShelfTab.scaleY = 1 - slideOffset
+                bookShelfBackground.alpha = 1 - slideOffset
                 bookShelfName.alpha = slideOffset
 //                Log.e("MainActivity","offset = $slideOffset height=$tabLayoutHeight offset = ${(tabLayoutHeight * slideOffset).toInt()}")
                 val layoutParams = tabLayout.layoutParams as RelativeLayout.LayoutParams
@@ -157,6 +184,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         //加载更多
         mainBookShelfMore.setOnClickListener(this)
         mainSearchPageBtn.setOnClickListener(this)
+        mainMine.setOnClickListener(this)
 
         //确认是打开书架还是开始加载
         var scrollTarget= 0
@@ -214,6 +242,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         viewModel.attachView(this)
         //自动刷新，但是不调用下拉框架
         viewModel.refresh()
+
+        if (UserDataUtil.isLogin())
+            BookShelfListUtil.pullData{BookShelfListUtil.pushData()}
         //刷新书架
         bookInfoUpdate()
     }
@@ -250,11 +281,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
     override fun onClick(v: View?) {
         when(v?.id){
             R.id.mainBookShelfMore -> {
-                viewPager.currentItem = 1
+                viewPager.setCurrentItem(1,false)
             }
 
             R.id.mainSearchPageBtn -> {
-                viewPager.currentItem = 0
+                viewPager.setCurrentItem(0,false)
+//                viewPager.currentItem = 0
+            }
+
+            R.id.mainMine->{
+                viewPager.setCurrentItem(2,false)
+//                viewPager.currentItem = 2
             }
         }
     }

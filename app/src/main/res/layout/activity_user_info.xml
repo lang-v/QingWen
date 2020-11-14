@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent"
+    tools:context=".view.activity.UserInfoActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/mineToolbar"
+        android:background="@color/colorPrimary"
+        android:layout_width="match_parent"
+        android:minHeight="60dp"
+        android:layout_height="60dp"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:gravity="center_horizontal"
+        android:layout_height="70dp">
+
+        <ImageView
+            android:id="@+id/userInfoAvatar"
+            android:layout_width="60dp"
+            android:transitionName="mineAvatar"
+            android:layout_height="60dp"/>
+
+        <ImageView
+            android:background="@drawable/avatar_modify_shpae"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10dp"
+            android:layout_width="60dp"
+            android:layout_height="30dp"/>
+
+        <ImageView
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="15dp"
+            android:src="@drawable/ic_edit"
+            android:layout_width="60dp"
+            android:layout_height="20dp"/>
+
+    </RelativeLayout>
+
+    <sl.view.elasticviewlibrary.ElasticLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_marginTop="30dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/userInfoNick"
+                    android:layout_marginStart="100dp"
+                    android:gravity="center"
+                    android:hint="昵称"
+                    android:lines="1"
+                    android:layout_marginEnd="100dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <EditText
+                    android:id="@+id/userInfoEmail"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginTop="10dp"
+                    android:hint="邮箱"
+                    android:lines="1"
+                    android:inputType="textEmailAddress"
+                    android:gravity="center"
+                    android:layout_marginEnd="50dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </sl.view.elasticviewlibrary.ElasticLayout>
+
+</LinearLayout>
