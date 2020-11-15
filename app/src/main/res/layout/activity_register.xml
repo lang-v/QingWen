@@ -50,7 +50,7 @@
     <EditText
         android:id="@+id/username"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:hint="用户名"
         android:layout_marginTop="256dp"
         android:layout_marginStart="30dp"
@@ -70,7 +70,7 @@
         android:imeOptions="actionNext"
         android:layout_width="match_parent"
         android:background="@drawable/button_radius_shape"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:nextFocusDown="@id/login"
         android:textColor="@android:color/black"
         android:hint="密码"

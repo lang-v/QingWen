@@ -280,8 +280,9 @@ object NetUtil {
                 response.body()?.let {
                     if (it.code == 200)
                         userDataCallback?.onSuccess(it.apply {
-                            this.username = this.username?.decode(2)
-                            this.nick = this.nick?.decode(2)
+                            this.username = this.username?.decode(1)
+                            this.nick = this.nick?.decode(1)
+                            this.email = this.email?.decode(1)
                             this.token = this.token?.decode(1)
                         })
                     else
@@ -303,7 +304,7 @@ object NetUtil {
                 response.body()?.let {
                     if (it.code == 200)
                         userDataCallback?.onSuccess(it.apply {
-                            this.username = this.username?.decode(2)
+                            this.username = this.username?.decode(1)
                             this.token = this.token?.decode(1)
                         })
                     else
@@ -335,7 +336,7 @@ object NetUtil {
 
     fun pushAvatar(token: String, avatar: String) {
         val request = userData.create(Novel::class.java)
-        val call = request.pushAvatar(token.decode(2), avatar)
+        val call = request.pushAvatar(token.decode(1), avatar)
         call.enqueue(object : Callback<Avatar> {
             override fun onResponse(call: Call<Avatar>, response: Response<Avatar>) {
                 response.body()?.let {
@@ -351,7 +352,7 @@ object NetUtil {
 
     fun pushBookShelf(token: String, data: String) {
         val request = userData.create(Novel::class.java)
-        val call = request.pushData(token.decode(2), data.encode(1))
+        val call = request.pushData(token.decode(1), data.encode(2))
         call.enqueue(object : Callback<BookShelf> {
             override fun onResponse(call: Call<BookShelf>, response: Response<BookShelf>) {
                 response.body()?.let {
@@ -369,12 +370,12 @@ object NetUtil {
 
     fun pullBookShelf(token: String) {
         val request = userData.create(Novel::class.java)
-        val call = request.pullData(token.decode(2))
+        val call = request.pullData(token.decode(1))
         call.enqueue(object : Callback<BookShelf> {
             override fun onResponse(call: Call<BookShelf>, response: Response<BookShelf>) {
                 response.body()?.let {
                     if (it.code == 200) {
-                        it.data = it.data?.decode(2)
+                        it.data = it.data?.decode(1)
                         bookShelfCallback?.onSuccess(it)
                     } else
                         bookShelfCallback?.onFailure()
@@ -410,13 +411,14 @@ object NetUtil {
 
     fun change(token: String, nick: String, email: String, avatar: String) {
         val request = userData.create(Novel::class.java)
-        val call = request.change(token.decode(2), nick.encode(1), email, avatar)
+        val call = request.change(token.decode(1), nick.encode(2), email.encode(2), avatar)
         call.enqueue(object : Callback<LoginResult> {
             override fun onResponse(call: Call<LoginResult>, response: Response<LoginResult>) {
                 response.body()?.let {
                     if (it.code == 200) {
                         userDataCallback?.onSuccess(it.apply {
                             this.nick = this.nick?.decode(1)
+                            this.email = this.email?.decode(1)
                         })
                     } else {
                         userDataCallback?.onFailure()

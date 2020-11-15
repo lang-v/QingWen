@@ -1,6 +1,8 @@
 package com.novel.qingwen.view.fragment
 
+import android.app.AlertDialog
 import android.os.Bundle
+import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,19 +18,20 @@ import com.novel.qingwen.utils.Show
 import com.novel.qingwen.utils.UserDataUtil
 import com.novel.qingwen.view.activity.Login
 import com.novel.qingwen.view.activity.UserInfoActivity
+import com.novel.qingwen.view.dialog.NoticeDialog
 import kotlinx.android.synthetic.main.activity_user_info.*
 import kotlinx.android.synthetic.main.fragment_minepage_layout.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-class MinePage:Fragment(), View.OnClickListener {
+class MinePage : Fragment(), View.OnClickListener {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_minepage_layout,container,false)
+        val view = inflater.inflate(R.layout.fragment_minepage_layout, container, false)
         return view
     }
 
@@ -41,51 +44,58 @@ class MinePage:Fragment(), View.OnClickListener {
         init()
     }
 
-    private fun init(){
+    private fun init() {
         userTab.setOnClickListener(this)
         logout.setOnClickListener(this)
         mineClearCache.setOnClickListener(this)
         mineCheckNewVersion.setOnClickListener(this)
     }
 
-    override fun onClick(v:View){
-        when(v){
-            userTab->{
-                if (!UserDataUtil.isLogin()){
+    override fun onClick(v: View) {
+        when (v) {
+            userTab -> {
+                if (!UserDataUtil.isLogin()) {
                     Login.start(requireContext())
                 } else {
-                    UserInfoActivity.start(this.requireActivity(),mineAvatar)
+                    UserInfoActivity.start(this.requireActivity(), mineAvatar)
                 }
             }
-            logout->{
+            logout -> {
                 UserDataUtil.default.apply {
                     nick = ""
-                    email=""
-                    password=""
-                    token=""
-                    avatar=""
+                    email = ""
+                    password = ""
+                    token = ""
+                    avatar = ""
                 }
-                GlobalScope.launch {
-                    //删除本地浏览数据
-                    RoomUtil.bookInfoDao.deleteAll()
-                    synchronized(BookShelfListUtil.getList()) {
-                        BookShelfListUtil.getList().clear()
-                    }
-                    UserDataUtil.update()
-                }
+//                GlobalScope.launch {
+//                    //删除本地浏览数据
+//                    RoomUtil.bookInfoDao.deleteAll()
+//                    synchronized(BookShelfListUtil.getList()) {
+//                        BookShelfListUtil.getList().clear()
+//                    }
+//                    UserDataUtil.update()
+//                }
                 //重置页面
                 reset()
             }
-            mineClearCache->{
-                GlobalScope.launch {
-                    val count = RoomUtil.chapterDao.deleteAll()
-                    GlobalScope.launch(Dispatchers.Main) {
-                        Show.show(requireContext(),"已清除${count}篇小说章节")
-                    }
-                }
+            mineClearCache -> {
+                AlertDialog.Builder(ContextThemeWrapper(requireContext(), R.style.CommonDialog))
+                    .setTitle("确认清空缓存吗？")
+                    .setPositiveButton(
+                        "确认"
+                    ) { _, _ ->
+                        GlobalScope.launch {
+                            val count = RoomUtil.chapterDao.deleteAll()
+                            GlobalScope.launch(Dispatchers.Main) {
+                                Show.show(requireContext(), "已清除${count}篇小说章节")
+                            }
+                        }
+                    }.setNegativeButton("算了") { _, _ ->
+                    }.show()
             }
-            mineCheckNewVersion->{
-                Show.show(requireContext(),"当前：1.1.6r2 已是最新版本")
+            mineCheckNewVersion -> {
+                Show.show(requireContext(), "当前：1.1.7 已是最新版本")
             }
         }
     }
@@ -96,6 +106,9 @@ class MinePage:Fragment(), View.OnClickListener {
 //            loadUserData()
 //        else
 //            reset()
+        if (UserDataUtil.isWaitRefresh()){
+            loadUserData()
+        }
     }
 
     override fun onResume() {
@@ -106,7 +119,7 @@ class MinePage:Fragment(), View.OnClickListener {
             reset()
     }
 
-    private fun loadUserData(){
+    private fun loadUserData() {
         val option = RequestOptions().error(R.mipmap.ic_launcher).transform(RoundedCorners(300))
         Glide.with(mineAvatar)
             .applyDefaultRequestOptions(option)
@@ -114,18 +127,18 @@ class MinePage:Fragment(), View.OnClickListener {
             .into(mineAvatar)
 
         val default = UserDataUtil.default
-        if (default.nick == null || default.nick == ""){
+        if (default.nick == null || default.nick == "") {
             mineNick.text = default.username
-        }else{
+        } else {
             mineNick.text = default.nick
         }
-        if (default.email != null && default.email != ""){
+        if (default.email != null && default.email != "") {
             mineEmail.text = default.email
         }
         logout.visibility = View.VISIBLE
     }
 
-    private fun reset(){
+    private fun reset() {
         mineEmail.text = ""
         mineNick.text = "请登录"
         val option = RequestOptions().error(R.mipmap.ic_launcher).transform(RoundedCorners(300))

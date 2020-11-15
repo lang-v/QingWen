@@ -33,7 +33,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="n">
-        <activity android:name=".view.activity.Register"></activity>
+        <activity
+            android:name=".view.activity.Welcome"
+            android:theme="@style/WelcomeTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".view.activity.Register" />
         <activity
             android:name=".view.activity.Login"
             android:theme="@style/transparent" />
@@ -53,11 +62,7 @@
             android:name=".view.activity.ResumeActivity"
             android:theme="@style/resumeActivity" />
         <activity android:name=".view.activity.MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <provider

@@ -11,8 +11,8 @@
 <!--    字体-->
     <string-array name="text_style">
         <item>默认</item>
-        <item>黑体</item>
-        <item>楷体</item>
+<!--        <item>黑体</item>-->
+<!--        <item>楷体</item>-->
     </string-array>
 <!-- 阅读页面背景颜色-->
     <string-array name="background_color">

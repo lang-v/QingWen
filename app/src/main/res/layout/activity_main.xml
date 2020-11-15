@@ -80,10 +80,4 @@
 
     </RelativeLayout>
 
-    <!--        欢迎页-->
-    <include
-        android:id="@+id/welcomePage"
-        layout="@layout/activity_welcome"
-        android:visibility="gone" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

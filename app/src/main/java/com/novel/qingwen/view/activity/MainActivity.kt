@@ -6,7 +6,6 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
 import androidx.activity.viewModels
@@ -22,9 +21,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
-import com.novel.qingwen.utils.BookShelfListUtil
-import com.novel.qingwen.utils.Show
-import com.novel.qingwen.utils.UserDataUtil
+import com.novel.qingwen.utils.*
 import com.novel.qingwen.view.adapter.BookShelfListAdapter
 import com.novel.qingwen.view.adapter.FragmentAdapter
 import com.novel.qingwen.view.fragment.BookStore
@@ -45,25 +42,27 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, ElasticLayout.OnEventListener {
+class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
+    ElasticLayout.OnEventListener {
     private val viewModel: BookShelfVM by viewModels()
     private lateinit var adapter: BookShelfListAdapter
-    private lateinit var bottomSheetBehavior:BottomSheetBehavior<*>
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<*>
 
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        window.statusBarColor = Color.parseColor("#669900")
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             RxPermissions(this)
                 .requestEach(
                     Manifest.permission.ACCESS_NETWORK_STATE,
                     Manifest.permission.ACCESS_WIFI_STATE,
                     Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                .subscribe{
-                    Log.e("rx",it.toString())
-                    if (it.name == Manifest.permission.WRITE_EXTERNAL_STORAGE && !it.granted){
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+                .subscribe {
+                    if (it.name == Manifest.permission.WRITE_EXTERNAL_STORAGE && !it.granted) {
                         showError("没有存储权限App无法正常运行")
                         finish()
                     }
@@ -72,18 +71,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         init()
     }
 
-    private fun initBugly(){
-        Bugly.init(applicationContext, "20fec18d0c", false)
-    }
-
-    private fun init(){
-        window.statusBarColor = Color.TRANSPARENT
-        initBugly()
+    private fun init() {
         val list = ArrayList<Fragment>()
         list.add(SearchBook())
         list.add(BookStore())
         list.add(MinePage())
-        window.statusBarColor = Color.parseColor("#669900")
         val fragmentAdapter = FragmentAdapter(this, list)
         viewPager.adapter = fragmentAdapter
         fragmentAdapter.notifyDataSetChanged()
@@ -95,11 +87,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
                     0 -> {
                         if (mainBookShelfMore.isActivated) {
                             mainBookShelfMore.isActivated = false
-                            mainBookShelfMore.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
+                            mainBookShelfMore.setTextColor(
+                                ContextCompat.getColor(
+                                    this@MainActivity,
+                                    R.color.textColorPrimary
+                                )
+                            )
                         }
-                        if (mainMine.isActivated){
+                        if (mainMine.isActivated) {
                             mainMine.isActivated = false
-                            mainMine.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
+                            mainMine.setTextColor(
+                                ContextCompat.getColor(
+                                    this@MainActivity,
+                                    R.color.textColorPrimary
+                                )
+                            )
                         }
                         mainSearchPageBtn.isActivated = true
                         mainSearchPageBtn.setTextColor(Color.parseColor("#669900"))
@@ -107,23 +109,43 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
                     1 -> {
                         if (mainSearchPageBtn.isActivated) {
                             mainSearchPageBtn.isActivated = false
-                            mainSearchPageBtn.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
+                            mainSearchPageBtn.setTextColor(
+                                ContextCompat.getColor(
+                                    this@MainActivity,
+                                    R.color.textColorPrimary
+                                )
+                            )
                         }
-                        if (mainMine.isActivated){
+                        if (mainMine.isActivated) {
                             mainMine.isActivated = false
-                            mainMine.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
+                            mainMine.setTextColor(
+                                ContextCompat.getColor(
+                                    this@MainActivity,
+                                    R.color.textColorPrimary
+                                )
+                            )
                         }
                         mainBookShelfMore.isActivated = true
                         mainBookShelfMore.setTextColor(Color.parseColor("#669900"))
                     }
-                    2->{
+                    2 -> {
                         if (mainSearchPageBtn.isActivated) {
                             mainSearchPageBtn.isActivated = false
-                            mainSearchPageBtn.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
+                            mainSearchPageBtn.setTextColor(
+                                ContextCompat.getColor(
+                                    this@MainActivity,
+                                    R.color.textColorPrimary
+                                )
+                            )
                         }
                         if (mainBookShelfMore.isActivated) {
                             mainBookShelfMore.isActivated = false
-                            mainBookShelfMore.setTextColor(ContextCompat.getColor(this@MainActivity,R.color.textColorPrimary))
+                            mainBookShelfMore.setTextColor(
+                                ContextCompat.getColor(
+                                    this@MainActivity,
+                                    R.color.textColorPrimary
+                                )
+                            )
                         }
                         mainMine.isActivated = true
                         mainMine.setTextColor(Color.parseColor("#669900"))
@@ -140,7 +162,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         //加入消息队列 展开底部书架并获取高度
         tabLayout.post {
             tabLayoutHeight = tabLayout.measuredHeight
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+//            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
         bottomSheetBehavior.addBottomSheetCallback(object :
             BottomSheetBehavior.BottomSheetCallback() {
@@ -187,25 +209,29 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         mainMine.setOnClickListener(this)
 
         //确认是打开书架还是开始加载
-        var scrollTarget= 0
+        var scrollTarget = 0
         //设置刷新加载事件监听
         bookShelfRefresh.setOnElasticViewEventListener(this)
         //关闭递增阻尼，list滑动不会感受阻力
-        bookShelfRefresh.setDamping(0.4f,false)
-        bookShelfRefresh.setHeaderAdapter(object :BaseHeader(this,200){
+        bookShelfRefresh.setDamping(0.4f, false)
+        bookShelfRefresh.setHeaderAdapter(object : BaseHeader(this, 200) {
             override fun scrollProgress(progress: Int) {
                 super.scrollProgress(progress)
-                scrollTarget = if (progress<offset) 0 else if (progress in offset until offset+200) 1 else 2
+                scrollTarget =
+                    if (progress < offset) 0 else if (progress in offset until offset + 200) 1 else 2
             }
+
             override fun releaseToDo() {
                 super.releaseToDo()
-                if(scrollTarget == 1)text.text = "继续下拉关闭书架,或者释放刷新"
-                else if(scrollTarget == 2)text.text = "释放关闭书架"
+                if (scrollTarget == 1) text.text = "继续下拉关闭书架,或者释放刷新"
+                else if (scrollTarget == 2) text.text = "释放关闭书架"
             }
+
             override fun onRelease() {
                 super.onRelease()
-                if(scrollTarget == 2)bookShelfRefresh.cancelLoading(150L)
+                if (scrollTarget == 2) bookShelfRefresh.cancelLoading(150L)
             }
+
             override fun onCancel() {
                 super.onCancel()
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -229,12 +255,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
 //            delay(1000)
 //            bookShelfRefresh.isRefreshing = true
 //        }
-        GlobalScope.launch(Dispatchers.Main) {
-            delay(500)
-            //当所有内容加载完毕，关闭欢迎页面
-            welcomePage.visibility = View.GONE
-        }
-
     }
 
     override fun onStart() {
@@ -242,9 +262,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         viewModel.attachView(this)
         //自动刷新，但是不调用下拉框架
         viewModel.refresh()
-
-        if (UserDataUtil.isLogin())
-            BookShelfListUtil.pullData{BookShelfListUtil.pushData()}
         //刷新书架
         bookInfoUpdate()
     }
@@ -254,11 +271,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         viewModel.detachView()
     }
 
-    private fun bookInfoUpdate(){
-        adapter.refresh()
+    private fun bookInfoUpdate() {
+//        adapter.refresh()
         val stringBuilder = StringBuilder()
         for (bookInfo in viewModel.getList()) {
-            if (bookInfo.update){
+            if (bookInfo.update) {
                 if (stringBuilder.toString() != "")
                     stringBuilder.append("、")
                 stringBuilder.append(bookInfo.novelName)
@@ -269,8 +286,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
             bookShelfUpdateBookName.text = "暂无更新"
             bookShelfRefreshTime.text = ""
             bookShelfRefreshTime.visibility = View.INVISIBLE
-        }
-        else{
+        } else {
             bookShelfUpdateTip.text = "今日更新:"
             bookShelfUpdateBookName.text = stringBuilder.toString()
             bookShelfRefreshTime.text = SimpleDateFormat("HH:mm").format(Date())
@@ -279,18 +295,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
     }
 
     override fun onClick(v: View?) {
-        when(v?.id){
+        when (v?.id) {
             R.id.mainBookShelfMore -> {
-                viewPager.setCurrentItem(1,false)
+                viewPager.setCurrentItem(1, false)
             }
 
             R.id.mainSearchPageBtn -> {
-                viewPager.setCurrentItem(0,false)
+                viewPager.setCurrentItem(0, false)
 //                viewPager.currentItem = 0
             }
 
-            R.id.mainMine->{
-                viewPager.setCurrentItem(2,false)
+            R.id.mainMine -> {
+                viewPager.setCurrentItem(2, false)
 //                viewPager.currentItem = 2
             }
         }
@@ -298,7 +314,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
 
     private var lastTime = 0L
     override fun onBackPressed() {
-        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED){
+        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
             return
         }
@@ -310,16 +326,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
         lastTime = currentTime
         show("再按一次退出")
     }
+
     override fun showMsg(msg: String) {
         show(msg)
     }
 
     @SuppressLint("SimpleDateFormat")
     override fun onComplete(target: Int) {
-        GlobalScope.launch(Dispatchers.Main){
-            delay(1000)
+        GlobalScope.launch(Dispatchers.Main) {
             adapter.refresh()
-            if(bookShelfRefresh.isRefreshing){
+            if (bookShelfRefresh.isRefreshing) {
+                delay(1000)
                 bookShelfRefresh.isRefreshing = false
                 //refreshHeader.overDo("完成")
                 bookInfoUpdate()
@@ -331,16 +348,23 @@ class MainActivity : AppCompatActivity(), View.OnClickListener,IBaseView, Elasti
 
     }
 
+    var time = 0L
     override fun onRefresh() {
-        viewModel.refresh()
+        if (System.currentTimeMillis() - time > 500L) {
+            viewModel.refresh()
+        }
+        time = System.currentTimeMillis()
     }
 }
-infix fun Activity.showError(msg: String){
+
+infix fun Activity.showError(msg: String) {
     Show.show(this, msg, Show.ERROR)
 }
-infix fun Activity.showSuccess(msg: String){
+
+infix fun Activity.showSuccess(msg: String) {
     Show.show(this, msg, Show.RIGHT)
 }
-infix fun Activity.show(msg: String){
+
+infix fun Activity.show(msg: String) {
     Show.show(this, msg, Show.NONE)
 }

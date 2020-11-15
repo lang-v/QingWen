@@ -1,13 +1,9 @@
 package com.novel.qingwen.viewmodel
 
-import android.util.Log
-import com.google.gson.Gson
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.net.bean.BaseResponse
-import com.novel.qingwen.net.bean.BookStoreItem
 import com.novel.qingwen.net.bean.LoginResult
 import com.novel.qingwen.net.callback.ResponseCallback
-import com.novel.qingwen.utils.ConfigUtil
 import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.utils.UserDataUtil
 

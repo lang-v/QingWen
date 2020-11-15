@@ -12,7 +12,7 @@ import java.util.regex.Pattern
 /*
  * 中文转unicode编码英文不转
  */
-infix fun String.encode(int:Int): String {
+infix fun String.encode(int: Int): String {
     val chars = this.toCharArray()
     val unicodeStr = StringBuilder("")
     for (i in chars.indices) {
@@ -21,7 +21,10 @@ infix fun String.encode(int:Int): String {
             if (hexB.length <= 2) {
                 hexB = "00$hexB"
             }
-            unicodeStr.append("\\\\u")
+            if (int == 1)
+                unicodeStr.append("\\u")
+            else if (int == 2)
+                unicodeStr.append("\\\\u")
             unicodeStr.append(hexB)
         } else {
             unicodeStr.append(chars[i])
@@ -49,9 +52,9 @@ infix fun String.encode(int:Int): String {
 
 infix fun String.decode(int: Int): String {
     val pattern: Pattern =
-//        if (int == 2)
-//            Pattern.compile("(\\\\\\\\u(\\p{XDigit}{4}))")
-//        else
+        if (int == 2)
+            Pattern.compile("(\\\\\\\\u(\\p{XDigit}{4}))")
+        else
             Pattern.compile("(\\\\u(\\p{XDigit}{4}))")
     val matcher: Matcher = pattern.matcher(this)
     var s: String = this
@@ -68,11 +71,12 @@ infix fun String.toBitmap(count: Int): Bitmap? {
         if (UserDataUtil.default.avatar == null || UserDataUtil.default.avatar == "") return null
         val bytes: ByteArray = Base64.decode(UserDataUtil.default.avatar, Base64.DEFAULT)
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-    }catch (e: Exception){
+    } catch (e: Exception) {
         e.printStackTrace()
         return null
     }
 }
+
 infix fun Bitmap.toBase64(count: Int): String? {
     try {
         var baos: ByteArrayOutputStream?
@@ -84,17 +88,17 @@ infix fun Bitmap.toBase64(count: Int): String? {
             val bitmapBytes: ByteArray = baos.toByteArray()
             return Base64.encodeToString(bitmapBytes, Base64.DEFAULT)
         }
-    }catch (e: Exception){
+    } catch (e: Exception) {
         e.printStackTrace()
     }
     return ""
 }
 
-infix fun List<BookInfo>.contain(novelId: Long):Boolean{
+infix fun List<BookInfo>.contain(novelId: Long): Boolean {
     val it = this.iterator()
-    while (it.hasNext()){
+    while (it.hasNext()) {
         val item = it.next()
-        if (item.novelId == novelId){
+        if (item.novelId == novelId) {
             return true
         }
     }

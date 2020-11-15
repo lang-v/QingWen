@@ -19,11 +19,12 @@ class MyApplication : Application() {
         super.onCreate()
         //初始化SQLite
         RoomUtil.init(this)
-        GlobalScope.launch(Dispatchers.Default) {
-            ConfigUtil.init()
-            UserDataUtil.init()
-            BookShelfListUtil.init()
-        }
+//        GlobalScope.launch() {
+//            RoomUtil.init(this@MyApplication)
+//            ConfigUtil.init()
+//            UserDataUtil.init()
+//            BookShelfListUtil.init()
+//        }
 
     }
 }

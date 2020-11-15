@@ -17,7 +17,9 @@ object BookShelfListUtil {
     var currentBookInfo: BookInfo? = null
     fun init() {
         GlobalScope.launch {
-            list.addAll(bookInfoDao.loadAll())
+            synchronized(list) {
+                list.addAll(bookInfoDao.loadAll())
+            }
             pullData {
                 pushData()
             }
@@ -27,25 +29,27 @@ object BookShelfListUtil {
 
     fun getList(): ArrayList<BookInfo> = list
 
-    fun insert(bookInfo: BookInfo) {
+    fun insert(bookInfo: BookInfo,push:Boolean=true) {
         if (list.contains(bookInfo)) return
         GlobalScope.launch {
             synchronized(list) {
                 if (bookInfoDao.contain(bookInfo.novelId).size == 1) return@launch
                 bookInfoDao.insert(bookInfo)
                 list.add(0, bookInfo)
+                if (push)
                 pushData()
             }
         }
     }
 
-    fun remove(item: BookInfo) {
+    fun remove(item: BookInfo,push:Boolean=true) {
         synchronized(list) {
             if (list.contains(item)) {
                 list.remove(item)
                 GlobalScope.launch {
                     if (bookInfoDao.contain(item.novelId).size != 1) return@launch
                     bookInfoDao.delete(item)
+                    if (push)
                     pushData()
                 }
             }
@@ -96,13 +100,16 @@ object BookShelfListUtil {
                             object : TypeToken<List<BookInfo>>() {}.type
                         )
                         //此处比较本地和服务器数据，将两者合并
-                        temp.forEach {
-                            if (!list.contain(it.novelId)) {
-                                if (it.novelId > 0) {
-                                    list.add(it)
-                                    insert(it)
+                        synchronized(list) {
+                            temp.forEach {
+                                if (!list.contain(it.novelId)) {
+                                    if (it.novelId > 0) {
+                                        list.add(it)
+                                        insert(it,false)
+                                    }
                                 }
                             }
+                            pushData()
                         }
                         block.invoke()
                     }

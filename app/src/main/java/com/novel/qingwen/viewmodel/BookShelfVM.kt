@@ -1,5 +1,6 @@
 package com.novel.qingwen.viewmodel
 
+import android.util.Log
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.room.entity.BookInfo
@@ -12,9 +13,9 @@ class BookShelfVM : BaseVM() {
     fun refresh() {
         BookShelfListUtil.pullData {
             BookShelfListUtil.pushData()
-            iView?.onComplete()
         }
         if (list.size == 0 || (list.size == 1 && list[0].novelId == -1L)) {
+//            Log.e("call","oncomplete")
             iView?.onComplete()
             return
         }
@@ -24,8 +25,8 @@ class BookShelfVM : BaseVM() {
             }
 
             override fun onSuccess(t: com.novel.qingwen.net.bean.BookInfo) {
-                size++
                 synchronized(list) {
+                    size++
                     list.forEach {
                         if (it.novelId == t.data.Id) {
                             if (it.lastChapterId != t.data.LastChapterId) {
@@ -37,8 +38,9 @@ class BookShelfVM : BaseVM() {
                             }
                         }
                     }
-                    if (size == list.size)
+                    if (size == list.size) {
                         iView?.onComplete()
+                    }
                 }
             }
         })

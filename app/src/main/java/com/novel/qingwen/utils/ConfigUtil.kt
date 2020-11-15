@@ -21,18 +21,18 @@ object ConfigUtil {
 
     fun getConfig():Config = appConfig
 
-
-
     fun getTextStyle():Int{
         return getTextStyle(appConfig.textStyle)
     }
     fun getTextStyle(position: Int):Int{
-        return when(position){
-            0 -> 0
-            1 -> R.font.ht
-            2 -> R.font.kt
-            else -> 0
-        }
+        return 0
+        //删除字体 apk包的一半大小都用来存字体了
+//        return when(position){
+//            0 -> 0
+//            1 -> R.font.ht
+//            2 -> R.font.kt
+//            else -> 0
+//        }
     }
 
     fun getTextSize():Int{

@@ -392,7 +392,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     && newState == RecyclerView.SCROLL_STATE_IDLE//当前recyclerview停止滑动
                     && !readList.canScrollVertically(1) //recyclerview无法向上滑动时
                 ) {
-                    if (loadLock && autoScrollRunning){
+                    if (loadLock && autoScrollRunning) {
                         return
                     }
                     nextChapter()
@@ -428,41 +428,41 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 }
                 MotionEvent.ACTION_UP -> {
                     if (target) {
-                        target = false
+//                        target = false
                         pageOnClick()
+                        target = false
                     }
                 }
-                //如果这个过程移动幅度过大就过滤掉本次点击事件
-                else -> {
+                MotionEvent.ACTION_MOVE -> {
                     //设置界面处于关闭时由readlist处理滑动事件
                     //开启状态由设置界面处理消息
                     if (isOpen) {
                         target = false
-                    } else {
-                        if (abs(event.x - oldX) > 5f
-                            || abs(event.y - oldY) > 5f
-                        ) {
-                            target = false
-
-                        }
                     }
+                    if (abs(oldX - event.x) > 5f || abs(oldY - event.y) > 5f)
+                        target = false
                 }
             }
             target
         }
 
-
-        //todo 打开设置面板后touch事件接收消息貌似不完整，无法正常处理点击过程中存在滑动的问题
-        //todo 本意是如果点击过程滑动则取消click事件，反之则调用click事件
         //当设置被打开时拦截滑动消息
         readList.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
             override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+//                Log.e("intercept", "isopen$isOpen")
                 return isOpen
             }
 
             override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
-                if (e.action == MotionEvent.ACTION_UP) {
-                    closeSetting()
+                when (e.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        oldX = e.x
+                        oldY = e.y
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        if (abs(oldX - e.x) < 10f && abs(oldY - e.y) < 10f)
+                            closeSetting()
+                    }
                 }
             }
 
@@ -470,6 +470,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         })
         contentsInit()
     }
+
     //自定义  重写了smoothScrollToPosition方法 实现修改滑动时间
 //    private val contentsManager = ContentsActivity.MyLinearLayoutManager(this)
     private val contentsManager = CenterLayoutManager(this)
@@ -483,7 +484,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     private var currentHeadViewIndex: Int = 0
 
     //数据由viewModel保管 数据视图分离
-    private val headList by lazy { contentsViewModel.getHeadList()}
+    private val headList by lazy { contentsViewModel.getHeadList() }
 
     //初始化右侧的目录页
     private fun contentsInit() {
@@ -715,10 +716,10 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 //                    contentAdapter.notifyItemChanged()
                     //contentManager.scrollToPositionWithOffset(0, readOffset)
                     readList.scrollBy(0, -readOffset)
-                    //加载上下章节
-                    contentViewModel.prepareChapter(0)
-                    contentViewModel.prepareChapter(contentAdapter.itemCount - 1)
                     firstRun = false
+                    //加载上下章节
+//                    contentViewModel.prepareChapter(0)
+//                    contentViewModel.prepareChapter(contentAdapter.itemCount - 1)
                 }
             }
             if (dialog.isShowing)

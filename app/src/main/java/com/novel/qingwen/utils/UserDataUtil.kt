@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory
 import android.util.Base64
 import android.util.Log
 import com.google.gson.Gson
+import com.novel.qingwen.net.bean.LoginResult
+import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.room.AppDatabase
 import com.novel.qingwen.room.entity.UserData
 import kotlinx.coroutines.GlobalScope
@@ -19,10 +21,42 @@ object UserDataUtil {
             RoomUtil.userDataDao.insert(temp)
         }
         default = temp
+        autoLogin()
     }
 
     fun isLogin():Boolean{
         return default.token != ""
+    }
+
+    private var isWaitForRefresh = false
+    get() {
+        return if (field) {
+            field = false
+            true
+        }else
+            false
+    }
+    //通知我的页面刷新内容
+    fun isWaitRefresh() = isWaitForRefresh
+
+    fun autoLogin(){
+        if (!isLogin())return
+        NetUtil.setUserData(object :ResponseCallback<LoginResult>{
+            override fun onFailure() {}
+            override fun onSuccess(t: LoginResult) {
+                default.apply {
+                    nick = t.nick
+                    email = t.email
+                    avatar = t.avatar
+                }
+                update(object :ConfigUtil.RoomUpdateListener{
+                    override fun updateFinish() {
+                        isWaitForRefresh = true
+                    }
+                })
+            }
+        })
+        NetUtil.login(default.username, default.password)
     }
 
     fun getAvatar(): Bitmap? {
@@ -32,7 +66,7 @@ object UserDataUtil {
     }
 
     //更新完毕发送通知
-    fun update(listener: ConfigUtil.RoomUpdateListener?=null) {
+    fun update(listener: ConfigUtil.RoomUpdateListener? =null) {
         GlobalScope.launch {
             RoomUtil.userDataDao.update(
                 default.token,
