@@ -4,7 +4,7 @@
     android:layout_width="150dp"
     android:theme="@style/AppTheme"
     android:orientation="vertical"
-    android:background="@drawable/dialog_background"
+    android:background="@android:color/transparent"
     android:layout_height="120dp">
 
     <ProgressBar
@@ -19,6 +19,7 @@
         android:layout_marginTop="10dp"
         android:textColor="?android:attr/textColorPrimary"
         android:textAlignment="center"
+        android:visibility="gone"
         android:ellipsize="marquee"
         android:textSize="18sp"
         android:singleLine="true"

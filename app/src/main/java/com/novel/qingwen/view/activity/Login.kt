@@ -14,26 +14,18 @@ import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.app.ActivityOptionsCompat
-import androidx.room.util.StringUtil
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.utils.BookShelfListUtil
-import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.utils.UserDataUtil
 import com.novel.qingwen.viewmodel.LoginVM
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_login.password
 import kotlinx.android.synthetic.main.activity_login.username
-import kotlinx.android.synthetic.main.activity_register.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class Login : AppCompatActivity(), View.OnClickListener,IBaseView {
     companion object{
@@ -122,7 +114,7 @@ class Login : AppCompatActivity(), View.OnClickListener,IBaseView {
         show(msg)
     }
 
-    override fun onComplete(target: Int) {
+    override fun onComplete(target: Int, target2: Int) {
         //更新书架列表
         BookShelfListUtil.pullData { BookShelfListUtil.pushData() }
         onBackPressed()

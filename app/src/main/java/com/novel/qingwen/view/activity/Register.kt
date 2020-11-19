@@ -2,7 +2,6 @@ package com.novel.qingwen.view.activity
 
 import android.animation.ValueAnimator
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
@@ -15,13 +14,11 @@ import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.core.app.ActivityOptionsCompat
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.utils.BookShelfListUtil
-import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.viewmodel.LoginVM
 import kotlinx.android.synthetic.main.activity_register.*
 
@@ -112,7 +109,7 @@ class Register : AppCompatActivity(), View.OnClickListener,IBaseView {
         show(msg)
     }
 
-    override fun onComplete(target: Int) {
+    override fun onComplete(target: Int, target2: Int) {
         when(target){
             0->{
                 registerTips.text = ""

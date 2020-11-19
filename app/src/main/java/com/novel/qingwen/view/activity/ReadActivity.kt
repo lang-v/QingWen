@@ -1,5 +1,7 @@
 package com.novel.qingwen.view.activity
 
+import android.animation.Animator
+import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -7,18 +9,24 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
+import android.graphics.Color
 import android.graphics.Point
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.FrameLayout
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
@@ -26,25 +34,20 @@ import com.novel.qingwen.broadcast.BatteryChangeListener
 import com.novel.qingwen.broadcast.BatteryChangeReceiver
 import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.ConfigUtil
+import com.novel.qingwen.utils.MeasurePage
 import com.novel.qingwen.view.adapter.BookContentsListAdapter
 import com.novel.qingwen.view.adapter.ItemOnClickListener
 import com.novel.qingwen.view.adapter.PageScrollController
 import com.novel.qingwen.view.adapter.ReadListAdapter
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.view.widget.CenterLayoutManager
-import com.novel.qingwen.view.widget.CustomLinearLayoutManager
 import com.novel.qingwen.view.widget.CustomSeekBar
 import com.novel.qingwen.viewmodel.ContentsVM
 import com.novel.qingwen.viewmodel.ReadVM
-import kotlinx.android.synthetic.main.activity_contents.*
 import kotlinx.android.synthetic.main.activity_read.*
-import kotlinx.android.synthetic.main.activity_read.contentsList
-import kotlinx.android.synthetic.main.activity_read.headView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.text.DecimalFormat
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.abs
 
@@ -85,13 +88,17 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 
     //记录当前阅读位置
     private var currentReadID: Long = -1L
+    private var currentIndex = -1
     private var readOffset: Int = 0
+
+    private var statusBarHeight: Int = 0
 
     //内容
     private val contentViewModel: ReadVM by viewModels()
     private lateinit var contentAdapter: ReadListAdapter
     private var contentManager =
-        CustomLinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        CenterLayoutManager(this, ConfigUtil.getDirection(), false)
+    private var pagerSnapHelper = PagerSnapHelper()
 
     private val dialog: NoticeDialog by lazy { NoticeDialog.build(this, "请稍候") }
 
@@ -102,24 +109,50 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     private var waitForRefresh = false
 
     private var firstRun: Boolean = true
-
     override fun onResume() {
         registerReceiver(broadcastReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+//        val scale = resources.displayMetrics.density
+//        MeasurePage.setWidth((readList.measuredWidth/scale).toInt())
+//        MeasurePage.setHeight((readList.measuredHeight/scale).toInt())
         super.onResume()
     }
 
     override fun onPause() {
         unregisterReceiver(broadcastReceiver)
         super.onPause()
+
+        //保存阅读进度
+        if (!isInBookShelf) return
+        val position = contentManager.findFirstVisibleItemPosition()
+        readOffset = if (position > 0)
+            contentViewModel.getList()[position].index
+        else -1
+        //如果这本书是已经加入书架了的就更新阅读位置
+        synchronized(BookShelfListUtil.getList()) {
+            BookShelfListUtil.getList().forEach {
+                if (it.novelId == novelId) {
+                    it.lastReadId = currentReadID
+                    it.lastReadOffset = readOffset
+                    it.update = false
+                    BookShelfListUtil.update(it)
+                    return@forEach
+                }
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN
-        )
+//        window.setFlags(
+//            WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//            WindowManager.LayoutParams.FLAG_FULLSCREEN
+//        )
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
         setContentView(R.layout.activity_read)
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
         init()
         if (dialog.isShowing) {
             dialog.dismiss()
@@ -158,8 +191,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 
     override fun onRestart() {
         if (waitForRefresh) {
-            refreshLayout()
             waitForRefresh = false
+            refreshLayout()
         }
         super.onRestart()
     }
@@ -167,23 +200,17 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     override fun onStart() {
         super.onStart()
         contentViewModel.attachView(this)
+//        MeasurePage.setHeight(readList.height)
         PageScrollController.attachView(readList)
         if (PageScrollController.isPause() && !isOpen)
             PageScrollController.resume()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
-            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-        } else {
-            // 全屏显示，隐藏状态栏
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-        }
+        enterFullsScreen()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        PageScrollController.stop()
+    }
 
     //保存阅读进度
     override fun onStop() {
@@ -193,25 +220,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         if (PageScrollController.isRunning())
             PageScrollController.pause()
         PageScrollController.detachView()
-        //设置返回值
-        if (!isInBookShelf) return
-        readOffset = if (contentViewModel.getList().size != 0) {
-            readList.getChildAt(0).top
-        } else {
-            return
-        }
-        //如果这本书是已经加入书架了的就更新阅读位置
-        synchronized(BookShelfListUtil.getList()) {
-            BookShelfListUtil.getList().forEach {
-                if (it.novelId == novelId) {
-                    it.lastReadId = currentReadID
-                    it.lastReadOffset = readOffset
-                    it.update = false
-                    BookShelfListUtil.update(it)
-                    return@forEach
-                }
-            }
-        }
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -245,8 +254,11 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     show("音量键调节滚动速度")
                     true
                 }
-                if (isOpen)
+                if (isOpen) {
+                    //刷新布局后才关闭设置面板
+//                    refreshLayout()
                     closeSetting()
+                }
             }
         }
         return super.onOptionsItemSelected(item)
@@ -276,7 +288,55 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         //文字大小进度条设置监听
         readTextSizeSeekBar.setOnSeekBarChangedListener(this)
         //此view继承自TextView 在生成时的所有属性保存在ConfigUtil管理的Config中
-        // 所以在xml中无法直接修改其属性，需要代码修改
+        //初始化String分页测量工具
+        MeasurePage.getTextPaint().apply {
+            textSize = ConfigUtil.getTextSize().toFloat()
+            if (ConfigUtil.getTextStyle() != 0)
+                typeface = ResourcesCompat.getFont(this@ReadActivity, ConfigUtil.getTextStyle())
+        }
+//        val layoutParams = readHead.layoutParams as RelativeLayout.LayoutParams
+//        layoutParams.bottomMargin = 0
+//        readHead.paddingBottom
+//        readHead.layoutParams = layoutParams
+
+        //获取状态栏高度
+        val resourceId =
+            applicationContext.resources.getIdentifier("status_bar_height", "dimen", "android")
+        statusBarHeight = if (resourceId > 0) {
+            applicationContext.resources.getDimensionPixelSize(resourceId)
+        } else
+            0
+        val layoutParams = readHead.layoutParams as LinearLayout.LayoutParams
+        layoutParams.topMargin = statusBarHeight
+//        readHead.paddingBottom
+        readHead.layoutParams = layoutParams
+
+        readToolbarTab.layoutParams.apply {
+            height += statusBarHeight
+            (this as FrameLayout.LayoutParams).topMargin = -height
+        }
+
+        readSetting.layoutParams.apply {
+            height + getNavigationBarHeight()
+            (this as RelativeLayout.LayoutParams).bottomMargin = -height
+        }
+
+        val scale = resources.displayMetrics.density
+
+//        readList.post {
+////            Log.e(
+////                "value",
+////                "scale:$scale,view.height=${readList.height}" +
+////                        ",view.width=${readList.width},screen.width=${resources.displayMetrics.widthPixels},screen.height=${resources.displayMetrics.heightPixels}" +
+////                        ",statusHeight=$statusBarHeight,navigationbarheight=${getNavigationBarHeight()}" +
+////                        ",window.width=${window.decorView.width},window.height=${window.decorView.height}"
+////            )
+////            MeasurePage.setWidth(readList.width - 20)
+////            MeasurePage.setHeight(readList.height)
+//        }
+        MeasurePage.setHeight((((resources.displayMetrics.heightPixels - statusBarHeight - getNavigationBarHeight()) / scale) - 43).toInt())
+        MeasurePage.setWidth(((resources.displayMetrics.widthPixels / scale) - 20).toInt())
+
         readHead.textSize = 12f
         //设置自动阅读滚动速度
         PageScrollController.setV(ConfigUtil.getConfig().autoScrollV)
@@ -284,27 +344,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         dialog.setOnKeyListener { _, keyCode, _ ->
             keyCode == KeyEvent.KEYCODE_BACK
         }
-        //设置属性全屏
-//        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-//                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-//                or View.SYSTEM_UI_FLAG_FULLSCREEN
-//                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-//        window.decorView.systemUiVisibility =
-//        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
-            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-        } else {
-            // 全屏显示，隐藏状态栏
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-        }
+        enterFullsScreen()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             window.attributes.apply {
                 layoutInDisplayCutoutMode =
@@ -322,9 +362,9 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         preChapter.setOnClickListener(this)
         nextChapter.setOnClickListener(this)
         moreSetting.setOnClickListener(this)
+        turnPageCover.setOnClickListener(this)
+        turnPageScroll.setOnClickListener(this)
 
-//        window.statusBarColor = Color.TRANSPARENT
-//        window.setTitleColor(Color.TRANSPARENT)
         //时钟
         readClock.setTextColor(ConfigUtil.getTextColor())
         //head
@@ -336,36 +376,41 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         contentAdapter = ReadListAdapter(contentViewModel.getList())
         readList.adapter = contentAdapter
         readList.layoutManager = contentManager
-        //不缓存
-//        readList.setItemViewCacheSize(0)
-
+        if (ConfigUtil.getDirection() == LinearLayout.HORIZONTAL) {
+            pagerSnapHelper.attachToRecyclerView(readList)
+            turnPageCover.isSelected = true
+            turnPageScroll.isSelected = false
+        } else {
+            turnPageScroll.isSelected = true
+            turnPageCover.isSelected = false
+        }
         broadcastReceiver.setListener(this)
         currentReadID = chapterId
         if (isInBookShelf) {
             readOffset = intent.getIntExtra("offset", 0)
 //            contentManager.scrollToPositionWithOffset(1,readOffset)
         }
-        val decimalFormat = DecimalFormat("0")
+        var recordDx = 0
         readList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                val index = contentManager.findFirstVisibleItemPosition()
-                if (contentAdapter.itemCount != 0) {
-                    val tempItem = readList.getChildAt(0)
-                    readProgress.text =
-                        decimalFormat.format(abs(-tempItem.y / tempItem.height * 100)) + "%"
-                }
-                if (index in 0 until contentViewModel.getList().size) {
-                    val item = contentViewModel.getList()[index]
+                currentIndex = contentManager.findFirstVisibleItemPosition()
+                if (ConfigUtil.getDirection() == LinearLayout.HORIZONTAL)
+                    recordDx += dx
+                if (currentIndex in 0 until contentViewModel.getList().size) {
+                    val item = contentViewModel.getList()[currentIndex]
                     //避免重复加载
                     readHead.text = item.name
-                    if (item.chapterId == currentReadID) return
+//                    if (item.chapterId == currentReadID) return
                     currentReadID = item.chapterId
-                    if (index == contentViewModel.getList().size - 1) {
-                        if (contentViewModel.getList()[index].nid != -1L) {
-                            contentViewModel.cancelPrepare()
+                    val list = contentViewModel.getList()
+                    if (list[currentIndex].type != 0 && list[list.size - 1].chapterId == list[currentIndex].chapterId) {
+                        //到达章节头部，且下一章不为空，那么静默加载下一章
+                        if (contentViewModel.getList()[currentIndex].nid != -1L) {
                             //提前加载下一章
-                            if (!firstRun)
-                                contentViewModel.prepareChapter(index)
+                            if (!firstRun) {
+                                contentViewModel.cancelPrepare()
+                                contentViewModel.prepareChapter(currentIndex)
+                            }
                         } else {
                             if (autoScrollRunning && !readList.canScrollVertically(1)) {
                                 PageScrollController.stop()
@@ -373,11 +418,15 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                                 show("阅读结束到底了")
                             }
                         }
-                    } else if (index == 0 && contentViewModel.getList()[0].pid != -1L) {
+                    }
+                    if ((currentIndex == 0 && list[0].pid != -1L)
+                        || (list[0].chapterId == list[currentIndex].chapterId && list[0].pid != -1L)
+                    ) {
                         if (item.chapterId == currentReadID) return
-                        contentViewModel.cancelPrepare()
-                        if (!firstRun)
+                        if (!firstRun) {
+                            contentViewModel.cancelPrepare()
                             contentViewModel.prepareChapter(0)
+                        }
                     }
                 }
             }
@@ -385,16 +434,20 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 //设置界面处于开启状态 不处理滑动加载事件
                 if (isOpen) return
-                //取消预加载
-                contentViewModel.cancelPrepare()
-                //加载下一章
                 if (contentManager.findLastVisibleItemPosition() == (contentAdapter.itemCount - 1)//屏幕最下面的完全可见的item是list中的最后一个
-                    && newState == RecyclerView.SCROLL_STATE_IDLE//当前recyclerview停止滑动
-                    && !readList.canScrollVertically(1) //recyclerview无法向上滑动时
+                    && newState == RecyclerView.SCROLL_STATE_IDLE//当前recyclerview停止滑动 //recyclerview无法向上滑动时
                 ) {
                     if (loadLock && autoScrollRunning) {
                         return
                     }
+
+                    if (ConfigUtil.getDirection() == LinearLayout.HORIZONTAL) {
+                        if (readList.canScrollHorizontally(1)) return
+                    } else {
+                        if (readList.canScrollVertically(1)) return
+                    }
+
+                    contentViewModel.cancelPrepare()
                     nextChapter()
                     super.onScrollStateChanged(recyclerView, newState)
                     return
@@ -405,6 +458,17 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     && newState == RecyclerView.SCROLL_STATE_IDLE//当前recyclerview停止滑动
                     && !readList.canScrollVertically(-1)
                 ) {
+                    if (ConfigUtil.getDirection() == LinearLayout.HORIZONTAL) {
+                        if (readList.canScrollHorizontally(1)) return
+                    } else {
+                        if (readList.canScrollVertically(1)) return
+                    }
+
+                    if (loadLock) {
+                        return
+                    }
+
+                    contentViewModel.cancelPrepare()
                     preChapter()
                     super.onScrollStateChanged(recyclerView, newState)
                     return
@@ -447,39 +511,40 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         }
 
         //当设置被打开时拦截滑动消息
-        readList.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
-            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+        readList.addOnItemTouchListener(
+            object : RecyclerView.OnItemTouchListener {
+                override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
 //                Log.e("intercept", "isopen$isOpen")
-                return isOpen
-            }
+                    return isOpen
+                }
 
-            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
-                when (e.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        oldX = e.x
-                        oldY = e.y
-                    }
-                    MotionEvent.ACTION_UP -> {
-                        if (abs(oldX - e.x) < 10f && abs(oldY - e.y) < 10f)
-                            closeSetting()
+                override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {
+                    when (e.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            oldX = e.x
+                            oldY = e.y
+                        }
+                        MotionEvent.ACTION_UP -> {
+                            if (abs(oldX - e.x) < 10f && abs(oldY - e.y) < 10f)
+                                closeSetting()
+                        }
                     }
                 }
-            }
 
-            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
-        })
+                override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+            })
+
+
         contentsInit()
     }
 
     //自定义  重写了smoothScrollToPosition方法 实现修改滑动时间
-//    private val contentsManager = ContentsActivity.MyLinearLayoutManager(this)
     private val contentsManager = CenterLayoutManager(this)
     private lateinit var contentsAdapter: BookContentsListAdapter
     private val contentsViewModel: ContentsVM by viewModels()
 
     /**记录当前悬浮头显示个是第几个，
      * 悬浮头集合
-     * @see headList
      */
     private var currentHeadViewIndex: Int = 0
 
@@ -599,7 +664,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     show(msg)
                 }
 
-                override fun onComplete(target: Int) {
+                override fun onComplete(target: Int, target2: Int) {
                     GlobalScope.launch(Dispatchers.Main) {
                         contentsAdapter.notifyDataSetChanged()
                         if (headList.size != 0) {
@@ -691,39 +756,58 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 show("阅读结束")
             }
         }
-        if (dialog.isShowing)
+        if (dialog.isShowing) {
+            //显示dialog可能会导致全屏退出
             dialog.dismiss()
+            enterFullsScreen()
+        }
     }
 
     /**
      * @param target 1:插入头部 2:插入尾部
      */
-    override fun onComplete(target: Int) {
+    override fun onComplete(target: Int, target2: Int) {
         if (loadLock)
             loadLock = false
         GlobalScope.launch(Dispatchers.Main) {
             when (target) {
                 1 -> {
-                    contentAdapter.notifyItemInserted(0)
+                    contentAdapter.notifyItemRangeInserted(0, target2)
                 }
 
                 2 -> {
-                    contentAdapter.notifyItemInserted(contentAdapter.itemCount - 1)
+                    contentAdapter.notifyItemRangeInserted(
+                        contentAdapter.itemCount - target2,
+                        target2
+                    )
                 }
 
                 3 -> {
-                    contentAdapter.notifyItemInserted(contentAdapter.itemCount - 1)
-//                    contentAdapter.notifyItemChanged()
-                    //contentManager.scrollToPositionWithOffset(0, readOffset)
-                    readList.scrollBy(0, -readOffset)
+                    val list = contentViewModel.getList()
+                    if (readOffset in 1 until list.size) {
+                        val temp = ArrayList<ReadListAdapter.Chapter>()
+                        for (i in 0 until readOffset) {
+                            temp.add(list[0])
+                            list.removeAt(0)
+                        }
+                        contentAdapter.notifyDataSetChanged()
+//                        contentAdapter.notifyItemRangeInserted(0, target2-readOffset+1)
+                        readList.post {
+                            for (i in readOffset - 1 downTo 0) {
+                                list.add(0, temp[i])
+                            }
+                            contentAdapter.notifyItemRangeInserted(0, readOffset)
+                        }
+                    } else {
+                        contentAdapter.notifyItemRangeInserted(0, target2)
+                    }
                     firstRun = false
-                    //加载上下章节
-//                    contentViewModel.prepareChapter(0)
-//                    contentViewModel.prepareChapter(contentAdapter.itemCount - 1)
                 }
             }
-            if (dialog.isShowing)
+            if (dialog.isShowing) {
                 dialog.dismiss()
+                enterFullsScreen()
+            }
         }
     }
 
@@ -737,38 +821,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         }
     }
 
-    private val topOpen: ObjectAnimator by lazy {
-        ObjectAnimator.ofFloat(
-            readToolbar,
-            "y",
-            readToolbar.y,
-            readToolbar.y + readToolbar.height.toFloat()
-        ).setDuration(300)
-    }
-    private val topClose: ObjectAnimator by lazy {
-        ObjectAnimator.ofFloat(
-            readToolbar, "y", readToolbar.y, readToolbar.y - readToolbar.height
-        ).setDuration(300)
-    }
-
-    private val bottomOpen: ObjectAnimator by lazy {
-        ObjectAnimator.ofFloat(
-            readSetting,
-            "y",
-            readSetting.y,
-            readSetting.y - readSetting.height - getNavigationBarHeight()
-        )
-            .setDuration(300)
-    }
-    private val bottomClose: ObjectAnimator by lazy {
-        ObjectAnimator.ofFloat(
-            readSetting,
-            "y",
-            readSetting.y,
-            readSetting.y + readSetting.height + getNavigationBarHeight()
-        )
-            .setDuration(300)
-    }
 
     //获取导航栏高度
     private fun getNavigationBarHeight(): Int {
@@ -787,72 +839,180 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         } else 0
     }
 
+    //进入全屏
+    @Synchronized
+    private fun enterFullsScreen() {
+        // 全屏展示
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
+            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+        } else {
+            // 全屏显示，隐藏状态栏
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
+        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+
+
+        /**
+         * 重新进入全屏模式后会导致textview的内容显示不完全，所以刷新一下
+         * todo 等待修复
+         */
+//            val index = contentManager.findFirstVisibleItemPosition()
+//            if (index in 0 until contentAdapter.itemCount)
+//                contentAdapter.notifyItemChanged(index)
+
+    }
+
+    //退出全屏
+    @Synchronized
+    private fun exitFullScreen() {
+        // 非全屏显示，显示状态栏和导航栏
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_VISIBLE
+                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        or View.SYSTEM_UI_FLAG_VISIBLE
+                )
+        window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+    }
+
+    private val topOpen: ObjectAnimator by lazy {
+        ObjectAnimator.ofFloat(
+            readToolbarTab,
+            "y",
+            readToolbarTab.y,
+            readToolbarTab.y + readToolbarTab.height
+        ).setDuration(300)
+    }
+    private val topClose: ObjectAnimator by lazy {
+        ObjectAnimator.ofFloat(
+            readToolbarTab,
+            "y",
+            readToolbarTab.y,
+            readToolbarTab.y - readToolbarTab.height
+        )
+    }
+    private val bottomOpen: ObjectAnimator by lazy {
+        ObjectAnimator.ofFloat(
+            readSetting,
+            "y",
+            readSetting.y,
+            readSetting.y - readSetting.height
+        )
+    }
+    private val bottomClose: ObjectAnimator by lazy {
+        ObjectAnimator.ofFloat(
+            readSetting,
+            "y",
+            readSetting.y,
+            readSetting.y + readSetting.height
+        )
+    }
+
+    private val open: AnimatorSet by lazy {
+        AnimatorSet().apply {
+            playTogether(topOpen, bottomOpen)
+            duration = 300
+            addListener(object : Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator?) {
+                    exitFullScreen()
+                }
+
+                override fun onAnimationEnd(animation: Animator?) {
+                }
+
+                override fun onAnimationCancel(animation: Animator?) {
+                    enterFullsScreen()
+                }
+
+                override fun onAnimationRepeat(animation: Animator?) {}
+            })
+        }
+    }
+
+    private val close: AnimatorSet by lazy {
+        AnimatorSet().apply {
+            playTogether(topClose, bottomClose)
+            duration = 300
+            addListener(object : Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator?) {
+                }
+
+                override fun onAnimationEnd(animation: Animator?) {
+                    enterFullsScreen()
+                }
+
+                override fun onAnimationCancel(animation: Animator?) {
+                }
+
+                override fun onAnimationRepeat(animation: Animator?) {}
+            })
+        }
+    }
+
     private val settingLock = ReentrantLock()
+
 
     //打开关闭  设置面板
     private fun openSetting() {
         if (settingLock.isLocked) {
             if (isOpen) return
-            topClose.cancel()
-            bottomClose.cancel()
+            close.cancel()
+//            topClose.cancel()
+//            bottomClose.cancel()
             settingLock.unlock()
         }
         settingLock.lock()
         isOpen = true
+        findViewById<TextView>(R.id.readAutoScroll).isEnabled = turnPageScroll.isSelected
         if (PageScrollController.isRunning())
             PageScrollController.pause()
 
-        // 非全屏显示，显示状态栏和导航栏
-        window.decorView.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_VISIBLE or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_VISIBLE
-        window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-
-        topOpen.start()
-        bottomOpen.start()
-
+        open.start()
+//        exitFullScreen()
+//        topOpen.start()
+//        bottomOpen.start()
     }
 
     private fun closeSetting() {
         if (settingLock.isLocked) {
             if (!isOpen) return
-            topOpen.cancel()
-            bottomOpen.cancel()
+            open.cancel()
+//            topOpen.cancel()
+//            bottomOpen.cancel()
             settingLock.unlock()
         }
         settingLock.lock()
         isOpen = false
-        topClose.start()
-        bottomClose.start()
+//        topClose.start()
+//        bottomClose.start()
+        close.start()
         if (PageScrollController.isPause())
             PageScrollController.resume()
-        GlobalScope.launch(Dispatchers.Main) {
-            delay(150)
-            // 全屏展示
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                // 全屏显示，隐藏状态栏和导航栏，拉出状态栏和导航栏显示一会儿后消失。
-                window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_FULLSCREEN
-                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
-            } else {
-                // 全屏显示，隐藏状态栏
-                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
-            }
-            window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        }
+//        GlobalScope.launch {
+//            delay(150)
+//            enterFullsScreen()
+//        }
     }
 
     //修改了字体 或者大小
     override fun onChanged(index: Int) {
         GlobalScope.launch {
             ConfigUtil.getConfig().textSize = index
+            MeasurePage.getTextPaint().apply {
+                textSize = ConfigUtil.getTextSize().toFloat()
+//                if (ConfigUtil.getTextStyle() != 0)
+//                    typeface = ResourcesCompat.getFont(this@ReadActivity, ConfigUtil.getTextStyle())
+            }
             ConfigUtil.update()
+            refreshLayout()
         }
-        refreshLayout()
     }
 
+    @SuppressLint("WrongConstant")
     override fun onBackPressed() {
         if (readDrawerLayout.isDrawerOpen(Gravity.END)) {
             readDrawerLayout.closeDrawer(Gravity.END)
@@ -889,6 +1049,22 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
 
+    private fun nextPage() {
+        var index = contentManager.findFirstVisibleItemPosition() + 1
+        if (index >= contentAdapter.itemCount)
+            index--
+        contentManager.scrollToPosition(index)
+//        contentManager.smoothScrollToPosition(readList,RecyclerView.State(),index)
+    }
+
+    private fun prePage() {
+        var index = contentManager.findFirstVisibleItemPosition() - 1
+        if (index < 0)
+            index++
+        contentManager.scrollToPosition(index)
+//        contentManager.smoothScrollToPosition(readList,RecyclerView.State(),index)
+    }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         if (isOpen) return super.onKeyDown(keyCode, event)
         when (keyCode) {
@@ -898,9 +1074,15 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     ConfigUtil.update()
                     return true
                 }
-                readList.scrollBy(0, -readList.height)
-                if (!readList.canScrollVertically(-1)) {
-                    preChapter()
+                prePage()
+
+                if (turnPageScroll.isSelected) {
+                    if (!readList.canScrollVertically(-1))
+                        preChapter()
+                } else {
+                    if (!readList.canScrollHorizontally(-1)) {
+                        preChapter()
+                    }
                 }
                 return true
             }
@@ -910,9 +1092,14 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     ConfigUtil.update()
                     return true
                 }
-                readList.scrollBy(0, readList.height)
-                if (!readList.canScrollVertically(1)) {
-                    nextChapter()
+                nextPage()
+                if (turnPageScroll.isSelected) {
+                    if (!readList.canScrollVertically(1))
+                        nextChapter()
+                } else {
+                    if (!readList.canScrollHorizontally(1)) {
+                        nextChapter()
+                    }
                 }
                 return true
             }
@@ -952,29 +1139,92 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 //                    readList.scrollToPosition(position + 1)
                 }
             }
+            R.id.turnPageCover -> {
+                turnPageScroll.isSelected = false
+                turnPageCover.isSelected = true
+                //让自动阅读按钮失效
+                findViewById<TextView>(R.id.readAutoScroll).isEnabled = false
+                ConfigUtil.getConfig().scrollDirection = LinearLayout.HORIZONTAL
+                refreshLayout()
+                ConfigUtil.update()
+            }
+            R.id.turnPageScroll -> {
+                turnPageCover.isSelected = false
+                turnPageScroll.isSelected = true
+                findViewById<TextView>(R.id.readAutoScroll).isEnabled = true
+                ConfigUtil.getConfig().scrollDirection = LinearLayout.VERTICAL
+                refreshLayout()
+                ConfigUtil.update()
+            }
+        }
+    }
+
+
+    //保存阅读记录
+    private fun saveReadRecord() {
+        readOffset = 0
+        synchronized(BookShelfListUtil.getList()) {
+            BookShelfListUtil.getList().forEach {
+                if (it.novelId == novelId) {
+                    it.lastReadId = currentReadID
+                    it.lastReadOffset = readOffset
+                    it.update = false
+                    BookShelfListUtil.update(it)
+                    return@forEach
+                }
+            }
         }
     }
 
     //刷新布局 应用设置
     private fun refreshLayout() {
-        GlobalScope.launch(Dispatchers.Main) {
-            val position = contentManager.findFirstVisibleItemPosition()
-            //列表
-            contentAdapter = ReadListAdapter(contentViewModel.getList())
-            contentManager = CustomLinearLayoutManager(this@ReadActivity)
+        GlobalScope.launch {
+            //这里会出现 空指针、溢出,加了catch 。。——。。
+            //todo
+            kotlin.runCatching {
+                if (ConfigUtil.getDirection() == LinearLayout.HORIZONTAL) {
+                    pagerSnapHelper.attachToRecyclerView(readList)
+                    val list = contentViewModel.getList()
+                    if (currentIndex >= list.size || currentIndex < 0)
+                        currentIndex = list.size - 1
+                    val item = list[currentIndex]
+                    list.clear()
+                    //重新绘制章节页面,并记录阅读位置
+                    readOffset = contentViewModel.reMeasure(
+                        currentReadID,
+                        item.index,
+                        item.totalPage
+                    )
+                    currentIndex = readOffset
+//                    list.clear()
+//                    //清空之前的数据
+//                    contentAdapter.notifyItemRangeRemoved(0, contentAdapter.itemCount)
+                } else {
+                    pagerSnapHelper.attachToRecyclerView(null)
+                }
+            }
+            GlobalScope.launch(Dispatchers.Main) {
+                //重置适配器
+                contentAdapter = ReadListAdapter(contentViewModel.getList())
+                contentManager =
+                    CenterLayoutManager(this@ReadActivity, ConfigUtil.getDirection(), false)
 //            contentManager.setScrollEnabled(true)
-            readList.adapter = contentAdapter
-            readList.layoutManager = contentManager
-            contentAdapter.notifyDataSetChanged()
-//            contentManager.scrollToPositionWithOffset(position, readOffset)
-            //时钟
-            readClock.setTextColor(ConfigUtil.getTextColor())
-            //head
-            readHead.setTextColor(ConfigUtil.getTextColor())
-            //阅读进度
-            readProgress.setTextColor(ConfigUtil.getTextColor())
-            //设置背景
-            readLayout.setBackgroundColor(ConfigUtil.getBackgroundColor())
+                readList.adapter = contentAdapter
+                readList.layoutManager = contentManager
+                //加载完毕后，滑动的记录位置
+                if (currentIndex > 0) {
+                    contentManager.scrollToPosition(currentIndex)
+                }
+//                contentManager.scrollToPosition(readOffset)
+                //时钟
+                readClock.setTextColor(ConfigUtil.getTextColor())
+                //head
+                readHead.setTextColor(ConfigUtil.getTextColor())
+                //阅读进度
+                readProgress.setTextColor(ConfigUtil.getTextColor())
+                //设置背景
+                readLayout.setBackgroundColor(ConfigUtil.getBackgroundColor())
+            }
         }
     }
 

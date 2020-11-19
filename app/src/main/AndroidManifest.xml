@@ -53,7 +53,7 @@
             android:theme="@style/transparent" />
         <activity
             android:name=".view.activity.ReadActivity"
-            android:theme="@style/FullscreenTheme" />
+            android:theme="@style/ReadTheme" />
         <activity
             android:name=".view.activity.ContentsActivity"
             android:label="目录"

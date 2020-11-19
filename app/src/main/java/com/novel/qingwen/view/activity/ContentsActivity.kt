@@ -1,21 +1,16 @@
 package com.novel.qingwen.view.activity
 
 import android.app.Activity
-import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.DisplayMetrics
-import android.view.ContextThemeWrapper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
@@ -244,7 +239,7 @@ class ContentsActivity : AppCompatActivity(), IBaseView, ItemOnClickListener {
         if (dialog.isShowing) dialog.dismiss()
     }
 
-    override fun onComplete(target: Int) {
+    override fun onComplete(target: Int, target2: Int) {
         GlobalScope.launch(Dispatchers.Main) {
             adapter.notifyDataSetChanged()
             if (dialog.isShowing) dialog.dismiss()

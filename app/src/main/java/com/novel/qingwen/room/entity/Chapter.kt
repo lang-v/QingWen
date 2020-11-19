@@ -8,17 +8,17 @@ import androidx.room.Entity
  * 以小说id 和 章节id 作为联合主键
  */
 @Entity(tableName = "BookChapter",primaryKeys = ["novelId","chapterId"])
-data class Chapter(
+open class Chapter(
     //章节id
-    @ColumnInfo(name = "novelId") val novelId:Long,
+    @ColumnInfo(name = "novelId") open val novelId:Long,
     //当前小说id
-    @ColumnInfo(name = "chapterId") val chapterId: Long,
+    @ColumnInfo(name = "chapterId") open val chapterId: Long,
     //章节名
-    @ColumnInfo(name = "chapterName") val name: String,
+    @ColumnInfo(name = "chapterName") open val name: String,
     //章节内容
-    @ColumnInfo(name = "content") val content: String,
+    @ColumnInfo(name = "content") open val content: String,
     //下一、章
-    @ColumnInfo(name="nextChapter") val nid:Long,
+    @ColumnInfo(name="nextChapter") open val nid:Long,
     //上一章
-    @ColumnInfo(name="preChapter") val pid:Long
+    @ColumnInfo(name="preChapter") open val pid:Long
 )

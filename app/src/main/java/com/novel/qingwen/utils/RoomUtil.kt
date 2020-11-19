@@ -29,7 +29,13 @@ object RoomUtil {
                 database.execSQL("create table UserData(id Integer primary key not null,token TEXT not null,username TEXT not null,nick TEXT not null,password TEXT not null,email TEXT not null,avatar TEXT not null)")
             }
         }
+
+        val mi3 = object :Migration(3,4){
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("alter table Config add column scrollDirection integer not null default 0")
+            }
+        }
         db = Room.databaseBuilder(context,
-            AppDatabase::class.java,"qingwenebook").addMigrations(mi,mi2).build()
+            AppDatabase::class.java,"qingwenebook").addMigrations(mi,mi2,mi3).build()
     }
 }

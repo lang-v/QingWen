@@ -8,28 +8,21 @@ import android.graphics.Color
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.FileProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
-import com.novel.qingwen.utils.ConfigUtil
 import com.novel.qingwen.utils.UserDataUtil
-import com.novel.qingwen.utils.decode
 import com.novel.qingwen.utils.toBase64
 import com.novel.qingwen.viewmodel.UserInfoVM
-import kotlinx.android.synthetic.main.activity_read.*
 import kotlinx.android.synthetic.main.activity_user_info.*
-import kotlinx.android.synthetic.main.fragment_minepage_layout.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -68,11 +61,11 @@ class UserInfoActivity : AppCompatActivity(),IBaseView, View.OnClickListener {
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         supportActionBar!!.setHomeButtonEnabled(true)
         mineToolbar.setNavigationIcon(R.drawable.back_btn_selector)
-        val option = RequestOptions().error(R.mipmap.ic_launcher).transform(RoundedCorners(300))
+        val option = RequestOptions().error(R.mipmap.ic_launcher_round).transform(RoundedCorners(300))
         Glide.with(userInfoAvatar)
             .applyDefaultRequestOptions(option)
             .load(UserDataUtil.getAvatar())
-            .error(R.mipmap.ic_launcher)
+            .error(R.mipmap.ic_launcher_round)
             .into(userInfoAvatar)
         if (UserDataUtil.default.nick != "")
             (userInfoNick as TextView).text = UserDataUtil.default.nick
@@ -80,7 +73,6 @@ class UserInfoActivity : AppCompatActivity(),IBaseView, View.OnClickListener {
             (userInfoEmail as TextView).text = UserDataUtil.default.email
         userInfoAvatar.setOnClickListener(this)
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.user_info_menu,menu)
@@ -158,7 +150,7 @@ class UserInfoActivity : AppCompatActivity(),IBaseView, View.OnClickListener {
         show("更新失败")
     }
 
-    override fun onComplete(target: Int) {
+    override fun onComplete(target: Int, target2: Int) {
         finish()
     }
 

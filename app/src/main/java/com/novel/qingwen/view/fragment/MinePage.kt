@@ -61,13 +61,26 @@ class MinePage : Fragment(), View.OnClickListener {
                 }
             }
             logout -> {
-                UserDataUtil.default.apply {
-                    nick = ""
-                    email = ""
-                    password = ""
-                    token = ""
-                    avatar = ""
-                }
+                AlertDialog.Builder(ContextThemeWrapper(requireContext(), R.style.CommonDialog))
+                    .setTitle("确认退出登录吗？")
+                    .setPositiveButton(
+                        "确认"
+                    ) { _, _ ->
+                        GlobalScope.launch {
+                            UserDataUtil.default.apply {
+                                nick = ""
+                                email = ""
+                                password = ""
+                                token = ""
+                                avatar = ""
+                            }
+                            UserDataUtil.update()
+                        }
+                        //重置页面
+                        reset()
+                    }.setNegativeButton("算了") { _, _ ->
+                    }.show()
+
 //                GlobalScope.launch {
 //                    //删除本地浏览数据
 //                    RoomUtil.bookInfoDao.deleteAll()
@@ -76,8 +89,6 @@ class MinePage : Fragment(), View.OnClickListener {
 //                    }
 //                    UserDataUtil.update()
 //                }
-                //重置页面
-                reset()
             }
             mineClearCache -> {
                 AlertDialog.Builder(ContextThemeWrapper(requireContext(), R.style.CommonDialog))
@@ -120,7 +131,7 @@ class MinePage : Fragment(), View.OnClickListener {
     }
 
     private fun loadUserData() {
-        val option = RequestOptions().error(R.mipmap.ic_launcher).transform(RoundedCorners(300))
+        val option = RequestOptions().error(R.mipmap.ic_launcher_round).transform(RoundedCorners(300))
         Glide.with(mineAvatar)
             .applyDefaultRequestOptions(option)
             .load(UserDataUtil.getAvatar())

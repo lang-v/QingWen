@@ -66,6 +66,6 @@ class BookStoreVM:BaseVM() ,ResponseCallback<BookStoreItem>{
             list.clear()
         list.addAll(t.data.BookList)
         page++
-        iView?.onComplete()
+        iView?.onComplete(target2 = 0)
     }
 }

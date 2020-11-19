@@ -9,21 +9,10 @@
     android:orientation="vertical">
 
     <com.novel.qingwen.view.widget.CustomTextView
-        android:id="@+id/readItemTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"
-        android:background="@android:color/transparent"
-        android:textColor="@android:color/black"
-        android:textStyle="bold"
-        tools:ignore="RtlSymmetry" />
-
-    <com.novel.qingwen.view.widget.CustomTextView
         android:id="@+id/readItemText"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        android:layout_marginBottom="150dp"
         android:textColor="@android:color/black" />
+
 </LinearLayout>

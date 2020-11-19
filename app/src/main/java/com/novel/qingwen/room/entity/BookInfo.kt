@@ -10,6 +10,7 @@ data class BookInfo(
     val status:String,
     var update:Boolean=false,
     var lastReadId: Long,
+    //当前阅读位置在小说章节中的第几页
     var lastReadOffset:Int,
     val novelName: String,
     val firstChapterId:Long,

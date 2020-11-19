@@ -119,7 +119,7 @@ class SearchBook : Fragment(), IBaseView, TextView.OnEditorActionListener, View.
         }
     }
 
-    override fun onComplete(target: Int) {
+    override fun onComplete(target: Int, target2: Int) {
         GlobalScope.launch(Dispatchers.Main) {
             searchListView.visibility =
                 if (viewModel.getList().size == 0) View.GONE else View.VISIBLE

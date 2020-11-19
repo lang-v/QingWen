@@ -3,7 +3,6 @@ package com.novel.qingwen.view.activity
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
@@ -11,8 +10,6 @@ import android.widget.RelativeLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -29,7 +26,6 @@ import com.novel.qingwen.view.fragment.MinePage
 import com.novel.qingwen.view.fragment.SearchBook
 import com.novel.qingwen.viewmodel.BookShelfVM
 import com.tbruyelle.rxpermissions2.RxPermissions
-import com.tencent.bugly.Bugly
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_book_shelf.*
 import kotlinx.coroutines.Dispatchers
@@ -51,8 +47,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
     @SuppressLint("CheckResult")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
         window.statusBarColor = Color.parseColor("#669900")
+        setContentView(R.layout.activity_main)
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             RxPermissions(this)
                 .requestEach(
@@ -332,7 +328,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
     }
 
     @SuppressLint("SimpleDateFormat")
-    override fun onComplete(target: Int) {
+    override fun onComplete(target: Int, target2: Int) {
         GlobalScope.launch(Dispatchers.Main) {
             adapter.refresh()
             if (bookShelfRefresh.isRefreshing) {

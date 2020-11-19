@@ -1,15 +1,12 @@
 package com.novel.qingwen.view.fragment
 
 import android.animation.ValueAnimator
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.createViewModelLazy
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,8 +16,6 @@ import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.view.activity.ResumeActivity
 import com.novel.qingwen.view.adapter.BookStoreCategoryAdapter
 import com.novel.qingwen.view.adapter.BookStoreListAdapter
-import com.novel.qingwen.view.dialog.NoticeDialog
-import com.novel.qingwen.view.widget.CenterLayoutManager
 import com.novel.qingwen.viewmodel.BookStoreVM
 import kotlinx.android.synthetic.main.fragment_book_store.*
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +23,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import sl.view.elasticviewlibrary.ElasticLayout
-import sl.view.elasticviewlibrary.base.BaseFooter
 import sl.view.elasticviewlibrary.base.BaseHeader
 
 class BookStore : Fragment(), IBaseView {
@@ -215,7 +209,7 @@ class BookStore : Fragment(), IBaseView {
         }
     }
 
-    override fun onComplete(target: Int) {
+    override fun onComplete(target: Int, target2: Int) {
         GlobalScope.launch(Dispatchers.Main) {
             delay(200L)
             if (bookStoreRefresh.isRefreshing)

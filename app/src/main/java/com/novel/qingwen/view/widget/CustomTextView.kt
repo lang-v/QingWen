@@ -1,6 +1,7 @@
 package com.novel.qingwen.view.widget
 
 import android.content.Context
+import android.text.Layout
 import android.util.AttributeSet
 import android.util.Log
 import androidx.core.content.res.ResourcesCompat
@@ -16,6 +17,8 @@ class CustomTextView @JvmOverloads constructor(
     init {
         setTextColor(ConfigUtil.getTextColor())
         textSize = ConfigUtil.getTextSize().toFloat()
+        lineHeight
+//        layout.getLineStart()
         //0 为系统默认字体无须设置
         if (ConfigUtil.getTextStyle() != 0)
             typeface = ResourcesCompat.getFont(context, ConfigUtil.getTextStyle())

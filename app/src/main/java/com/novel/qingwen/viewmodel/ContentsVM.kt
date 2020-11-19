@@ -38,7 +38,7 @@ class ContentsVM : BaseVM(), ResponseCallback<BookContents> {
                 list.add(ContentsInfo(it1.name,it1.id))
             }
         }
-        iView?.onComplete()
+        iView?.onComplete(target2 = 0)
     }
 
     /**

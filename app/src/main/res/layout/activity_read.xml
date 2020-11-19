@@ -15,25 +15,34 @@
         <RelativeLayout
             android:id="@+id/readLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <com.novel.qingwen.view.widget.CustomTextView
-                android:id="@+id/readHead"
-                android:layout_width="match_parent"
-                android:layout_height="25dp"
-                android:background="@android:color/transparent"
-                android:gravity="center_vertical"
-                android:paddingStart="20dp"
-                android:paddingEnd="10dp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/readList"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_above="@id/readFooter"
-                android:layout_below="@id/readHead"
-                android:background="@android:color/transparent"
-                android:overScrollMode="never" />
+                android:orientation="vertical">
+
+                <com.novel.qingwen.view.widget.CustomTextView
+                    android:id="@+id/readHead"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:gravity="center_vertical"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="10dp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/readList"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_above="@id/readFooter"
+                    android:layout_below="@id/readHead"
+                    android:background="@android:color/transparent"
+                    android:overScrollMode="never" />
+            </LinearLayout>
+
 
             <RelativeLayout
                 android:id="@+id/readFooter"
@@ -46,33 +55,32 @@
                     android:id="@+id/readBattery"
                     android:layout_width="25dp"
                     android:layout_height="18dp"
-                    android:layout_marginTop="2dp"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentBottom="true"
                     android:layout_marginStart="30dp"
+                    android:layout_marginTop="2dp"
                     android:background="@drawable/ic_battery_five" />
 
                 <TextView
+                    android:id="@+id/readProgress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentBottom="true"
-                    android:id="@+id/readProgress"
                     android:layout_marginEnd="30dp"
-                    android:textSize="12sp"
                     android:textColor="@android:color/black"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:textSize="12sp" />
 
                 <com.novel.qingwen.view.widget.CustomTextClock
                     android:id="@+id/readClock"
-                    android:layout_toRightOf="@id/readBattery"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
+                    android:layout_toRightOf="@id/readBattery"
                     android:format12Hour="hh:mm"
                     android:format24Hour="HH:mm"
                     android:textColor="@android:color/black"
                     android:textSize="12sp" />
-
 
             </RelativeLayout>
 
@@ -133,6 +141,57 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_below="@id/readTextSizeSeekBar"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="翻页方式"
+                            android:textColor="@android:color/black" />
+
+                        <TextView
+                            android:id="@+id/turnPageCover"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="5dp"
+                            android:background="@drawable/frame_radius_selector"
+                            android:paddingStart="8dp"
+                            android:paddingTop="2dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="2dp"
+                            android:text="覆盖"
+                            android:textColor="@android:color/white" />
+
+                        <TextView
+                            android:id="@+id/turnPageScroll"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="5dp"
+                            android:background="@drawable/frame_radius_selector"
+                            android:paddingStart="8dp"
+                            android:paddingTop="2dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="2dp"
+                            android:text="滚动"
+                            android:textColor="@android:color/white" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_marginBottom="35dp"
                     android:orientation="horizontal">
@@ -173,15 +232,22 @@
 
         </RelativeLayout>
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/readToolbar"
-            android:theme="@style/ToolbarTheme"
+        <LinearLayout
+            android:id="@+id/readToolbarTab"
             android:layout_width="match_parent"
-            android:layout_height="70dp"
-            android:layout_marginTop="-72dp"
+            android:gravity="bottom"
             android:background="@color/colorPrimary"
-            android:gravity="center_vertical|start"
-            android:minHeight="70dp" />
+            android:layout_height="70dp">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/readToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="70dp"
+                android:background="@color/colorPrimary"
+                android:gravity="center_vertical|start"
+                android:minHeight="70dp"
+                android:theme="@style/ToolbarTheme" />
+        </LinearLayout>
 
     </FrameLayout>
 
@@ -226,8 +292,8 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:background="?attr/backgroundColor"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="?attr/backgroundColor">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/contentsList"

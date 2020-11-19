@@ -14,14 +14,15 @@ import kotlinx.coroutines.launch
 
 object UserDataUtil {
     lateinit var default: UserData
-    fun init() {
+    fun init(block:(()->Unit)?=null) {
         var temp = RoomUtil.userDataDao.loadById()
         if (temp == null) {
             temp = UserData(0, "", "", "", "", "", "")
             RoomUtil.userDataDao.insert(temp)
         }
         default = temp
-        autoLogin()
+        block?.invoke()
+//        autoLogin()
     }
 
     fun isLogin():Boolean{

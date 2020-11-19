@@ -1,14 +1,14 @@
 package com.novel.qingwen.viewmodel
 
-import android.util.Log
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.net.bean.ChapterContent
 import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.utils.RoomUtil
-import com.novel.qingwen.room.entity.Chapter
+import com.novel.qingwen.view.adapter.ReadListAdapter.Chapter
 import com.novel.qingwen.room.entity.Config
 import com.novel.qingwen.utils.ConfigUtil
+import com.novel.qingwen.utils.MeasurePage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -35,6 +35,17 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
     }
 
     /**
+     * 重新测量章节分页，将重新测量的分页数据重新加入到list
+     * @return 返回大概的阅读位置,方便定位
+     */
+    fun reMeasure(chapterId: Long,currentIndex:Int,totalPage:Int):Int{
+        //按道理说这里是不会获取到null的
+        val t =  RoomUtil.chapterDao.loadById(novelId,chapterId) ?: return -1
+        val count = MeasurePageCount(t,false)
+        return (count * (currentIndex.toFloat()/totalPage)).toInt()
+    }
+
+    /**
      * 小说文章加载时先从数据库中查找，没有缓存则网络请求,返回结果后将结果写入数据库
      * @param attachStart 是否将加载的小说内容添加到集合头部
      */
@@ -49,11 +60,13 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
                     return@launch
                 }
                 if (attachStart) {
-                    list.add(0, t)
-                    iView?.onComplete(1)
+//                    list.add(0, t)
+                    val size = MeasurePageCount(t, attachStart)
+                    iView?.onComplete(1, size)
                 } else {
-                    list.add(t)
-                    iView?.onComplete(if (list.size == 1) 3 else 2)
+//                    list.add(t)
+                    val size = MeasurePageCount(t, attachStart)
+                    iView?.onComplete(if (list.size == size) 3 else 2, size)
                 }
                 return@launch
             }
@@ -72,6 +85,29 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         }
     }
 
+    //将分页数据添加到list
+    private fun MeasurePageCount(chapter: com.novel.qingwen.room.entity.Chapter, attachStart: Boolean): Int {
+        val strList = MeasurePage.getPageString("******\r\n"+chapter.name + "\r\n******\r\n\r\n" + chapter.content)
+        for (i in 0 until strList.size) {
+            val temp = Chapter(
+                chapter.novelId,
+                chapter.chapterId,
+                chapter.name,
+                strList[i],
+                chapter.nid,
+                chapter.pid,
+                if (i == 0) -1 else if (i == list.size - 1) 1 else 0,
+                i,
+                strList.size
+            )
+            if (attachStart)
+                list.add(i, temp)
+            else
+                list.add(temp)
+        }
+        return strList.size
+    }
+
     //取消预加载
     fun cancelPrepare() {
         NetUtil.cancelLoadChapter()
@@ -88,17 +124,20 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
             Chapter(t.data.id, t.data.cid, t.data.cname, t.data.content, t.data.nid, t.data.pid)
         if (attachStart) {
             if (chapter.chapterId != list[0].chapterId && chapter.chapterId == list[0].pid) {
-                list.add(0, chapter)
+//                list.add(0, chapter)
+                val size = MeasurePageCount(chapter, attachStart)
                 attachStart = false
-                iView?.onComplete(1)
+                iView?.onComplete(1, size)
             }
         } else {
             if (list.size == 0) {
-                list.add(chapter)
-                iView?.onComplete(3)
+//                list.add(chapter)
+                val size = MeasurePageCount(chapter, attachStart)
+                iView?.onComplete(3, size)
             } else if (list.size > 0 && chapter.chapterId != list[list.size - 1].chapterId && chapter.chapterId == list[list.size - 1].nid) {
-                list.add(chapter)
-                iView?.onComplete(2)
+//                list.add(chapter)
+                val size = MeasurePageCount(chapter, attachStart)
+                iView?.onComplete(2, size)
             }
         }
         GlobalScope.launch {

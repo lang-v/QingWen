@@ -1,6 +1,5 @@
 package com.novel.qingwen.utils
 
-import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.novel.qingwen.net.bean.BookShelf
@@ -8,49 +7,43 @@ import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.room.entity.BookInfo
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.util.*
 import kotlin.collections.ArrayList
 
 object BookShelfListUtil {
     private val list = ArrayList<BookInfo>()
     private val bookInfoDao = RoomUtil.bookInfoDao
     var currentBookInfo: BookInfo? = null
-    fun init() {
-        GlobalScope.launch {
-            synchronized(list) {
-                list.addAll(bookInfoDao.loadAll())
-            }
-            pullData {
-                pushData()
-            }
+    fun init(block:(()->Unit)?=null) {
+        synchronized(list) {
+            list.addAll(bookInfoDao.loadAll())
         }
+        pullData(block)
     }
-
 
     fun getList(): ArrayList<BookInfo> = list
 
-    fun insert(bookInfo: BookInfo,push:Boolean=true) {
+    fun insert(bookInfo: BookInfo, push: Boolean = true) {
         if (list.contains(bookInfo)) return
         GlobalScope.launch {
             synchronized(list) {
-                if (bookInfoDao.contain(bookInfo.novelId).size == 1) return@launch
+                if (bookInfoDao.loadById(bookInfo.novelId).size == 1) return@launch
                 bookInfoDao.insert(bookInfo)
-                list.add(0, bookInfo)
+                list.add(bookInfo)
                 if (push)
-                pushData()
+                    pushData()
             }
         }
     }
 
-    fun remove(item: BookInfo,push:Boolean=true) {
+    fun remove(item: BookInfo, push: Boolean = true) {
         synchronized(list) {
             if (list.contains(item)) {
                 list.remove(item)
                 GlobalScope.launch {
-                    if (bookInfoDao.contain(item.novelId).size != 1) return@launch
+                    if (bookInfoDao.loadById(item.novelId).size != 1) return@launch
                     bookInfoDao.delete(item)
                     if (push)
-                    pushData()
+                        pushData()
                 }
             }
         }
@@ -87,7 +80,7 @@ object BookShelfListUtil {
     }
 
     //从服务器拉取数据
-    fun pullData(block: () -> Unit) {
+    fun pullData(block: (() -> Unit)?=null) {
         if (UserDataUtil.isLogin()) {
             NetUtil.setBookShelf(object : ResponseCallback<BookShelf> {
                 override fun onFailure() {}
@@ -104,14 +97,14 @@ object BookShelfListUtil {
                             temp.forEach {
                                 if (!list.contain(it.novelId)) {
                                     if (it.novelId > 0) {
-                                        list.add(it)
-                                        insert(it,false)
+//                                        list.add(it)
+                                        insert(it, false)
                                     }
                                 }
                             }
                             pushData()
                         }
-                        block.invoke()
+                        block?.invoke()
                     }
                 }
             })

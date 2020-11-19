@@ -5,7 +5,6 @@ import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.*
-import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.core.app.ActivityOptionsCompat
 import androidx.databinding.DataBindingUtil
@@ -48,7 +47,13 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
     }
 
     private fun getStatusHeight(): Int {
-        return ceil(25 * resources.displayMetrics.density).roundToInt()
+        var height = 0
+        val resourceId =
+            applicationContext.resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            height = applicationContext.resources.getDimensionPixelSize(resourceId)
+        }
+        return height
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,6 +97,10 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
             resumeToolbar.layoutParams.apply {
                 height += statusHeight
             }
+            resumeBg.layoutParams.apply {
+                height += statusHeight
+            }
+
             resumeToolbar.setPadding(0, statusHeight, 0, 0)
 //            resumeBg.layoutParams.apply {
 //                height+=statusHeight
@@ -143,8 +152,10 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
                 if(!BookShelfListUtil.getList().contains(BookShelfListUtil.currentBookInfo)){
 //                    Log.e("ResumeActivity","加入书架")
                     showSuccess("加入书架")
-                    BookShelfListUtil.currentBookInfo?.let { BookShelfListUtil.insert(it) }
-                    BookShelfListUtil.refresh()
+                    BookShelfListUtil.currentBookInfo?.let {
+                        BookShelfListUtil.insert(it)
+                    }
+//                    BookShelfListUtil.refresh()
                     resumeToolbar.menu.setGroupVisible(0,false)
                 }
             }
@@ -158,7 +169,7 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
             dialog.dismiss()
     }
 
-    override fun onComplete(target: Int) {
+    override fun onComplete(target: Int, target2: Int) {
         if (dialog.isShowing)
             dialog.dismiss()
 //        if (BookShelfListUtil.getList().contains(BookShelfListUtil.currentBookInfo)){

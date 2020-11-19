@@ -16,5 +16,11 @@ data class Config(
      */
     @ColumnInfo(name = "text_style") var textStyle: Int,
     @ColumnInfo(name = "back_ground") var backGround: Int,
-    @ColumnInfo(name = "auto_scroll_v",defaultValue = "0") var autoScrollV:Int
+    @ColumnInfo(name = "auto_scroll_v",defaultValue = "0") var autoScrollV:Int,
+    /**
+     * 小说阅读页面滑动方向
+     * 0: 横向
+     * 1：纵向
+     */
+    var scrollDirection:Int = 0
 )

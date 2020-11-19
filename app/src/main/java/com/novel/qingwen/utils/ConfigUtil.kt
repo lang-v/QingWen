@@ -1,6 +1,7 @@
 package com.novel.qingwen.utils
 
 import android.graphics.Color
+import android.widget.LinearLayout
 import com.novel.qingwen.R
 import com.novel.qingwen.room.entity.Config
 import kotlinx.coroutines.GlobalScope
@@ -8,17 +9,18 @@ import kotlinx.coroutines.launch
 
 object ConfigUtil {
     private lateinit var appConfig: Config
-
-    fun init() {
-        var temp :Config? = RoomUtil.configDao.loadById()
-        if (temp == null){
-            //默认字体大小20 字体黑色 系统默认字体 背景米白色
-            temp = Config(0,2, 0, 0, 0,50)
-            RoomUtil.configDao.insert(temp)//更新数据
+     fun init(block:(()->Unit)?=null) {
+        synchronized(this) {
+            var temp: Config? = RoomUtil.configDao.loadById()
+            if (temp == null) {
+                //默认字体大小20 字体黑色 系统默认字体 背景米白色
+                temp = Config(0, 2, 0, 0, 0, 50, 0)
+                RoomUtil.configDao.insert(temp)//更新数据
+            }
+            appConfig = temp
         }
-        appConfig = temp
+         block?.invoke()
     }
-
     fun getConfig():Config = appConfig
 
     fun getTextStyle():Int{
@@ -53,6 +55,11 @@ object ConfigUtil {
 
     fun getBackgroundColor():Int{
         return getBackgroundColor(appConfig.backGround)
+    }
+
+    fun getDirection():Int{
+        return if (appConfig.scrollDirection == 0) LinearLayout.HORIZONTAL
+        else LinearLayout.VERTICAL
     }
 
     fun getBackgroundColor(position:Int):Int{

@@ -1,6 +1,5 @@
 package com.novel.qingwen.viewmodel
 
-import android.util.Log
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.room.entity.BookInfo
@@ -16,7 +15,7 @@ class BookShelfVM : BaseVM() {
         }
         if (list.size == 0 || (list.size == 1 && list[0].novelId == -1L)) {
 //            Log.e("call","oncomplete")
-            iView?.onComplete()
+            iView?.onComplete(target2 = 0)
             return
         }
         var size = 0
@@ -39,7 +38,7 @@ class BookShelfVM : BaseVM() {
                         }
                     }
                     if (size == list.size) {
-                        iView?.onComplete()
+                        iView?.onComplete(target2 = 0)
                     }
                 }
             }

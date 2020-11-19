@@ -119,7 +119,7 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
             info.lastChapterName
         )
         BookShelfListUtil.currentBookInfo = bookInfo
-        iView?.onComplete()
+        iView?.onComplete(target2 = 0)
     }
 
     override fun onCleared() {

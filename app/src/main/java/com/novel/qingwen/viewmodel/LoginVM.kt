@@ -13,9 +13,9 @@ class LoginVM : BaseVM(), ResponseCallback<LoginResult> {
             override fun onFailure() {}
             override fun onSuccess(t: BaseResponse) {
                 if (t.code == 200)
-                    iView?.onComplete(0)
+                    iView?.onComplete(0, 0)
                 else
-                    iView?.onComplete(1)
+                    iView?.onComplete(1, 0)
             }
         }
 
@@ -49,7 +49,7 @@ class LoginVM : BaseVM(), ResponseCallback<LoginResult> {
             UserDataUtil.default.password = t.password
             UserDataUtil.default.token = t.token
             UserDataUtil.update()
-            iView?.onComplete(2)
+            iView?.onComplete(2, 0)
 
         } else {
             t.msg?.let { iView?.showMsg(it) }

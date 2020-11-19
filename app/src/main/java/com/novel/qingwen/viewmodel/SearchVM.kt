@@ -2,14 +2,9 @@ package com.novel.qingwen.viewmodel
 
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
 import androidx.databinding.library.baseAdapters.BR
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.MutableLiveData
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.net.bean.SearchResult
 import com.novel.qingwen.net.bean.SearchResultItem
@@ -101,7 +96,7 @@ class SearchVM : BaseVM(), ResponseCallback<SearchResult> {
 
     override fun onSuccess(t: SearchResult) {
         list.addAll(t.data)
-        iView?.onComplete()
+        iView?.onComplete(target2 = 0)
         //GlobalScope.launch(Dispatchers.Main) {
 //        adapter.notifyDataSetChanged()
         //}

@@ -40,15 +40,14 @@
             android:gravity="center_vertical|start"
             android:minHeight="70dp" />
 
-
         <ImageView
             android:id="@+id/resumeImg"
             android:layout_width="100dp"
             android:layout_height="120dp"
-            android:layout_alignTop="@id/resumeBg"
             android:layout_marginStart="10dp"
             android:transitionName="novelPic"
-            android:layout_marginTop="90dp"
+            android:layout_below="@id/resumeToolbar"
+            android:layout_marginTop="30dp"
             android:background="@android:color/white"
             android:scaleType="fitXY"
             app:imageUrl="@{resumeVM.info.img}" />
@@ -57,10 +56,10 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignTop="@id/resumeBg"
+            android:layout_below="@id/resumeToolbar"
             android:layout_marginStart="20dp"
             android:background="@android:color/transparent"
-            android:layout_marginTop="70dp"
+            android:layout_marginTop="10dp"
             android:layout_toEndOf="@id/resumeImg"
             android:orientation="vertical">
 

@@ -25,6 +25,6 @@ class UserInfoVM:BaseVM(),ResponseCallback<LoginResult> {
         UserDataUtil.default.email = t.email
         UserDataUtil.default.avatar = t.avatar
         UserDataUtil.update()
-        iView?.onComplete()
+        iView?.onComplete(target2 = 0)
     }
 }

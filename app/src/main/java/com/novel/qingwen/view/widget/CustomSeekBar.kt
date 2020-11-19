@@ -33,13 +33,15 @@ class CustomSeekBar @JvmOverloads constructor(
         this.listener = listener
     }
 
+    var currentIndex = -1
     override fun setProgress(progress: Int) {
         val temp = max.toFloat()/(size-1)
         val index = (progress/temp).roundToInt()
         val newProgress = index*temp.toInt()
         //使得当前进度条只能在特定位置停留
         super.setProgress(newProgress)
-        listener?.onChanged(index)
+        if (currentIndex != index)
+            listener?.onChanged(index)
     }
 
     //在这里监听用户拖动进度条的情况
