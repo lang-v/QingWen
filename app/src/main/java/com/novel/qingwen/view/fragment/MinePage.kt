@@ -106,7 +106,7 @@ class MinePage : Fragment(), View.OnClickListener {
                     }.show()
             }
             mineCheckNewVersion -> {
-                Show.show(requireContext(), "当前：1.1.7 已是最新版本")
+                Show.show(requireContext(), "当前：1.1.8fordzz 已是最新版本")
             }
         }
     }
@@ -138,12 +138,12 @@ class MinePage : Fragment(), View.OnClickListener {
             .into(mineAvatar)
 
         val default = UserDataUtil.default
-        if (default.nick == null || default.nick == "") {
+        if (default.nick == "null" || default.nick == "") {
             mineNick.text = default.username
         } else {
             mineNick.text = default.nick
         }
-        if (default.email != null && default.email != "") {
+        if (default.email != "null" && default.email != "") {
             mineEmail.text = default.email
         }
         logout.visibility = View.VISIBLE

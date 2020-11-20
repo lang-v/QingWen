@@ -86,7 +86,8 @@ object ConfigUtil {
                 appConfig.textColor,
                 appConfig.textStyle,
                 appConfig.backGround,
-                appConfig.autoScrollV
+                appConfig.autoScrollV,
+                appConfig.scrollDirection
             )
             listener?.updateFinish()
         }

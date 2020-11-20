@@ -45,7 +45,7 @@ object MeasurePage {
     }
 
     fun getPageString(str:String?=null):ArrayList<String>{
-        if (str == null || str.equals(""))return ArrayList()
+        if (str == null || str == "")return ArrayList()
         str?.let { setText(str) }
         if (width == 0 || height == 0)return arrayListOf(str.toString())
         val totalLineCount = mLayout.lineCount

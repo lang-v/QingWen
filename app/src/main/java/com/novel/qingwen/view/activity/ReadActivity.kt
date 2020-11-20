@@ -1004,8 +1004,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             ConfigUtil.getConfig().textSize = index
             MeasurePage.getTextPaint().apply {
                 textSize = ConfigUtil.getTextSize().toFloat()
-//                if (ConfigUtil.getTextStyle() != 0)
-//                    typeface = ResourcesCompat.getFont(this@ReadActivity, ConfigUtil.getTextStyle())
+                if (ConfigUtil.getTextStyle() != 0)
+                    typeface = ResourcesCompat.getFont(this@ReadActivity, ConfigUtil.getTextStyle())
             }
             ConfigUtil.update()
             refreshLayout()
@@ -1145,16 +1145,16 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 //让自动阅读按钮失效
                 findViewById<TextView>(R.id.readAutoScroll).isEnabled = false
                 ConfigUtil.getConfig().scrollDirection = LinearLayout.HORIZONTAL
-                refreshLayout()
                 ConfigUtil.update()
+                refreshLayout()
             }
             R.id.turnPageScroll -> {
                 turnPageCover.isSelected = false
                 turnPageScroll.isSelected = true
                 findViewById<TextView>(R.id.readAutoScroll).isEnabled = true
                 ConfigUtil.getConfig().scrollDirection = LinearLayout.VERTICAL
-                refreshLayout()
                 ConfigUtil.update()
+                refreshLayout()
             }
         }
     }

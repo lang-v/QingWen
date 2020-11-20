@@ -21,7 +21,6 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@id/readFooter"
                 android:orientation="vertical">
 
                 <com.novel.qingwen.view.widget.CustomTextView
@@ -33,56 +32,62 @@
                     android:paddingStart="20dp"
                     android:paddingEnd="10dp" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/readList"
+                <RelativeLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_above="@id/readFooter"
-                    android:layout_below="@id/readHead"
-                    android:background="@android:color/transparent"
-                    android:overScrollMode="never" />
+                    android:layout_height="match_parent">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/readList"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        android:overScrollMode="never" />
+
+                    <RelativeLayout
+                        android:id="@+id/readFooter"
+                        android:layout_width="match_parent"
+                        android:layout_height="18dp"
+                        android:layout_alignParentBottom="true"
+                        android:background="@android:color/transparent">
+
+                        <View
+                            android:id="@+id/readBattery"
+                            android:layout_width="25dp"
+                            android:layout_height="18dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentBottom="true"
+                            android:layout_marginStart="30dp"
+                            android:layout_marginTop="2dp"
+                            android:background="@drawable/ic_battery_five" />
+
+                        <TextView
+                            android:id="@+id/readProgress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentBottom="true"
+                            android:layout_marginEnd="30dp"
+                            android:textColor="@android:color/black"
+                            android:textSize="12sp" />
+
+                        <com.novel.qingwen.view.widget.CustomTextClock
+                            android:id="@+id/readClock"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_toRightOf="@id/readBattery"
+                            android:format12Hour="hh:mm"
+                            android:format24Hour="HH:mm"
+                            android:textColor="@android:color/black"
+                            android:textSize="12sp" />
+
+                    </RelativeLayout>
+                </RelativeLayout>
+
             </LinearLayout>
 
 
-            <RelativeLayout
-                android:id="@+id/readFooter"
-                android:layout_width="match_parent"
-                android:layout_height="18dp"
-                android:layout_alignParentBottom="true"
-                android:background="@android:color/transparent">
 
-                <View
-                    android:id="@+id/readBattery"
-                    android:layout_width="25dp"
-                    android:layout_height="18dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginStart="30dp"
-                    android:layout_marginTop="2dp"
-                    android:background="@drawable/ic_battery_five" />
-
-                <TextView
-                    android:id="@+id/readProgress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentBottom="true"
-                    android:layout_marginEnd="30dp"
-                    android:textColor="@android:color/black"
-                    android:textSize="12sp" />
-
-                <com.novel.qingwen.view.widget.CustomTextClock
-                    android:id="@+id/readClock"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:layout_toRightOf="@id/readBattery"
-                    android:format12Hour="hh:mm"
-                    android:format24Hour="HH:mm"
-                    android:textColor="@android:color/black"
-                    android:textSize="12sp" />
-
-            </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/readSetting"

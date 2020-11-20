@@ -27,6 +27,7 @@ object BookShelfListUtil {
         GlobalScope.launch {
             synchronized(list) {
                 if (bookInfoDao.loadById(bookInfo.novelId).size == 1) return@launch
+                if (list.contain(bookInfo.novelId))return@launch
                 bookInfoDao.insert(bookInfo)
                 list.add(bookInfo)
                 if (push)
