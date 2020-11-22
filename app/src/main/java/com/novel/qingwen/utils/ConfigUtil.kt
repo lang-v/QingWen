@@ -37,11 +37,11 @@ object ConfigUtil {
 //        }
     }
 
-    fun getTextSize():Int{
-        return getTextSize(appConfig.textSize)
+    fun getTextSize():Float{
+        return getTextSize(appConfig.textSize).toFloat()
     }
     fun getTextSize(position: Int):Int{
-        return position *5 + 10
+        return position *10 + 35
     }
 
     fun getTextColor():Int{

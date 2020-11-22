@@ -2,7 +2,6 @@ package com.novel.qingwen.view.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
@@ -353,14 +352,3 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
     }
 }
 
-infix fun Activity.showError(msg: String) {
-    Show.show(this, msg, Show.ERROR)
-}
-
-infix fun Activity.showSuccess(msg: String) {
-    Show.show(this, msg, Show.RIGHT)
-}
-
-infix fun Activity.show(msg: String) {
-    Show.show(this, msg, Show.NONE)
-}

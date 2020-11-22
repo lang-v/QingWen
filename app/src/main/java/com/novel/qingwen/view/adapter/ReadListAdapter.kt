@@ -7,12 +7,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.view.widget.CustomTextView
+import com.novel.qingwen.view.widget.ReadView
 
 class ReadListAdapter(
     private var list: ArrayList<Chapter>
 ) : RecyclerView.Adapter<ReadListAdapter.VH>() {
     class VH(view: View) : RecyclerView.ViewHolder(view) {
-        val text: CustomTextView = view.findViewById(R.id.readItemText)
+        val text: ReadView = view.findViewById(R.id.readItemText)
 //        val title: CustomTextView = view.findViewById(R.id.readItemTitle)
     }
 

@@ -13,10 +13,11 @@ import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.databinding.ActivityResumeBinding
 import com.novel.qingwen.utils.BookShelfListUtil
+import com.novel.qingwen.utils.showError
+import com.novel.qingwen.utils.showSuccess
 import com.novel.qingwen.view.dialog.NoticeDialog
 import com.novel.qingwen.viewmodel.ResumeVM
 import kotlinx.android.synthetic.main.activity_resume.*
-import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 class ResumeActivity : AppCompatActivity(), IBaseView {

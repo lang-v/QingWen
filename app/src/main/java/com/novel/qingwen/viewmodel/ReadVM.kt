@@ -2,15 +2,14 @@ package com.novel.qingwen.viewmodel
 
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.net.bean.ChapterContent
-import com.novel.qingwen.utils.NetUtil
 import com.novel.qingwen.net.callback.ResponseCallback
-import com.novel.qingwen.utils.RoomUtil
-import com.novel.qingwen.view.adapter.ReadListAdapter.Chapter
 import com.novel.qingwen.room.entity.Config
 import com.novel.qingwen.utils.ConfigUtil
 import com.novel.qingwen.utils.MeasurePage
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import com.novel.qingwen.utils.NetUtil
+import com.novel.qingwen.utils.RoomUtil
+import com.novel.qingwen.view.adapter.ReadListAdapter.Chapter
+import kotlinx.coroutines.*
 
 class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
     private var list = ArrayList<Chapter>()
@@ -40,7 +39,7 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
      */
     fun reMeasure(chapterId: Long,currentIndex:Int,totalPage:Int):Int{
         //按道理说这里是不会获取到null的
-        val t =  RoomUtil.chapterDao.loadById(novelId,chapterId) ?: return -1
+        val t = RoomUtil.chapterDao.loadById(novelId, chapterId)?:return -1
         val count = MeasurePageCount(t,false)
         return (count * (currentIndex.toFloat()/totalPage)).toInt()
     }

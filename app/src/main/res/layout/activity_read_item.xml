@@ -5,14 +5,14 @@
     android:layout_height="wrap_content"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
+    android:minHeight="200dp"
     android:background="@android:color/transparent"
     android:orientation="vertical">
 
-    <com.novel.qingwen.view.widget.CustomTextView
+    <com.novel.qingwen.view.widget.ReadView
         android:id="@+id/readItemText"
+        android:textColor="@android:color/black"
+        android:includeFontPadding="false"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:textColor="@android:color/black" />
-
+        android:layout_height="match_parent"/>
 </LinearLayout>

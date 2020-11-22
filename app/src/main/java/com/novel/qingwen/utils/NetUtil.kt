@@ -194,8 +194,6 @@ object NetUtil {
             }
         })
     }
-
-
     var chapterCall: Call<ChapterContent>? = null
 
     /**

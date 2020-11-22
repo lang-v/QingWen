@@ -9,6 +9,7 @@ import android.view.View
 import android.view.WindowManager
 import com.novel.qingwen.R
 import com.novel.qingwen.utils.ConfigUtil
+import com.novel.qingwen.utils.show
 import com.novel.qingwen.view.dialog.NoticeDialog
 import kotlinx.android.synthetic.main.activity_setting.*
 import kotlin.math.ceil

@@ -20,6 +20,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.utils.UserDataUtil
+import com.novel.qingwen.utils.show
 import com.novel.qingwen.utils.toBase64
 import com.novel.qingwen.viewmodel.UserInfoVM
 import kotlinx.android.synthetic.main.activity_user_info.*
@@ -135,7 +136,7 @@ class UserInfoActivity : AppCompatActivity(),IBaseView, View.OnClickListener {
                     .into(userInfoAvatar)
             }
             val bitmap = BitmapFactory.decodeStream(temp?.let { contentResolver.openInputStream(it) })
-            val t  = bitmap.toBase64(1)
+            val t  = bitmap.toBase64()
             t?.let { avatar = t }
 //            runOnUiThread {
 //                Glide.with(this)

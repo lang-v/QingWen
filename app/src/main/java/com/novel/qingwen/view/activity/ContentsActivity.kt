@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.utils.BookShelfListUtil
+import com.novel.qingwen.utils.showError
 import com.novel.qingwen.view.adapter.BookContentsListAdapter
 import com.novel.qingwen.view.adapter.ItemOnClickListener
 import com.novel.qingwen.view.dialog.NoticeDialog

@@ -133,6 +133,8 @@
 -keep class com.novel.qingwen.room.dao.*{*;}
 -keep class com.novel.qingwen.room.*{*;}
 -keep class com.novel.qingwen.utils.*{*;}
+-keep class com.novel.qingwen.view.adapter.ReadListAdapter
+-keep class com.novel.qingwen.utils.MeasurePage
 -keep class com.novel.qingwen.viewmodel.*{*;}
 
 

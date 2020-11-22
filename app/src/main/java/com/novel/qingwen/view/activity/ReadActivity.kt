@@ -14,7 +14,6 @@ import android.graphics.Point
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.FrameLayout
 import android.widget.LinearLayout
@@ -32,9 +31,7 @@ import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.broadcast.BatteryChangeListener
 import com.novel.qingwen.broadcast.BatteryChangeReceiver
-import com.novel.qingwen.utils.BookShelfListUtil
-import com.novel.qingwen.utils.ConfigUtil
-import com.novel.qingwen.utils.MeasurePage
+import com.novel.qingwen.utils.*
 import com.novel.qingwen.view.adapter.BookContentsListAdapter
 import com.novel.qingwen.view.adapter.ItemOnClickListener
 import com.novel.qingwen.view.adapter.PageScrollController
@@ -111,6 +108,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     private var firstRun: Boolean = true
     override fun onResume() {
         registerReceiver(broadcastReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        readList.keepScreenOn = true
 //        val scale = resources.displayMetrics.density
 //        MeasurePage.setWidth((readList.measuredWidth/scale).toInt())
 //        MeasurePage.setHeight((readList.measuredHeight/scale).toInt())
@@ -120,7 +118,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     override fun onPause() {
         unregisterReceiver(broadcastReceiver)
         super.onPause()
-
+        readList.keepScreenOn = false
         //保存阅读进度
         if (!isInBookShelf) return
         val position = contentManager.findFirstVisibleItemPosition()
@@ -244,20 +242,22 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 selectChapterItem()
             }
             R.id.readAutoScroll -> {
-                autoScrollRunning = if (autoScrollRunning) {
-                    PageScrollController.stop()
-                    item.title = "自动翻页"
-                    false
-                } else {
-                    PageScrollController.start()
-                    item.title = "关闭翻页"
-                    show("音量键调节滚动速度")
-                    true
-                }
-                if (isOpen) {
-                    //刷新布局后才关闭设置面板
+                if (ConfigUtil.getDirection() == LinearLayout.VERTICAL||contentViewModel.getList().size>0) {
+                    autoScrollRunning = if (autoScrollRunning) {
+                        PageScrollController.stop()
+                        item.title = "自动翻页"
+                        false
+                    } else {
+                        PageScrollController.start()
+                        item.title = "关闭翻页"
+                        show("音量键调节滚动速度")
+                        true
+                    }
+                    if (isOpen) {
+                        //刷新布局后才关闭设置面板
 //                    refreshLayout()
-                    closeSetting()
+                        closeSetting()
+                    }
                 }
             }
         }
@@ -289,11 +289,13 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         readTextSizeSeekBar.setOnSeekBarChangedListener(this)
         //此view继承自TextView 在生成时的所有属性保存在ConfigUtil管理的Config中
         //初始化String分页测量工具
-        MeasurePage.getTextPaint().apply {
-            textSize = ConfigUtil.getTextSize().toFloat()
-            if (ConfigUtil.getTextStyle() != 0)
-                typeface = ResourcesCompat.getFont(this@ReadActivity, ConfigUtil.getTextStyle())
-        }
+//        MeasurePage.getTextPaint().apply {
+//            textSize = ConfigUtil.getTextSize().toFloat()
+//            if (ConfigUtil.getTextStyle() != 0)
+//                typeface = ResourcesCompat.getFont(this@ReadActivity, ConfigUtil.getTextStyle())
+//        }
+        measurePageText.setTextSize(ConfigUtil.getTextSize().toFloat())
+//        MeasurePage.initView(measurePageText)
 //        val layoutParams = readHead.layoutParams as RelativeLayout.LayoutParams
 //        layoutParams.bottomMargin = 0
 //        readHead.paddingBottom
@@ -310,40 +312,30 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
         layoutParams.topMargin = statusBarHeight
 //        readHead.paddingBottom
         readHead.layoutParams = layoutParams
-
+        readHead.textSize = 12f
         readToolbarTab.layoutParams.apply {
             height += statusBarHeight
             (this as FrameLayout.LayoutParams).topMargin = -height
         }
-
         readSetting.layoutParams.apply {
             height + getNavigationBarHeight()
             (this as RelativeLayout.LayoutParams).bottomMargin = -height
         }
 
-        val scale = resources.displayMetrics.density
-
-//        readList.post {
-////            Log.e(
-////                "value",
-////                "scale:$scale,view.height=${readList.height}" +
-////                        ",view.width=${readList.width},screen.width=${resources.displayMetrics.widthPixels},screen.height=${resources.displayMetrics.heightPixels}" +
-////                        ",statusHeight=$statusBarHeight,navigationbarheight=${getNavigationBarHeight()}" +
-////                        ",window.width=${window.decorView.width},window.height=${window.decorView.height}"
-////            )
-////            MeasurePage.setWidth(readList.width - 20)
-////            MeasurePage.setHeight(readList.height)
+//        val scale = resources.displayMetrics.density
+//        MeasurePage.setHeight((resources.displayMetrics.heightPixels- readHead.height - readFooter.height - statusBarHeight))
+//        MeasurePage.setWidth((resources.displayMetrics.widthPixels- 20 * scale).toInt())
+        MeasurePage.initView(measurePageText)
+//        MeasurePage.getTextPaint().apply {
+//            textSize=measurePageText.textSize
 //        }
-        MeasurePage.setHeight((((resources.displayMetrics.heightPixels - statusBarHeight - getNavigationBarHeight()) / scale) - 43).toInt())
-        MeasurePage.setWidth(((resources.displayMetrics.widthPixels / scale) - 20).toInt())
-
-        readHead.textSize = 12f
         //设置自动阅读滚动速度
         PageScrollController.setV(ConfigUtil.getConfig().autoScrollV)
         //捕捉dialog弹出时的返回按钮
         dialog.setOnKeyListener { _, keyCode, _ ->
             keyCode == KeyEvent.KEYCODE_BACK
         }
+
         enterFullsScreen()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             window.attributes.apply {
@@ -403,7 +395,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 //                    if (item.chapterId == currentReadID) return
                     currentReadID = item.chapterId
                     val list = contentViewModel.getList()
-                    if (list[currentIndex].type != 0 && list[list.size - 1].chapterId == list[currentIndex].chapterId) {
+                    if (list[list.size - 1].chapterId == list[currentIndex].chapterId) {
                         //到达章节头部，且下一章不为空，那么静默加载下一章
                         if (contentViewModel.getList()[currentIndex].nid != -1L) {
                             //提前加载下一章
@@ -873,8 +865,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     private fun exitFullScreen() {
         // 非全屏显示，显示状态栏和导航栏
         window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_VISIBLE
-                        or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        or View.SYSTEM_UI_FLAG_VISIBLE
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                or View.SYSTEM_UI_FLAG_VISIBLE
                 )
         window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
     }
@@ -1002,11 +994,15 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     override fun onChanged(index: Int) {
         GlobalScope.launch {
             ConfigUtil.getConfig().textSize = index
-            MeasurePage.getTextPaint().apply {
-                textSize = ConfigUtil.getTextSize().toFloat()
-                if (ConfigUtil.getTextStyle() != 0)
-                    typeface = ResourcesCompat.getFont(this@ReadActivity, ConfigUtil.getTextStyle())
-            }
+//            measurePageText.textSize = ConfigUtil.getTextSize().toFloat()
+//            measurePageText.typeface = ConfigUtil.getTextSize().toFloat()
+            measurePageText.setTextSize(ConfigUtil.getTextSize())
+            MeasurePage.initView(measurePageText)
+//            MeasurePage.getTextPaint().apply {
+//                textSize = ConfigUtil.getTextSize().toFloat()
+//                if (ConfigUtil.getTextStyle() != 0)
+//                    typeface = ResourcesCompat.getFont(this@ReadActivity, ConfigUtil.getTextStyle())
+//            }
             ConfigUtil.update()
             refreshLayout()
         }
@@ -1105,6 +1101,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             }
             //vivo 手机特殊按键
             308 -> {
+                if (contentViewModel.getList().size==0)return true
                 findViewById<TextView>(R.id.readAutoScroll).callOnClick()
             }
         }
@@ -1120,6 +1117,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 startActivity(Intent(this, SettingActivity::class.java))
             }
             R.id.preChapter -> {
+                if (contentViewModel.getList().size==0)return
                 //关闭SettingBar
                 pageOnClick()
                 val position = contentManager.findFirstVisibleItemPosition()
@@ -1130,6 +1128,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 }
             }
             R.id.nextChapter -> {
+                if (contentViewModel.getList().size==0)return
                 pageOnClick()
                 val position = contentManager.findFirstVisibleItemPosition()
                 if (position == contentAdapter.itemCount - 1) {
@@ -1140,6 +1139,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 }
             }
             R.id.turnPageCover -> {
+                if (turnPageCover.isSelected||contentViewModel.getList().size==0)return
                 turnPageScroll.isSelected = false
                 turnPageCover.isSelected = true
                 //让自动阅读按钮失效
@@ -1149,6 +1149,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 refreshLayout()
             }
             R.id.turnPageScroll -> {
+                if (turnPageScroll.isSelected||contentViewModel.getList().size==0)return
                 turnPageCover.isSelected = false
                 turnPageScroll.isSelected = true
                 findViewById<TextView>(R.id.readAutoScroll).isEnabled = true
@@ -1178,17 +1179,24 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 
     //刷新布局 应用设置
     private fun refreshLayout() {
+        if (contentViewModel.getList().size==0)return
+        //取消加载
+        contentViewModel.cancelPrepare()
+        //同时撤销回调 避免数据冲突
+        contentViewModel.detachView()
         GlobalScope.launch {
-            //这里会出现 空指针、溢出,加了catch 。。——。。
-            //todo
-            kotlin.runCatching {
+            synchronized(contentViewModel.getList()) {
+                val list = contentViewModel.getList()
                 if (ConfigUtil.getDirection() == LinearLayout.HORIZONTAL) {
                     pagerSnapHelper.attachToRecyclerView(readList)
-                    val list = contentViewModel.getList()
                     if (currentIndex >= list.size || currentIndex < 0)
-                        currentIndex = list.size - 1
+                        currentIndex = 0
                     val item = list[currentIndex]
-                    list.clear()
+                    val listSize = list.size
+                    GlobalScope.launch(Dispatchers.Main) {
+                        list.clear()
+                        contentAdapter.notifyItemRangeRemoved(0, listSize)
+                    }
                     //重新绘制章节页面,并记录阅读位置
                     readOffset = contentViewModel.reMeasure(
                         currentReadID,
@@ -1196,34 +1204,31 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                         item.totalPage
                     )
                     currentIndex = readOffset
-//                    list.clear()
-//                    //清空之前的数据
-//                    contentAdapter.notifyItemRangeRemoved(0, contentAdapter.itemCount)
                 } else {
                     pagerSnapHelper.attachToRecyclerView(null)
                 }
-            }
-            GlobalScope.launch(Dispatchers.Main) {
-                //重置适配器
-                contentAdapter = ReadListAdapter(contentViewModel.getList())
-                contentManager =
-                    CenterLayoutManager(this@ReadActivity, ConfigUtil.getDirection(), false)
-//            contentManager.setScrollEnabled(true)
-                readList.adapter = contentAdapter
-                readList.layoutManager = contentManager
-                //加载完毕后，滑动的记录位置
-                if (currentIndex > 0) {
-                    contentManager.scrollToPosition(currentIndex)
+
+                GlobalScope.launch(Dispatchers.Main) {
+                    contentViewModel.attachView(this@ReadActivity)
+                    //重置适配器
+                    contentAdapter = ReadListAdapter(contentViewModel.getList())
+                    contentManager =
+                        CenterLayoutManager(this@ReadActivity, ConfigUtil.getDirection(), false)
+                    readList.adapter = contentAdapter
+                    readList.layoutManager = contentManager
+                    //加载完毕后，滑动的记录位置
+                    if (currentIndex > 0) {
+                        contentManager.scrollToPosition(currentIndex)
+                    }
+                    //时钟
+                    readClock.setTextColor(ConfigUtil.getTextColor())
+                    //head
+                    readHead.setTextColor(ConfigUtil.getTextColor())
+                    //阅读进度
+                    readProgress.setTextColor(ConfigUtil.getTextColor())
+                    //设置背景
+                    readLayout.setBackgroundColor(ConfigUtil.getBackgroundColor())
                 }
-//                contentManager.scrollToPosition(readOffset)
-                //时钟
-                readClock.setTextColor(ConfigUtil.getTextColor())
-                //head
-                readHead.setTextColor(ConfigUtil.getTextColor())
-                //阅读进度
-                readProgress.setTextColor(ConfigUtil.getTextColor())
-                //设置背景
-                readLayout.setBackgroundColor(ConfigUtil.getBackgroundColor())
             }
         }
     }

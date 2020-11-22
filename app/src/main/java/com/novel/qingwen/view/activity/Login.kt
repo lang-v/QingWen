@@ -22,6 +22,7 @@ import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.UserDataUtil
+import com.novel.qingwen.utils.show
 import com.novel.qingwen.viewmodel.LoginVM
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_login.password

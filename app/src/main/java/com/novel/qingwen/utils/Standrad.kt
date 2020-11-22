@@ -1,5 +1,6 @@
 package com.novel.qingwen.utils
 
+import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
@@ -12,7 +13,7 @@ import java.util.regex.Pattern
 /*
  * 中文转unicode编码英文不转
  */
-infix fun String.encode(int: Int): String {
+fun String.encode(int: Int): String {
     val chars = this.toCharArray()
     val unicodeStr = StringBuilder("")
     for (i in chars.indices) {
@@ -50,7 +51,7 @@ infix fun String.encode(int: Int): String {
 //    return unicodeBytes
 //}
 
-infix fun String.decode(int: Int): String {
+fun String.decode(int: Int): String {
     val pattern: Pattern =
         if (int == 2)
             Pattern.compile("(\\\\\\\\u(\\p{XDigit}{4}))")
@@ -66,7 +67,7 @@ infix fun String.decode(int: Int): String {
     return s
 }
 
-infix fun String.toBitmap(count: Int): Bitmap? {
+fun String.toBitmap(): Bitmap? {
     try {
         if (UserDataUtil.default.avatar == null || UserDataUtil.default.avatar == "") return null
         val bytes: ByteArray = Base64.decode(UserDataUtil.default.avatar, Base64.DEFAULT)
@@ -77,7 +78,7 @@ infix fun String.toBitmap(count: Int): Bitmap? {
     }
 }
 
-infix fun Bitmap.toBase64(count: Int): String? {
+fun Bitmap.toBase64(): String? {
     try {
         var baos: ByteArrayOutputStream?
         if (this != null) {
@@ -94,7 +95,7 @@ infix fun Bitmap.toBase64(count: Int): String? {
     return ""
 }
 
-infix fun List<BookInfo>.contain(novelId: Long): Boolean {
+fun List<BookInfo>.contain(novelId: Long): Boolean {
     val it = this.iterator()
     while (it.hasNext()) {
         val item = it.next()
@@ -104,3 +105,16 @@ infix fun List<BookInfo>.contain(novelId: Long): Boolean {
     }
     return false
 }
+
+fun Activity.showError(msg: String) {
+    Show.show(this, msg, Show.ERROR)
+}
+
+fun Activity.showSuccess(msg: String) {
+    Show.show(this, msg, Show.RIGHT)
+}
+
+fun Activity.show(msg: String) {
+    Show.show(this, msg, Show.NONE)
+}
+
