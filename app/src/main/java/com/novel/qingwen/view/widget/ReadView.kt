@@ -47,7 +47,6 @@ class ReadView @JvmOverloads constructor(
             ResourcesCompat.getFont(context, ConfigUtil.getTextStyle())?.let { setTypeface(it) }
     }
 
-
     var mLayout =
         StaticLayout(
             text,
@@ -112,18 +111,16 @@ class ReadView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas?) {
-        synchronized(this) {
-            val count = getLineCount()
-            for (i in 0 until count) {
-                val str = getLine(i)
-                canvas?.drawText(
-                    str,
-                    paddingStart.toFloat(),
+        val count = getLineCount()
+        for (i in 0 until count) {
+            val str = getLine(i)
+            canvas?.drawText(
+                str,
+                paddingStart.toFloat(),
 //                if (i == 0) getFirstLineHeight() else
-                    (i + 1) * getLineHeight(),
-                    textPaint
-                )
-            }
+                (i + 1) * getLineHeight(),
+                textPaint
+            )
         }
         super.onDraw(canvas)
     }
