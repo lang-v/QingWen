@@ -90,7 +90,7 @@ class SearchVM : BaseVM(), ResponseCallback<SearchResult> {
 //        }
 //    }
 
-    override fun onFailure() {
+    override fun onFailure(o: Any?) {
         iView?.showMsg("连接出错，请检查网络。")
     }
 

@@ -9,19 +9,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.drawable.BitmapDrawable
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
 import android.view.*
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.res.ResourcesCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -145,10 +144,12 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 //            WindowManager.LayoutParams.FLAG_FULLSCREEN,
 //            WindowManager.LayoutParams.FLAG_FULLSCREEN
 //        )
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+
+        setContentView(R.layout.activity_read)
+        window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
-        setContentView(R.layout.activity_read)
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = Color.TRANSPARENT
         init()
@@ -242,7 +243,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 selectChapterItem()
             }
             R.id.readAutoScroll -> {
-                if (ConfigUtil.getDirection() == LinearLayout.VERTICAL||contentViewModel.getList().size>0) {
+                if (ConfigUtil.getDirection() == LinearLayout.VERTICAL || contentViewModel.getList().size > 0) {
                     autoScrollRunning = if (autoScrollRunning) {
                         PageScrollController.stop()
                         item.title = "自动翻页"
@@ -382,54 +383,45 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             readOffset = intent.getIntExtra("offset", 0)
 //            contentManager.scrollToPositionWithOffset(1,readOffset)
         }
-        var recordDx = 0
         readList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 currentIndex = contentManager.findFirstVisibleItemPosition()
-                if (ConfigUtil.getDirection() == LinearLayout.HORIZONTAL)
-                    recordDx += dx
-                if (currentIndex in 0 until contentViewModel.getList().size) {
+
+                val list = contentViewModel.getList()
+                if (currentIndex in list.indices) {
                     val item = contentViewModel.getList()[currentIndex]
                     //避免重复加载
                     readHead.text = item.name
-//                    if (item.chapterId == currentReadID) return
                     currentReadID = item.chapterId
-                    val list = contentViewModel.getList()
-                    if (list[list.size - 1].chapterId == list[currentIndex].chapterId) {
-                        //到达章节头部，且下一章不为空，那么静默加载下一章
-                        if (contentViewModel.getList()[currentIndex].nid != -1L) {
-                            //提前加载下一章
-                            if (!firstRun) {
-                                contentViewModel.cancelPrepare()
-                                contentViewModel.prepareChapter(currentIndex)
-                            }
-                        } else {
+                        if (list[currentIndex].nid == -1L) {
                             if (autoScrollRunning && !readList.canScrollVertically(1)) {
                                 PageScrollController.stop()
                                 findViewById<View>(R.id.readAutoScroll).callOnClick()
                                 show("阅读结束到底了")
                             }
                         }
-                    }
-                    if ((currentIndex == 0 && list[0].pid != -1L)
-                        || (list[0].chapterId == list[currentIndex].chapterId && list[0].pid != -1L)
-                    ) {
-                        if (item.chapterId == currentReadID) return
-                        if (!firstRun) {
-                            contentViewModel.cancelPrepare()
-                            contentViewModel.prepareChapter(0)
-                        }
-                    }
+//                    if ((currentIndex == 0 &&list[0].pid != -1L)
+//                        || (list[0].chapterId == list[currentIndex].chapterId && list[0].pid != -1L)
+//                    ) {
+//                        if (item.chapterId == currentReadID) return
+//                        if (!firstRun) {
+//                            contentViewModel.prepareChapter(0)
+//                        }
+//                    }
                 }
             }
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 //设置界面处于开启状态 不处理滑动加载事件
                 if (isOpen) return
+                currentIndex = contentManager.findFirstVisibleItemPosition()
+                if (!firstRun) {
+                    contentViewModel.prepareChapter(currentIndex)//后台加载上下两个相邻章节
+                }
                 if (contentManager.findLastVisibleItemPosition() == (contentAdapter.itemCount - 1)//屏幕最下面的完全可见的item是list中的最后一个
                     && newState == RecyclerView.SCROLL_STATE_IDLE//当前recyclerview停止滑动 //recyclerview无法向上滑动时
                 ) {
-                    if (loadLock && autoScrollRunning) {
+                    if (loadLock) {
                         return
                     }
 
@@ -439,7 +431,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                         if (readList.canScrollVertically(1)) return
                     }
 
-                    contentViewModel.cancelPrepare()
                     nextChapter()
                     super.onScrollStateChanged(recyclerView, newState)
                     return
@@ -448,19 +439,17 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 //加载上一章
                 if (contentManager.findFirstVisibleItemPosition() == 0
                     && newState == RecyclerView.SCROLL_STATE_IDLE//当前recyclerview停止滑动
-                    && !readList.canScrollVertically(-1)
                 ) {
-                    if (ConfigUtil.getDirection() == LinearLayout.HORIZONTAL) {
-                        if (readList.canScrollHorizontally(1)) return
-                    } else {
-                        if (readList.canScrollVertically(1)) return
-                    }
-
                     if (loadLock) {
                         return
                     }
 
-                    contentViewModel.cancelPrepare()
+                    if (ConfigUtil.getDirection() == LinearLayout.HORIZONTAL) {
+                        if (readList.canScrollHorizontally(-1)) return
+                    } else {
+                        if (readList.canScrollVertically(-1)) return
+                    }
+
                     preChapter()
                     super.onScrollStateChanged(recyclerView, newState)
                     return
@@ -776,24 +765,26 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 
                 3 -> {
                     val list = contentViewModel.getList()
-                    if (readOffset in 1 until list.size) {
-                        val temp = ArrayList<ReadListAdapter.Chapter>()
-                        for (i in 0 until readOffset) {
-                            temp.add(list[0])
-                            list.removeAt(0)
-                        }
-                        contentAdapter.notifyDataSetChanged()
-//                        contentAdapter.notifyItemRangeInserted(0, target2-readOffset+1)
-                        readList.post {
-                            for (i in readOffset - 1 downTo 0) {
-                                list.add(0, temp[i])
+                    synchronized(list) {
+                        if (readOffset in 1 until list.size) {
+                            val temp = ArrayList<ReadListAdapter.Chapter>()
+                            for (i in 0 until readOffset) {
+                                temp.add(list[0])
+                                list.removeAt(0)
                             }
-                            contentAdapter.notifyItemRangeInserted(0, readOffset)
+                            contentAdapter.notifyItemRangeInserted(0, list.size)
+//                        contentAdapter.notifyItemRangeInserted(0, target2-readOffset+1)
+                            readList.post {
+                                for (i in (readOffset - 1) downTo 0) {
+                                    list.add(0, temp[i])
+                                }
+                                contentAdapter.notifyItemRangeInserted(0, readOffset)
+                            }
+                        } else {
+                            contentAdapter.notifyItemRangeInserted(0, target2)
                         }
-                    } else {
-                        contentAdapter.notifyItemRangeInserted(0, target2)
+                        firstRun = false
                     }
-                    firstRun = false
                 }
             }
             if (dialog.isShowing) {
@@ -840,6 +831,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.STATUS_BAR_HIDDEN
                     or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     or View.SYSTEM_UI_FLAG_FULLSCREEN
                     or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
@@ -848,27 +840,30 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-
-
-        /**
-         * 重新进入全屏模式后会导致textview的内容显示不完全，所以刷新一下
-         * todo 等待修复
-         */
-//            val index = contentManager.findFirstVisibleItemPosition()
-//            if (index in 0 until contentAdapter.itemCount)
-//                contentAdapter.notifyItemChanged(index)
-
     }
 
     //退出全屏
     @Synchronized
     private fun exitFullScreen() {
-        // 非全屏显示，显示状态栏和导航栏
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_VISIBLE
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                or View.SYSTEM_UI_FLAG_VISIBLE
-                )
+//        // 非全屏显示，显示状态栏和导航栏
+//        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_VISIBLE
+//                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+//                or View.SYSTEM_UI_FLAG_VISIBLE
+//                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//                )
+//        window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+//        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+//        val options = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+//        window.decorView.systemUiVisibility = options
         window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_LAYOUT_FLAGS
+                or View.SYSTEM_UI_FLAG_LAYOUT_STABLE)
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS or WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+        window.statusBarColor = Color.TRANSPARENT
     }
 
     private val topOpen: ObjectAnimator by lazy {
@@ -1101,7 +1096,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             }
             //vivo 手机特殊按键
             308 -> {
-                if (contentViewModel.getList().size==0)return true
+                if (contentViewModel.getList().size == 0) return true
                 findViewById<TextView>(R.id.readAutoScroll).callOnClick()
             }
         }
@@ -1117,7 +1112,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 startActivity(Intent(this, SettingActivity::class.java))
             }
             R.id.preChapter -> {
-                if (contentViewModel.getList().size==0)return
+                if (contentViewModel.getList().size == 0) return
                 //关闭SettingBar
                 pageOnClick()
                 val position = contentManager.findFirstVisibleItemPosition()
@@ -1128,7 +1123,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 }
             }
             R.id.nextChapter -> {
-                if (contentViewModel.getList().size==0)return
+                if (contentViewModel.getList().size == 0) return
                 pageOnClick()
                 val position = contentManager.findFirstVisibleItemPosition()
                 if (position == contentAdapter.itemCount - 1) {
@@ -1139,7 +1134,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 }
             }
             R.id.turnPageCover -> {
-                if (turnPageCover.isSelected||contentViewModel.getList().size==0)return
+                if (turnPageCover.isSelected || contentViewModel.getList().size == 0) return
                 turnPageScroll.isSelected = false
                 turnPageCover.isSelected = true
                 //让自动阅读按钮失效
@@ -1149,7 +1144,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                 refreshLayout()
             }
             R.id.turnPageScroll -> {
-                if (turnPageScroll.isSelected||contentViewModel.getList().size==0)return
+                if (turnPageScroll.isSelected || contentViewModel.getList().size == 0) return
                 turnPageCover.isSelected = false
                 turnPageScroll.isSelected = true
                 findViewById<TextView>(R.id.readAutoScroll).isEnabled = true
@@ -1179,7 +1174,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
 
     //刷新布局 应用设置
     private fun refreshLayout() {
-        if (contentViewModel.getList().size==0)return
+        if (contentViewModel.getList().size == 0) return
         //取消加载
         contentViewModel.cancelPrepare()
         //同时撤销回调 避免数据冲突

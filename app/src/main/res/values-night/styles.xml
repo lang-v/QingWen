@@ -75,7 +75,9 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:navigationBarColor">@color/colorPrimary</item>
-<!--        <item name="android:windowTranslucentStatus">true</item>-->
+        <item name="android:windowFullscreen">true</item>
+        <item name="behavior_autoHide">true</item>
+        <!--        <item name="android:windowTranslucentStatus">true</item>-->
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
     </style>
 

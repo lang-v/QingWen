@@ -23,7 +23,7 @@ class BookShelfVM : BaseVM() {
         }
         var size = 0
         NetUtil.setInfo(object : ResponseCallback<com.novel.qingwen.net.bean.BookInfo> {
-            override fun onFailure() {
+            override fun onFailure(o: Any?) {
             }
 
             override fun onSuccess(t: com.novel.qingwen.net.bean.BookInfo) {

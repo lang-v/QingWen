@@ -71,6 +71,7 @@
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:navigationBarColor">@color/colorPrimary</item>
+        <item name="android:windowFullscreen">true</item>
         <!--        <item name="backgroundColor">@android:color/white</item>-->
         <!--        <item name="android:statusBarColor">@color/colorPrimary</item>-->
         <!--        <item name="android:navigationBarColor">@color/colorPrimary</item>-->

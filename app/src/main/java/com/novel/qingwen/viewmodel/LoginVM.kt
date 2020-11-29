@@ -10,7 +10,7 @@ import com.novel.qingwen.utils.UserDataUtil
 class LoginVM : BaseVM(), ResponseCallback<LoginResult> {
     private val usernameCallback: ResponseCallback<BaseResponse> =
         object : ResponseCallback<BaseResponse> {
-            override fun onFailure() {}
+            override fun onFailure(o: Any?) {}
             override fun onSuccess(t: BaseResponse) {
                 if (t.code == 200)
                     iView?.onComplete(0, 0)
@@ -36,7 +36,7 @@ class LoginVM : BaseVM(), ResponseCallback<LoginResult> {
         NetUtil.checkName(username)
     }
 
-    override fun onFailure() {
+    override fun onFailure(o: Any?) {
         iView?.showMsg("发生错误")
     }
 

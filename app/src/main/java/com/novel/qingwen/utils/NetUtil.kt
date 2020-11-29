@@ -1,13 +1,11 @@
 package com.novel.qingwen.utils
 
-import android.text.Editable
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
 import com.novel.qingwen.net.bean.*
 import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.net.service.Novel
-import com.novel.qingwen.room.entity.UserData
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -40,13 +38,13 @@ object NetUtil {
      */
     //书籍信息和目录
     private val infoAndContents = Retrofit.Builder()
-        .baseUrl("http://infosxs.pysmei.com/")
+        .baseUrl("https://infosxs.pysmei.com/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
     //章节内容
     private val chapterContent = Retrofit.Builder()
-        .baseUrl("http://contentxs.pysmei.com/")
+        .baseUrl("https://contentxs.pysmei.com/")
         .addConverterFactory(GsonConverterFactory.create(GsonBuilder().setLenient().create()))
         .build()
 
@@ -121,14 +119,14 @@ object NetUtil {
         val call: Call<SearchResult> = request.search(key, page)
         call.enqueue(object : Callback<SearchResult> {
             override fun onFailure(call: Call<SearchResult>, t: Throwable) {
-                searchCallback?.onFailure()
+                searchCallback?.onFailure(null)
             }
 
             override fun onResponse(call: Call<SearchResult>, response: Response<SearchResult>) {
                 if (response.body() != null)
                     searchCallback?.onSuccess(response.body()!!)
                 else
-                    searchCallback?.onFailure()
+                    searchCallback?.onFailure(null)
             }
         })
     }
@@ -148,19 +146,19 @@ object NetUtil {
         val call: Call<BookInfo> = request.getBookInfo(id)
         call.enqueue(object : Callback<BookInfo> {
             override fun onFailure(call: Call<BookInfo>, t: Throwable) {
-                infoCallback?.onFailure()
+                infoCallback?.onFailure(null)
             }
 
             override fun onResponse(call: Call<BookInfo>, response: Response<BookInfo>) {
                 if (response.body() == null)
-                    infoCallback?.onFailure()
+                    infoCallback?.onFailure(null)
                 else {
                     try {
                         response.body()?.let {
                             infoCallback?.onSuccess(it)
                         }
                     } catch (e: JsonSyntaxException) {
-                        infoCallback?.onFailure()
+                        infoCallback?.onFailure(null)
                     }
                 }
             }
@@ -176,7 +174,7 @@ object NetUtil {
         val call: Call<ResponseBody> = request.getContents(id)
         call.enqueue(object : Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                contentsCallback?.onFailure()
+                contentsCallback?.onFailure(null)
             }
 
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
@@ -187,10 +185,10 @@ object NetUtil {
                             .replace(",]", "]").replace(",}", "}")
                         contentsCallback?.onSuccess(Gson().fromJson(json, BookContents::class.java))
                     } catch (e: JsonSyntaxException) {
-                        contentsCallback?.onFailure()
+                        contentsCallback?.onFailure(null)
                     }
                 } else
-                    contentsCallback?.onFailure()
+                    contentsCallback?.onFailure(null)
             }
         })
     }
@@ -205,7 +203,7 @@ object NetUtil {
         chapterCall?.enqueue(object : Callback<ChapterContent> {
             override fun onFailure(call: Call<ChapterContent>, t: Throwable) {
                 if (!slient)
-                    chapterContentCallback?.onFailure()
+                    chapterContentCallback?.onFailure(chapterId)
             }
 
             override fun onResponse(
@@ -216,14 +214,15 @@ object NetUtil {
                     try {
                         response.body()?.let {
                             chapterContentCallback?.onSuccess(it)
-                        }
+                        }?:if (!slient)
+                            chapterContentCallback?.onFailure(chapterId)
                     } catch (e: JsonSyntaxException) {
                         if (!slient)
-                            chapterContentCallback?.onFailure()
+                            chapterContentCallback?.onFailure(chapterId)
                     }
                 } else {
                     if (!slient)
-                        chapterContentCallback?.onFailure()
+                        chapterContentCallback?.onFailure(chapterId)
                 }
             }
         })
@@ -250,19 +249,19 @@ object NetUtil {
         categoryCall = request.getCategory(categoryId, status, page)
         categoryCall?.enqueue(object : Callback<BookStoreItem> {
             override fun onFailure(call: Call<BookStoreItem>, t: Throwable) {
-                categoryCallBack?.onFailure()
+                categoryCallBack?.onFailure(null)
             }
 
             override fun onResponse(call: Call<BookStoreItem>, response: Response<BookStoreItem>) {
                 if (response.body() == null)
-                    categoryCallBack?.onFailure()
+                    categoryCallBack?.onFailure(null)
                 else {
                     try {
                         response.body()?.let {
                             categoryCallBack?.onSuccess(it)
                         }
                     } catch (e: JsonSyntaxException) {
-                        categoryCallBack?.onFailure()
+                        categoryCallBack?.onFailure(null)
                     }
                 }
             }
@@ -284,12 +283,12 @@ object NetUtil {
                             this.token = this.token?.decode(1)
                         })
                     else
-                        userDataCallback?.onFailure()
+                        userDataCallback?.onFailure(null)
                 }
             }
 
             override fun onFailure(call: Call<LoginResult>, t: Throwable) {
-                userDataCallback?.onFailure()
+                userDataCallback?.onFailure(null)
             }
         })
     }
@@ -306,12 +305,12 @@ object NetUtil {
                             this.token = this.token?.decode(1)
                         })
                     else
-                        userDataCallback?.onFailure()
+                        userDataCallback?.onFailure(null)
                 }
             }
 
             override fun onFailure(call: Call<LoginResult>, t: Throwable) {
-                userDataCallback?.onFailure()
+                userDataCallback?.onFailure(null)
             }
         })
     }
@@ -327,7 +326,7 @@ object NetUtil {
             }
 
             override fun onFailure(call: Call<Avatar>, t: Throwable) {
-                avatarCallback?.onFailure()
+                avatarCallback?.onFailure(null)
             }
         })
     }
@@ -343,7 +342,7 @@ object NetUtil {
             }
 
             override fun onFailure(call: Call<Avatar>, t: Throwable) {
-                avatarCallback?.onFailure()
+                avatarCallback?.onFailure(null)
             }
         })
     }
@@ -356,12 +355,12 @@ object NetUtil {
                 response.body()?.let {
                     if (it.code == 200)
                         bookShelfCallback?.onSuccess(it)
-                    else bookShelfCallback?.onFailure()
+                    else bookShelfCallback?.onFailure(null)
                 }
             }
 
             override fun onFailure(call: Call<BookShelf>, t: Throwable) {
-                bookShelfCallback?.onFailure()
+                bookShelfCallback?.onFailure(null)
             }
         })
     }
@@ -376,12 +375,12 @@ object NetUtil {
                         it.data = it.data?.decode(1)
                         bookShelfCallback?.onSuccess(it)
                     } else
-                        bookShelfCallback?.onFailure()
+                        bookShelfCallback?.onFailure(null)
                 }
             }
 
             override fun onFailure(call: Call<BookShelf>, t: Throwable) {
-                bookShelfCallback?.onFailure()
+                bookShelfCallback?.onFailure(null)
             }
         })
     }
@@ -397,12 +396,12 @@ object NetUtil {
                             this.username = this.username?.decode(2)
                         })
                     else
-                        userDataCallback?.onFailure()
+                        userDataCallback?.onFailure(null)
                 }
             }
 
             override fun onFailure(call: Call<LoginResult>, t: Throwable) {
-                userDataCallback?.onFailure()
+                userDataCallback?.onFailure(null)
             }
         })
     }
@@ -419,13 +418,13 @@ object NetUtil {
                             this.email = this.email?.decode(1)
                         })
                     } else {
-                        userDataCallback?.onFailure()
+                        userDataCallback?.onFailure(null)
                     }
                 }
             }
 
             override fun onFailure(call: Call<LoginResult>, t: Throwable) {
-                userDataCallback?.onFailure()
+                userDataCallback?.onFailure(null)
             }
         })
     }
@@ -440,12 +439,12 @@ object NetUtil {
                     if (it.code == 200)
                         usernameCallback?.onSuccess(it)
                     else
-                        usernameCallback?.onFailure()
+                        usernameCallback?.onFailure(null)
                 }
             }
 
             override fun onFailure(call: Call<BaseResponse>, t: Throwable) {
-                usernameCallback?.onFailure()
+                usernameCallback?.onFailure(null)
             }
         })
     }

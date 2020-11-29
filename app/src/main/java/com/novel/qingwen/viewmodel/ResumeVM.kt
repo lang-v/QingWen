@@ -87,7 +87,7 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
 //        }
     }
 
-    override fun onFailure() {
+    override fun onFailure(o: Any?) {
         iView?.showMsg("发生错误，请检查网络。")
     }
 

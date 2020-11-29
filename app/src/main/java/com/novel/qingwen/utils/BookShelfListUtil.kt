@@ -84,7 +84,7 @@ object BookShelfListUtil {
     fun pullData(block: (() -> Unit)?=null) {
         if (UserDataUtil.isLogin()) {
             NetUtil.setBookShelf(object : ResponseCallback<BookShelf> {
-                override fun onFailure() {}
+                override fun onFailure(o: Any?) {}
                 override fun onSuccess(t: BookShelf) {
                     kotlin.runCatching {
                         if (t.data == null) return@runCatching

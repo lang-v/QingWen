@@ -50,7 +50,7 @@ class BookStoreVM:BaseVM() ,ResponseCallback<BookStoreItem>{
         NetUtil.cancelGetCategory()
     }
 
-    override fun onFailure() {
+    override fun onFailure(o: Any?) {
         isLoading = false
         if (prepareCancel) {
             prepareCancel = false

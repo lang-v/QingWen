@@ -1,5 +1,6 @@
 package com.novel.qingwen.viewmodel
 
+import android.util.Log
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.net.bean.ChapterContent
 import com.novel.qingwen.net.callback.ResponseCallback
@@ -37,11 +38,12 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
      * 重新测量章节分页，将重新测量的分页数据重新加入到list
      * @return 返回大概的阅读位置,方便定位
      */
-    fun reMeasure(chapterId: Long,currentIndex:Int,totalPage:Int):Int{
-        //按道理说这里是不会获取到null的
-        val t = RoomUtil.chapterDao.loadById(novelId, chapterId)?:return -1
-        val count = MeasurePageCount(t,false)
-        return (count * (currentIndex.toFloat()/totalPage)).toInt()
+    fun reMeasure(chapterId: Long, currentIndex: Int, totalPage: Int): Int {
+//        getChapter(chapterId,false, slient = false)
+        //按道理说这里是不会获取到null的 在数据库中查找
+        val t = RoomUtil.chapterDao.loadById(novelId, chapterId) ?: return -1
+        val count = MeasurePageCount(t, false)
+        return (count * (currentIndex.toFloat() / totalPage)).toInt()
     }
 
     /**
@@ -58,14 +60,23 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
                     NetUtil.getChapterContent(novelId, chapterId, slient)
                     return@launch
                 }
+
                 if (attachStart) {
 //                    list.add(0, t)
                     val size = MeasurePageCount(t, attachStart)
+                    if (loadingPreChapter > 0 && loadingPreChapter == t.chapterId) {
+                        loadingPreChapter = -1L
+                    }
                     iView?.onComplete(1, size)
+
                 } else {
 //                    list.add(t)
                     val size = MeasurePageCount(t, attachStart)
+                    if (loadingNextChapter > 0 && loadingNextChapter == t.chapterId) {
+                        loadingNextChapter = -1L
+                    }
                     iView?.onComplete(if (list.size == size) 3 else 2, size)
+
                 }
                 return@launch
             }
@@ -74,19 +85,41 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         }
     }
 
-    //静默加载
+    private var loadingPreChapter = -1L
+    private var loadingNextChapter = -1L
+
+    //静默加载 上下
     fun prepareChapter(position: Int) {
-        if (position == 0 && list[0].pid != -1L)
-            getChapter(list[0].pid, true, slient = true)
-        else {
-            val chapterId: Long = list[list.size - 1].nid
-            getChapter(chapterId, false, slient = true)
+        synchronized(list) {
+            if (position in list.indices) {
+                if (list[position].pid != -1L && loadingPreChapter == -1L) {
+                    val preChapterId: Long = list[position].pid
+                    if (list[0].chapterId > preChapterId) {
+                        loadingPreChapter = preChapterId
+                        Log.e("prepare","pre $preChapterId")
+                        getChapter(preChapterId, true, slient = false)
+                    }
+                }
+
+                if (list[position].nid != -1L && loadingNextChapter == -1L) {
+                    val nextChapterId: Long = list[position].nid
+                    if (list[list.size - 1].chapterId < nextChapterId) {
+                        loadingNextChapter = nextChapterId
+                        Log.e("prepare","next $nextChapterId")
+                        getChapter(nextChapterId, false, slient = false)
+                    }
+                }
+            }
         }
     }
 
     //将分页数据添加到list
-    private fun MeasurePageCount(chapter: com.novel.qingwen.room.entity.Chapter, attachStart: Boolean): Int {
-        val strList = MeasurePage.getPageString("******\r\n"+chapter.name + "\r\n******\r\n\r\n" + chapter.content)
+    private fun MeasurePageCount(
+        chapter: com.novel.qingwen.room.entity.Chapter,
+        attachStart: Boolean
+    ): Int {
+        val strList =
+            MeasurePage.getPageString("******\r\n" + chapter.name + "\r\n******\r\n\r\n" + chapter.content)
         for (i in 0 until strList.size) {
             val temp = Chapter(
                 chapter.novelId,
@@ -112,7 +145,18 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         NetUtil.cancelLoadChapter()
     }
 
-    override fun onFailure() {
+    override fun onFailure(o: Any?) {
+        if (o != null) {
+            o as Long
+            //加载失败，重置标志位
+            if (loadingPreChapter > 0 && loadingPreChapter == o) {
+                loadingPreChapter = -1L
+            }
+            if (loadingNextChapter > 0 && loadingNextChapter == o) {
+                loadingNextChapter = -1L
+            }
+            return
+        }
         iView?.showMsg("加载失败，请检查网络。")
     }
 
@@ -126,6 +170,9 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
 //                list.add(0, chapter)
                 val size = MeasurePageCount(chapter, attachStart)
                 attachStart = false
+                if (loadingPreChapter > 0 && loadingPreChapter == t.data.cid) {
+                    loadingPreChapter = -1L
+                }
                 iView?.onComplete(1, size)
             }
         } else {
@@ -136,6 +183,9 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
             } else if (list.size > 0 && chapter.chapterId != list[list.size - 1].chapterId && chapter.chapterId == list[list.size - 1].nid) {
 //                list.add(chapter)
                 val size = MeasurePageCount(chapter, attachStart)
+                if (loadingNextChapter > 0 && loadingNextChapter == t.data.cid) {
+                    loadingNextChapter = -1L
+                }
                 iView?.onComplete(2, size)
             }
         }

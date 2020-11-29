@@ -3,11 +3,8 @@ package com.novel.qingwen.utils
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
-import android.util.Log
-import com.google.gson.Gson
 import com.novel.qingwen.net.bean.LoginResult
 import com.novel.qingwen.net.callback.ResponseCallback
-import com.novel.qingwen.room.AppDatabase
 import com.novel.qingwen.room.entity.UserData
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -43,7 +40,7 @@ object UserDataUtil {
     fun autoLogin(){
         if (!isLogin())return
         NetUtil.setUserData(object :ResponseCallback<LoginResult>{
-            override fun onFailure() {}
+            override fun onFailure(o: Any?) {}
             override fun onSuccess(t: LoginResult) {
                 default.apply {
                     nick = t.nick

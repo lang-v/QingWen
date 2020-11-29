@@ -16,7 +16,7 @@ class UserInfoVM:BaseVM(),ResponseCallback<LoginResult> {
         NetUtil.change(UserDataUtil.default.token,nick, email, avatar)
     }
 
-    override fun onFailure() {
+    override fun onFailure(o: Any?) {
         iView?.showMsg("更新失败")
     }
 

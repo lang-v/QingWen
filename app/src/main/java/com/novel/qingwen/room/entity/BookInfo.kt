@@ -3,6 +3,8 @@ package com.novel.qingwen.room.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+
+//todo 增加权重，根据用户点击次数 计算列表位置
 @Entity(tableName = "book_info")
 data class BookInfo(
     @PrimaryKey val novelId: Long,

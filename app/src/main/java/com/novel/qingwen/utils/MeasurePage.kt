@@ -15,75 +15,79 @@ import java.lang.ref.WeakReference
 object MeasurePage {
     private var width = 0
     private var height = 0
-    private lateinit var mLayout:Layout
+    private lateinit var mLayout: Layout
     private var mTextPaint = TextPaint()
-    private var text:String = ""
-    private var viewReference : WeakReference<ReadView>? = null
+    private var text: String = ""
+    private var viewReference: WeakReference<ReadView>? = null
+//    private var lineSpaceExtra = 0f
+//    private var lineSpaceMult = 1f
+//    private var lineHeight = 0f
 
-    private var textLock = false
-    fun setText(str: String){
-        while (textLock)Thread.yield()
-        text = str
-        mLayout = StaticLayout(
-            text,
-            viewReference?.get()?.textPaint?: mTextPaint,
-            width,
-            Layout.Alignment.ALIGN_NORMAL,
-            viewReference?.get()?.lineSpaceMult?:1.0f,
-            viewReference?.get()?.lineSpaceExtra?:0.0f,
-            false
-        )
+    private fun attachView(view: ReadView) {
+        viewReference = WeakReference(view)
     }
 
-    fun setHeight(height: Int){
-        this.height = height
+    private fun detachView() {
+        viewReference = null
     }
 
-    fun setWidth(width:Int){
-        this.width = width
-    }
-
-    var initLock=false
-    fun initView(view: ReadView){
-        if (initLock)return
-        initLock=true
-        view.post {
-            setWidth(view.width-view.paddingStart-view.paddingEnd)
-//            Log.e("view.width","${width}")
-            setHeight(
-                view.height
-                        -view.paddingTop
-                        -view.paddingBottom
+    private fun setText(str: String) {
+        while (initLock) Thread.yield()
+        synchronized(this) {
+            text = str
+            mLayout = StaticLayout(
+                text,
+                viewReference?.get()?.textPaint ?: mTextPaint,
+                width,
+                Layout.Alignment.ALIGN_NORMAL,
+                viewReference?.get()?.lineSpaceMult ?: 1.0f,
+                viewReference?.get()?.lineSpaceExtra ?: 0f,
+                false
             )
-            mTextPaint = view.textPaint
-            viewReference = WeakReference(view)
-//            Log.e("view.height","${height}")
-//            mTextPaint.textSize=view.textSize
-//            mLayout=view.layout
-//            mLayout.topPadding=view.totalPaddingTop
-//            mLayout.getLineVisibleEnd()
-            initLock=false
         }
     }
 
-    fun getPageString(str:String?=null):ArrayList<String>{
-        while (initLock || textLock)Thread.yield()
-        if (str == null || str == "")return ArrayList()
-        str?.let { setText(str) }
-        if (!textLock) textLock=true
-        if (width == 0 || height == 0)return arrayListOf(str.toString())
-        val totalLineCount = mLayout.lineCount
-//        Log.e("totalLineCount","$totalLineCount")
-        var allowLineCount = (height)/ getLineHeight()
-        if (allowLineCount < 1)allowLineCount = 1
-        //通过以上参数分割字符串
-        val pageLineCount = allowLineCount
-//        Log.e("pageLineCount","$pageLineCount")
-        var pageCount = totalLineCount/pageLineCount
-        if (totalLineCount%pageLineCount > 0)
-            pageCount++
-        val list = ArrayList<String>()
-//        var currentIndex = 0
+    private fun setHeight(height: Int) {
+        this.height = height
+    }
+
+    private fun setWidth(width: Int) {
+        this.width = width
+    }
+
+    var initLock = false
+    fun initView(view: ReadView) {
+        if (initLock) return
+        initLock = true
+        view.post {
+            setWidth(view.width - view.paddingStart - view.paddingEnd)
+//            Log.e("view.width","${width}")
+            setHeight(
+                view.height
+                        - view.paddingTop
+                        - view.paddingBottom
+            )
+            mTextPaint = view.textPaint
+            viewReference = WeakReference(view)
+            initLock = false
+        }
+    }
+
+    fun getPageString(str: String? = null): ArrayList<String> {
+        while (initLock) Thread.yield()
+        synchronized(this) {
+            if (width == 0 || height == 0) return arrayListOf(str.toString())
+            str?.let { setText(it) }
+            val totalLineCount = mLayout.lineCount
+            var allowLineCount =
+                (height).toInt() / getLineHeight()
+            if (allowLineCount < 1) allowLineCount = 1
+            //通过以上参数分割字符串
+            val pageLineCount = allowLineCount
+            var pageCount = totalLineCount / pageLineCount
+            if (totalLineCount % pageLineCount > 0)
+                pageCount++
+            val list = ArrayList<String>()
             for (i in 0 until pageCount) {
                 var temp = (i + 1) * pageLineCount
                 temp--
@@ -91,23 +95,20 @@ object MeasurePage {
                     temp = totalLineCount - 1
                 val start = mLayout.getLineStart(i * pageLineCount)
                 val end = mLayout.getLineEnd(temp)
-                try {
-                    val string = text.substring(start, end)
-//            Log.e("MeasurePage","start$start end$end")
-                    list.add(string)
-                }catch (e:Exception){
-                    //todo release包在vivo机上偶尔会出现指针溢出，可能是代码混淆
-                    e.printStackTrace()
-                }
+                val string = text.substring(start, end)
+                list.add(string)
+
             }
-//        for (i in 0 until  list.size) {
-//            Log.e("MeasurePageView$i", list[i])
-//        }
-        textLock=false
-        return list
+
+            return list
+        }
     }
 
-    private fun getLineHeight():Int{
-        return viewReference?.get()?.getLineHeight()?.toInt()?:round(mTextPaint.getFontMetricsInt(null) * 1f + 0f)
+    private fun getLineHeight(): Int {
+        return viewReference?.get()?.getLineHeight()?.toInt() ?: round(
+            mTextPaint.getFontMetricsInt(
+                null
+            ) * 1f + 0f
+        )
     }
 }

@@ -5,17 +5,10 @@ import com.novel.qingwen.net.bean.Avatar
 import com.novel.qingwen.net.bean.BookShelf
 import com.novel.qingwen.net.bean.LoginResult
 import com.novel.qingwen.net.callback.ResponseCallback
-import com.novel.qingwen.room.entity.BookInfo
 import com.novel.qingwen.utils.NetUtil
-import com.novel.qingwen.utils.UserDataUtil
 import com.novel.qingwen.utils.decode
-import com.novel.qingwen.utils.encode
-import kotlinx.coroutines.delay
 
-import org.junit.Assert.*
 import org.junit.Test
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -26,7 +19,7 @@ class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
         NetUtil.setAvatar(object : ResponseCallback<Avatar> {
-            override fun onFailure() {
+            override fun onFailure(o: Any?) {
                 println("failed")
             }
 
@@ -41,7 +34,7 @@ class ExampleUnitTest {
         })
 
         NetUtil.setUserData(object : ResponseCallback<LoginResult> {
-            override fun onFailure() {
+            override fun onFailure(o: Any?) {
                 println("failed")
 
             }
@@ -52,7 +45,7 @@ class ExampleUnitTest {
 
         })
         NetUtil.setBookShelf(object :ResponseCallback<BookShelf>{
-            override fun onFailure() {
+            override fun onFailure(o: Any?) {
                 println("failed")
             }
 
