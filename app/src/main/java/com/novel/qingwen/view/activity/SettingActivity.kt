@@ -12,6 +12,8 @@ import com.novel.qingwen.utils.ConfigUtil
 import com.novel.qingwen.utils.show
 import com.novel.qingwen.view.dialog.NoticeDialog
 import kotlinx.android.synthetic.main.activity_setting.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -67,7 +69,6 @@ class SettingActivity : AppCompatActivity(), ConfigUtil.RoomUpdateListener {
             R.id.settingComplete -> {
                 updateConfig()
                 updateFinish()
-
             }
         }
         return super.onOptionsItemSelected(item)
@@ -103,8 +104,8 @@ class SettingActivity : AppCompatActivity(), ConfigUtil.RoomUpdateListener {
 
     override fun updateFinish() {
         if (dialog.isShowing) {
+//            show("设置完成")
             dialog.dismiss()
-            show("设置完成")
             finish()
         }
     }

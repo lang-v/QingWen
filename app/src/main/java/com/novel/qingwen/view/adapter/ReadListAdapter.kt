@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.R
-import com.novel.qingwen.view.widget.CustomTextView
 import com.novel.qingwen.view.widget.ReadView
 
 class ReadListAdapter(
@@ -51,6 +50,6 @@ class ReadListAdapter(
         var type: Int = 0,
         //记录当前item 位于当前章节的位置
         var index: Int = 0,
-        var totalPage:Int =0
+        var totalPage: Int = 0
     ) : com.novel.qingwen.room.entity.Chapter(novelId, chapterId, name, content, nid, pid)
 }

@@ -1,5 +1,6 @@
 package com.novel.qingwen.utils
 
+import androidx.lifecycle.LiveData
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.novel.qingwen.net.bean.BookShelf
@@ -13,21 +14,20 @@ object BookShelfListUtil {
     private val list = ArrayList<BookInfo>()
     private val bookInfoDao = RoomUtil.bookInfoDao
     var currentBookInfo: BookInfo? = null
-    fun init(block:(()->Unit)?=null) {
-        synchronized(list) {
-            list.addAll(bookInfoDao.loadAll())
-        }
+
+    fun init(block: (() -> Unit)? = null) {
+        list.addAll(bookInfoDao.loadAll())
         pullData(block)
     }
 
     fun getList(): ArrayList<BookInfo> = list
 
     fun insert(bookInfo: BookInfo, push: Boolean = true) {
-        if (list.contains(bookInfo)) return
+        if (list.contain(bookInfo.novelId)) return
         GlobalScope.launch {
             synchronized(list) {
                 if (bookInfoDao.loadById(bookInfo.novelId).size == 1) return@launch
-                if (list.contain(bookInfo.novelId))return@launch
+                if (list.contain(bookInfo.novelId)) return@launch
                 bookInfoDao.insert(bookInfo)
                 list.add(bookInfo)
                 if (push)
@@ -81,7 +81,7 @@ object BookShelfListUtil {
     }
 
     //从服务器拉取数据
-    fun pullData(block: (() -> Unit)?=null) {
+    fun pullData(block: (() -> Unit)? = null) {
         if (UserDataUtil.isLogin()) {
             NetUtil.setBookShelf(object : ResponseCallback<BookShelf> {
                 override fun onFailure(o: Any?) {}
@@ -110,6 +110,8 @@ object BookShelfListUtil {
                 }
             })
             NetUtil.pullBookShelf(UserDataUtil.default.token)
+        }else{
+            block?.invoke()
         }
     }
 

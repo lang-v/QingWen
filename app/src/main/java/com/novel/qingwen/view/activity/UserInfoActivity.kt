@@ -27,6 +27,8 @@ import kotlinx.android.synthetic.main.activity_user_info.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
 
 class UserInfoActivity : AppCompatActivity(),IBaseView, View.OnClickListener {
     companion object {
@@ -113,8 +115,7 @@ class UserInfoActivity : AppCompatActivity(),IBaseView, View.OnClickListener {
 //        intent.putExtra("outputX",100)
 //        intent.putExtra("outputY",100)
 
-        //是否有返回值，但是无论我开不开，都能在result中获取到图片
-        intent.putExtra("return-data", false)
+       
         intent.putExtra("outputFormat", Bitmap.CompressFormat.JPEG.toString())
         startActivityForResult(intent, 300)
     }

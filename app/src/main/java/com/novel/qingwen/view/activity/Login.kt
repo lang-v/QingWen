@@ -18,6 +18,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.core.app.ActivityOptionsCompat
+import androidx.lifecycle.MutableLiveData
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
 import com.novel.qingwen.utils.BookShelfListUtil
@@ -27,6 +28,7 @@ import com.novel.qingwen.viewmodel.LoginVM
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.activity_login.password
 import kotlinx.android.synthetic.main.activity_login.username
+import java.util.*
 
 class Login : AppCompatActivity(), View.OnClickListener,IBaseView {
     companion object{
@@ -47,6 +49,7 @@ class Login : AppCompatActivity(), View.OnClickListener,IBaseView {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         window.statusBarColor = Color.parseColor("#669900")
+        lifecycle
         init()
     }
 

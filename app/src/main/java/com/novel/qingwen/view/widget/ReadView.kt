@@ -81,7 +81,6 @@ class ReadView @JvmOverloads constructor(
                 wantWidth = 0
             }
         }
-
         var wantHeight = StaticLayout(
             text,
             textPaint,

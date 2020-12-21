@@ -96,13 +96,16 @@ fun Bitmap.toBase64(): String? {
 }
 
 fun List<BookInfo>.contain(novelId: Long): Boolean {
-    val it = this.iterator()
-    while (it.hasNext()) {
-        val item = it.next()
-        if (item.novelId == novelId) {
-            return true
-        }
+    this.forEach {
+        if(it.novelId == novelId)return true
     }
+//    val it = this.iterator()
+//    while (it.hasNext()) {
+//        val item = it.next()
+//        if (item.novelId == novelId) {
+//            return true
+//        }
+//    }
     return false
 }
 

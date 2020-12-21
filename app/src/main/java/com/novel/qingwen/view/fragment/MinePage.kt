@@ -1,6 +1,7 @@
 package com.novel.qingwen.view.fragment
 
 import android.app.AlertDialog
+import android.graphics.Color
 import android.os.Bundle
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -24,6 +25,8 @@ import kotlinx.android.synthetic.main.fragment_minepage_layout.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.logging.Handler
+import java.util.logging.LogRecord
 
 class MinePage : Fragment(), View.OnClickListener {
     override fun onCreateView(
@@ -106,7 +109,7 @@ class MinePage : Fragment(), View.OnClickListener {
                     }.show()
             }
             mineCheckNewVersion -> {
-                Show.show(requireContext(), "当前：1.1.8fordzz 已是最新版本")
+                Show.show(requireContext(), "当前：2.0.0 已是最新版本")
             }
         }
     }

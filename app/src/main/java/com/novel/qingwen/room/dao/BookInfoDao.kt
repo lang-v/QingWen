@@ -1,5 +1,6 @@
 package com.novel.qingwen.room.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.novel.qingwen.room.entity.BookInfo
 

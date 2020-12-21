@@ -1,5 +1,6 @@
 package com.novel.qingwen.viewmodel
 
+import android.content.ContentProvider
 import android.util.Log
 import com.novel.qingwen.base.BaseVM
 import com.novel.qingwen.net.bean.ChapterContent
@@ -96,7 +97,6 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
                     val preChapterId: Long = list[position].pid
                     if (list[0].chapterId > preChapterId) {
                         loadingPreChapter = preChapterId
-                        Log.e("prepare","pre $preChapterId")
                         getChapter(preChapterId, true, slient = false)
                     }
                 }
@@ -105,7 +105,6 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
                     val nextChapterId: Long = list[position].nid
                     if (list[list.size - 1].chapterId < nextChapterId) {
                         loadingNextChapter = nextChapterId
-                        Log.e("prepare","next $nextChapterId")
                         getChapter(nextChapterId, false, slient = false)
                     }
                 }
