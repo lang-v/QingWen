@@ -1,6 +1,7 @@
 package com.novel.qingwen.view.fragment
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.ContextThemeWrapper
@@ -17,6 +18,7 @@ import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.RoomUtil
 import com.novel.qingwen.utils.Show
 import com.novel.qingwen.utils.UserDataUtil
+import com.novel.qingwen.view.activity.DownloadPage
 import com.novel.qingwen.view.activity.Login
 import com.novel.qingwen.view.activity.UserInfoActivity
 import com.novel.qingwen.view.dialog.NoticeDialog
@@ -50,6 +52,7 @@ class MinePage : Fragment(), View.OnClickListener {
     private fun init() {
         userTab.setOnClickListener(this)
         logout.setOnClickListener(this)
+        download.setOnClickListener(this)
         mineClearCache.setOnClickListener(this)
         mineCheckNewVersion.setOnClickListener(this)
     }
@@ -110,6 +113,10 @@ class MinePage : Fragment(), View.OnClickListener {
             }
             mineCheckNewVersion -> {
                 Show.show(requireContext(), "当前：2.0.0 已是最新版本")
+            }
+            //进入下载页面
+            download->{
+                startActivity(Intent(requireContext(),DownloadPage::class.java))
             }
         }
     }

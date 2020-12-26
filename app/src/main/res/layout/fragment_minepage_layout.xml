@@ -163,6 +163,31 @@
                 </RelativeLayout>
 
                 <RelativeLayout
+                    android:id="@+id/download"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="10dp"
+                    android:paddingStart="10dp"
+                    android:paddingTop="10dp"
+                    android:paddingEnd="10dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="下载管理"
+                        android:textSize="18sp" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:rotation="180"
+                        android:src="@drawable/ic_arrow_back_gray" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/logout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

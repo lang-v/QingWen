@@ -16,7 +16,8 @@ object BookShelfListUtil {
     var currentBookInfo: BookInfo? = null
 
     fun init(block: (() -> Unit)? = null) {
-        list.addAll(bookInfoDao.loadAll())
+        if(list.size == 0)
+            list.addAll(bookInfoDao.loadAll())
         pullData(block)
     }
 

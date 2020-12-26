@@ -9,11 +9,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.Point
-import android.graphics.drawable.BitmapDrawable
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.os.BatteryManager
 import android.os.Build
 import android.os.Bundle
@@ -108,11 +107,23 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     override fun onResume() {
         registerReceiver(broadcastReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         readList.keepScreenOn = true
+        contentViewModel.setNetworkAvailable(isNetworkAvailable())
 //        val scale = resources.displayMetrics.density
 //        MeasurePage.setWidth((readList.measuredWidth/scale).toInt())
 //        MeasurePage.setHeight((readList.measuredHeight/scale).toInt())
         super.onResume()
     }
+
+    //检查网络是否可用
+    fun isNetworkAvailable(): Boolean {
+        val connectivity = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val info = connectivity.activeNetworkInfo
+        if (info != null && info.isConnected) {       // 当前网络是连接的
+            return info.state == NetworkInfo.State.CONNECTED // 当前所连接的网络可用
+        }
+        return false
+    }
+
 
     override fun onPause() {
         unregisterReceiver(broadcastReceiver)
@@ -232,6 +243,24 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     @SuppressLint("WrongConstant")
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            //缓存全书
+            R.id.downloadBook -> {
+                show("开始下载")
+//                com.novel.qingwen.service.DownloadManager.stop = false
+//                DownloadVM.list.value?.add(DownloadVM.DownloadItem(UPDATE,novelName,novelId,BookShelfListUtil.currentBookInfo!!.firstChapterId,0))
+//                startService(Intent(this,com.novel.qingwen.service.DownloadManager::class.java).apply {
+//                    putExtra("novelName",novelName)
+//                    putExtra("novelId",novelId)
+//                    putExtra("chapterId",BookShelfListUtil.currentBookInfo!!.firstChapterId)
+//                })
+                com.novel.qingwen.service.DownloadManager.start(
+                    this,
+                    novelId,
+                    BookShelfListUtil.currentBookInfo!!.firstChapterId,
+                    novelName
+                )
+                item.isEnabled = false
+            }
             //返回
             android.R.id.home -> {
                 finish()
@@ -393,13 +422,13 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     //避免重复加载
                     readHead.text = item.name
                     currentReadID = item.chapterId
-                        if (list[currentIndex].nid == -1L) {
-                            if (autoScrollRunning && !readList.canScrollVertically(1)) {
-                                PageScrollController.stop()
-                                findViewById<View>(R.id.readAutoScroll).callOnClick()
-                                show("阅读结束到底了")
-                            }
+                    if (list[currentIndex].nid == -1L) {
+                        if (autoScrollRunning && !readList.canScrollVertically(1)) {
+                            PageScrollController.stop()
+                            findViewById<View>(R.id.readAutoScroll).callOnClick()
+                            show("阅读结束到底了")
                         }
+                    }
 //                    if ((currentIndex == 0 &&list[0].pid != -1L)
 //                        || (list[0].chapterId == list[currentIndex].chapterId && list[0].pid != -1L)
 //                    ) {

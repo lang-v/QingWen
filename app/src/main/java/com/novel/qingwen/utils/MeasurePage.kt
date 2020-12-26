@@ -2,6 +2,7 @@ package com.novel.qingwen.utils
 
 import android.text.*
 import android.util.Log
+import android.widget.TextView
 import com.novel.qingwen.view.widget.ReadView
 import java.lang.Exception
 import java.lang.Math.round
@@ -73,6 +74,34 @@ object MeasurePage {
         }
     }
 
+
+    fun test() {
+
+        val lineSpaceadd = 0.0f
+        val lineSpacemuti = 1.0f
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            mLayout = StaticLayout.Builder
+                .obtain("", 0, 0, TextPaint(), width)
+                .build()
+        } else {
+            mLayout = StaticLayout(
+                "传入的String",
+                TextPaint(),
+                width,
+                Layout.Alignment.ALIGN_NORMAL,
+                lineSpaceadd,
+                lineSpacemuti,
+                false
+            )
+        }
+
+        mLayout.lineCount//获取行数
+//        mLayout.draw()
+        mLayout.getLineStart(0)//获取第一行在传入String中的起始位置
+        mLayout.getLineEnd(0)//获取第一行在传入String中的终止位置
+        mLayout.getLineVisibleEnd(2)//获取指定行的最后可见字符（不计算空格的文本偏移量）
+    }
+
     fun getPageString(str: String? = null): ArrayList<String> {
         while (initLock) Thread.yield()
         synchronized(this) {
@@ -97,9 +126,7 @@ object MeasurePage {
                 val end = mLayout.getLineEnd(temp)
                 val string = text.substring(start, end)
                 list.add(string)
-
             }
-
             return list
         }
     }

@@ -47,15 +47,11 @@ class BookShelfListAdapter(
             holder.newTime.text = item.lastUpdateTime
 
             holder.update.visibility = if (item.update) View.VISIBLE else View.GONE
-//            holder.delete.setOnClickListener {
-//                //移出
-//                BookShelfListUtil.remove(item)
-//                refresh()
-//            }
             holder.itemView.setOnClickListener {
                 if (item.lastReadId == -1L) {
                     Show.show(holder.itemView.context, "未知错误")
                 }
+                BookShelfListUtil.currentBookInfo = item
                 ReadActivity.start(
                     holder.itemView.context,
                     item.novelId,
@@ -80,19 +76,6 @@ class BookShelfListAdapter(
                     BookShelfListUtil.remove(item)
                     refresh()
                 }
-//                val menu = PopupMenu(it.context, it, Gravity.TOP or Gravity.CENTER)
-//                menu.menuInflater.inflate(R.menu.popup_menu_delete,menu.menu)
-//                menu.setOnMenuItemClickListener {
-//                    when(it.itemId){
-//                        R.id.popupMenuDelete->{
-//                            //移出
-//                            BookShelfListUtil.remove(item)
-//                            refresh()
-//                        }
-//                    }
-//                    true
-//                }
-//                menu.show()
                 true
             }
         }

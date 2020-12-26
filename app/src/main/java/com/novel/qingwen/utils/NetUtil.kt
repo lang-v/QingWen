@@ -169,7 +169,6 @@ object NetUtil {
      * 获取小说目录
      */
     fun getContents(id: Long) {
-        infoAndContents
         val request = infoAndContents.create(Novel::class.java)
         val call: Call<ResponseBody> = request.getContents(id)
         call.enqueue(object : Callback<ResponseBody> {

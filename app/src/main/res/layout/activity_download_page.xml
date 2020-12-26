@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".view.activity.DownloadPage">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/downloadToobar"
+        android:background="#669900"
+        android:layout_width="match_parent"
+        android:minHeight="70dp"
+        android:layout_height="70dp"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/downloadList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</LinearLayout>

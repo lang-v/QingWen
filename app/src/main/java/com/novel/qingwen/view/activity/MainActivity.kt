@@ -14,9 +14,13 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
+import com.bumptech.glide.Glide
+import com.bumptech.glide.GlideBuilder
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.gson.Gson
 import com.novel.qingwen.R
 import com.novel.qingwen.base.IBaseView
+import com.novel.qingwen.service.DownloadManager
 import com.novel.qingwen.utils.*
 import com.novel.qingwen.view.adapter.BookShelfListAdapter
 import com.novel.qingwen.view.adapter.FragmentAdapter
@@ -24,6 +28,7 @@ import com.novel.qingwen.view.fragment.BookStore
 import com.novel.qingwen.view.fragment.MinePage
 import com.novel.qingwen.view.fragment.SearchBook
 import com.novel.qingwen.viewmodel.BookShelfVM
+import com.novel.qingwen.viewmodel.DownloadVM
 import com.tbruyelle.rxpermissions2.RxPermissions
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_book_shelf.*
@@ -48,6 +53,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
         super.onCreate(savedInstanceState)
         window.statusBarColor = Color.parseColor("#669900")
         setContentView(R.layout.activity_main)
+        loadDownloadCache()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             RxPermissions(this)
                 .requestEach(
@@ -264,6 +270,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
     override fun onStop() {
         super.onStop()
         viewModel.detachView()
+        saveDownloadCahce()
+        DownloadManager.stopAll()
     }
 
     private fun bookInfoUpdate() {
@@ -349,6 +357,29 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
             viewModel.refresh()
         }
         time = System.currentTimeMillis()
+    }
+
+    //装载下载缓存记录
+    private fun loadDownloadCache() {
+        val share = getSharedPreferences("download", MODE_PRIVATE)
+        val str = share.getString("list", "")
+        if (!str.isNullOrEmpty()) {
+            kotlin.runCatching {
+                val list = Gson().fromJson(str, Array<DownloadVM.DownloadItem>::class.java)
+                DownloadVM.list.value!!.addAll(list)
+            }
+        }
+
+    }
+
+    //保存缓存
+    private fun saveDownloadCahce() {
+        val json = Gson().toJson(DownloadVM.list.value)
+        val share = getSharedPreferences("download", MODE_PRIVATE)
+        share.edit().apply{
+            this.remove("list").apply()
+            putString("list",json)
+        }.apply()
     }
 }
 

@@ -35,6 +35,12 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         list.clear()
     }
 
+    private var networkAvailable = true
+
+    fun setNetworkAvailable(available:Boolean) {
+        networkAvailable = available
+    }
+
     /**
      * 重新测量章节分页，将重新测量的分页数据重新加入到list
      * @return 返回大概的阅读位置,方便定位
@@ -55,7 +61,7 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         GlobalScope.launch {
             val t = RoomUtil.chapterDao.loadById(novelId, chapterId)
             if (t != null) {
-                if (t.content.length < 200 || t.nid == -1L) {
+                if ((t.content.length < 200 || t.nid == -1L) && networkAvailable) {
                     //RoomUtil.chapterDao.delete(t)
                     //重新在网络上加载
                     NetUtil.getChapterContent(novelId, chapterId, slient)

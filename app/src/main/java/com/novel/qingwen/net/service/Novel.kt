@@ -23,6 +23,18 @@ interface Novel {
         @Path("pageid") pageId: Long = (novelId / 1000 + 1)
     ): Call<ChapterContent>
 
+    @HTTP(
+        method = "GET",
+        path = "BookFiles/Html/{pageid}/{novelid}/{chapterid}.html",
+        hasBody = false
+    )
+    fun downloadChapter(
+        @Path("novelid") novelId: Long,
+        @Path("chapterid") chapterId: Long,
+        @Path("pageid") pageId: Long = (novelId / 1000 + 1)
+    ): Call<ChapterContent>
+
+
     /**
      * 坑死了，json数据格式不标准，这里做修改，对json数据做预处理，再转POJO
      */

@@ -33,9 +33,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:targetApi="n">
+        <activity android:name=".view.activity.DownloadPage" android:theme="@style/AppTheme" />
         <activity
             android:name=".view.activity.Welcome"
-            android:theme="@style/WelcomeTheme" >
+            android:theme="@style/WelcomeTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -61,9 +62,7 @@
         <activity
             android:name=".view.activity.ResumeActivity"
             android:theme="@style/resumeActivity" />
-        <activity android:name=".view.activity.MainActivity">
-
-        </activity>
+        <activity android:name=".view.activity.MainActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -74,6 +73,16 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+
+        <service android:name=".service.DownloadManager"/>
+
+<!--        改为动态广播-->
+        <!-- 自定义广播更新下载进度 -->
+<!--        <receiver android:name=".broadcast.DownloadProgressReceiver">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="con.novel.download" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
     </application>
 
 </manifest>

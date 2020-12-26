@@ -10,4 +10,5 @@
     <color name="black_overlay">#66000000</color>
     <color name="readTextColorPrimary">#000000</color>
     <color name="buttonBackGroundColor">#5aaa</color>
+    <color name="bottomSheetShadow">#000</color>
 </resources>

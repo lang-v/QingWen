@@ -110,6 +110,7 @@ class ReadView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas?) {
+//        mLayout.draw(canvas)
         val count = getLineCount()
         for (i in 0 until count) {
             val str = getLine(i)
