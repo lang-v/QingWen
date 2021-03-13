@@ -7,21 +7,21 @@ import retrofit2.http.*
 
 interface Novel {
     @HTTP(method = "GET", path = "BookFiles/Html/{pageid}/{novelid}/info.html", hasBody = false)
-    fun getBookInfo(
+    suspend fun getBookInfo(
         @Path("novelid") novelId: Long,
         @Path("pageid") pageId: Long = (novelId / 1000 + 1)
-    ): Call<BookInfo>
+    ): BookInfo
 
     @HTTP(
         method = "GET",
         path = "BookFiles/Html/{pageid}/{novelid}/{chapterid}.html",
         hasBody = false
     )
-    fun getChapterContent(
+    suspend fun getChapterContent(
         @Path("novelid") novelId: Long,
         @Path("chapterid") chapterId: Long,
         @Path("pageid") pageId: Long = (novelId / 1000 + 1)
-    ): Call<ChapterContent>
+    ): ChapterContent
 
     @HTTP(
         method = "GET",
@@ -39,30 +39,30 @@ interface Novel {
      * 坑死了，json数据格式不标准，这里做修改，对json数据做预处理，再转POJO
      */
     @HTTP(method = "GET", path = "BookFiles/Html/{pageid}/{novelid}/index.html", hasBody = false)
-    fun getContents(
+    suspend fun getContents(
         @Path("novelid") novelId: Long,
         @Path("pageid") pageId: Long = (novelId / 1000 + 1)
-    ): Call<ResponseBody>
+    ): ResponseBody
 
     /**
      * @param id 此处固定为app2
      */
     @GET("search.aspx")
-    fun search(
+    suspend fun search(
         @Query("key") key: String,
         @Query("page") page: Long,
         @Query("siteid") id: String = "app2"
-    ): Call<SearchResult>
+    ): SearchResult
 
     /**
      * 获取分类下的小说
      */
     @HTTP(method = "GET", path = "Categories/{categoryId}/{status}/{page}.html")
-    fun getCategory(
+    suspend fun getCategory(
         @Path("categoryId") categoryId: Int,
         @Path("status") status: String,
         @Path("page") page: Int
-    ):Call<BookStoreItem>
+    ):BookStoreItem
 
     @FormUrlEncoded
     @POST("login")

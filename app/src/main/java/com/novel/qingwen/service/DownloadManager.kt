@@ -138,7 +138,7 @@ class DownloadManager : IntentService("DownloadService") {
 
     private fun download(nid: Long, cid: Long): ChapterContent? {
         val request = chapter.create(Novel::class.java)
-        var call = request.getChapterContent(nid, cid)
+        var call = request.downloadChapter(nid, cid)
         var errorCount = 0//错误超过五次后自动放弃
         while (errorCount < 6) {
             try {
@@ -148,9 +148,9 @@ class DownloadManager : IntentService("DownloadService") {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                call = request.getChapterContent(nid, cid)
+                call = request.downloadChapter(nid, cid)
                 errorCount++
-                Log.e("DownloadManager", "found error reload $errorCount")
+//                Log.e("DownloadManager", "found error reload $errorCount")
                 Thread.sleep(5000)
             }
         }

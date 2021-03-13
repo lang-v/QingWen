@@ -35,7 +35,7 @@ import com.novel.qingwen.view.adapter.ItemOnClickListener
 import com.novel.qingwen.view.adapter.PageScrollController
 import com.novel.qingwen.view.adapter.ReadListAdapter
 import com.novel.qingwen.view.dialog.NoticeDialog
-import com.novel.qingwen.view.widget.CenterLayoutManager
+import com.novel.qingwen.manager.CenterLayoutManager
 import com.novel.qingwen.view.widget.CustomSeekBar
 import com.novel.qingwen.viewmodel.ContentsVM
 import com.novel.qingwen.viewmodel.ReadVM
@@ -92,7 +92,11 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     private val contentViewModel: ReadVM by viewModels()
     private lateinit var contentAdapter: ReadListAdapter
     private var contentManager =
-        CenterLayoutManager(this, ConfigUtil.getDirection(), false)
+        CenterLayoutManager(
+            this,
+            ConfigUtil.getDirection(),
+            false
+        )
     private var pagerSnapHelper = PagerSnapHelper()
 
     private val dialog: NoticeDialog by lazy { NoticeDialog.build(this, "请稍候") }
@@ -441,6 +445,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             }
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                show("receive state")
                 //设置界面处于开启状态 不处理滑动加载事件
                 if (isOpen) return
                 currentIndex = contentManager.findFirstVisibleItemPosition()
@@ -549,7 +554,8 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
     }
 
     //自定义  重写了smoothScrollToPosition方法 实现修改滑动时间
-    private val contentsManager = CenterLayoutManager(this)
+    private val contentsManager =
+        CenterLayoutManager(this)
     private lateinit var contentsAdapter: BookContentsListAdapter
     private val contentsViewModel: ContentsVM by viewModels()
 
@@ -1237,7 +1243,11 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     //重置适配器
                     contentAdapter = ReadListAdapter(contentViewModel.getList())
                     contentManager =
-                        CenterLayoutManager(this@ReadActivity, ConfigUtil.getDirection(), false)
+                        CenterLayoutManager(
+                            this@ReadActivity,
+                            ConfigUtil.getDirection(),
+                            false
+                        )
                     readList.adapter = contentAdapter
                     readList.layoutManager = contentManager
                     //加载完毕后，滑动的记录位置

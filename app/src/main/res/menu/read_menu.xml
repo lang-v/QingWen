@@ -2,6 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/readAutoScroll" android:title="自动阅读" app:showAsAction="always"/>
-    <item android:id="@+id/downloadBook" android:title="缓存全书" app:showAsAction="always" android:icon="@drawable/ic_download"/>
+    <item android:id="@+id/downloadBook" android:title="缓存全书" app:showAsAction="always" android:visible="false" android:icon="@drawable/ic_download"/>
     <item android:id="@+id/readMenuContents" android:title="目录" app:showAsAction="always" android:icon="@drawable/ic_menu"/>
 </menu>

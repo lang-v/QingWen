@@ -19,7 +19,7 @@ import com.novel.qingwen.utils.showError
 import com.novel.qingwen.view.adapter.BookContentsListAdapter
 import com.novel.qingwen.view.adapter.ItemOnClickListener
 import com.novel.qingwen.view.dialog.NoticeDialog
-import com.novel.qingwen.view.widget.CenterLayoutManager
+import com.novel.qingwen.manager.CenterLayoutManager
 import com.novel.qingwen.viewmodel.ContentsVM
 import kotlinx.android.synthetic.main.activity_contents.*
 import kotlinx.coroutines.Dispatchers

@@ -1,36 +1,49 @@
 package com.novel.qingwen.view.activity
 
+import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
+import android.transition.Explode
+import android.transition.Transition
 import android.view.View
+import android.view.Window
 import android.view.WindowManager
+import android.transition.Fade
+import android.transition.Slide
+import android.view.Gravity
+import androidx.core.app.ActivityOptionsCompat
 import com.novel.qingwen.R
 import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.ConfigUtil
-import com.novel.qingwen.utils.RoomUtil
 import com.novel.qingwen.utils.UserDataUtil
 import com.tencent.bugly.Bugly
-import io.reactivex.Observable
 import kotlinx.coroutines.*
 
 class Welcome : AppCompatActivity() {
+    private val animTime = 1000L
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.requestFeature(Window.FEATURE_CONTENT_TRANSITIONS)
         setContentView(R.layout.activity_welcome)
+        window.exitTransition =
+            Fade(Fade.OUT).apply {
+            duration=animTime
+        }
         enterFullsScreen()
         GlobalScope.launch {
             UserDataUtil.init {
                 BookShelfListUtil.init()
                 ConfigUtil.init {
                     initBugly()
-                    runOnUiThread {
-                        //延迟1秒进入
-//                            delay(1000)
-                        startActivity(Intent(this@Welcome, MainActivity::class.java))
-                        finish()
+                    launch {
+                        launch(Dispatchers.Main) {
+                            startActivity(Intent(this@Welcome, MainActivity::class.java),ActivityOptionsCompat.makeSceneTransitionAnimation(this@Welcome).toBundle())
+                            //等待动画执行完毕，关闭欢迎页面
+                            delay(animTime)
+                            finish()
+                        }
                     }
                 }
             }

@@ -1,4 +1,4 @@
-package com.novel.qingwen.view.widget;
+package com.novel.qingwen.manager;
 
 import android.content.Context;
 import android.util.AttributeSet;

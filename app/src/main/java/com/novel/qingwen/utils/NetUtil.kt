@@ -6,6 +6,9 @@ import com.google.gson.JsonSyntaxException
 import com.novel.qingwen.net.bean.*
 import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.net.service.Novel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
@@ -54,11 +57,9 @@ object NetUtil {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-//        .baseUrl("http://localhost:8080/Gradle___com_novel_qingwen___QingWen_1_0_war/")
 
     private val userData = Retrofit.Builder()
         .baseUrl("http://39.97.127.33/qingwen/")
-//        .baseUrl("http://127.0.0.1:8080/Gradle___com_novel_qingwen___QingWen_1_0_war/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -114,21 +115,32 @@ object NetUtil {
     private var currentPage: Long = 0
     private var searchText = ""
     fun search(key: String, page: Long = 0) {
-        if (searchText != key) searchText = key
-        val request = search.create(Novel::class.java)
-        val call: Call<SearchResult> = request.search(key, page)
-        call.enqueue(object : Callback<SearchResult> {
-            override fun onFailure(call: Call<SearchResult>, t: Throwable) {
-                searchCallback?.onFailure(null)
+        GlobalScope.launch(Dispatchers.IO) {
+            if (searchText != key) searchText = key
+            val request = search.create(Novel::class.java)
+            kotlin.runCatching {
+                val res = request.search(key, page)
+                searchCallback?.onSuccess(res)
+            }.onFailure {
+                searchCallback?.onFailure(it)
             }
-
-            override fun onResponse(call: Call<SearchResult>, response: Response<SearchResult>) {
-                if (response.body() != null)
-                    searchCallback?.onSuccess(response.body()!!)
-                else
-                    searchCallback?.onFailure(null)
-            }
-        })
+//            val call: Call<SearchResult> = request.search(key, page)
+//            call.enqueue(object : Callback<SearchResult> {
+//                override fun onFailure(call: Call<SearchResult>, t: Throwable) {
+//                    searchCallback?.onFailure(null)
+//                }
+//
+//                override fun onResponse(
+//                    call: Call<SearchResult>,
+//                    response: Response<SearchResult>
+//                ) {
+//                    if (response.body() != null)
+//                        searchCallback?.onSuccess(response.body()!!)
+//                    else
+//                        searchCallback?.onFailure(null)
+//                }
+//            })
+        }
     }
 
     fun searchNext() {
@@ -143,26 +155,31 @@ object NetUtil {
      */
     fun getBookInfo(id: Long) {
         val request = infoAndContents.create(Novel::class.java)
-        val call: Call<BookInfo> = request.getBookInfo(id)
-        call.enqueue(object : Callback<BookInfo> {
-            override fun onFailure(call: Call<BookInfo>, t: Throwable) {
-                infoCallback?.onFailure(null)
-            }
-
-            override fun onResponse(call: Call<BookInfo>, response: Response<BookInfo>) {
-                if (response.body() == null)
-                    infoCallback?.onFailure(null)
-                else {
-                    try {
-                        response.body()?.let {
-                            infoCallback?.onSuccess(it)
-                        }
-                    } catch (e: JsonSyntaxException) {
-                        infoCallback?.onFailure(null)
-                    }
-                }
-            }
-        })
+        GlobalScope.launch(Dispatchers.IO) {
+            runCatching {
+                infoCallback?.onSuccess(request.getBookInfo(id))
+            }.onFailure { infoCallback?.onFailure(it) }
+        }
+//        val call: Call<BookInfo> = request.getBookInfo(id)
+//        call.enqueue(object : Callback<BookInfo> {
+//            override fun onFailure(call: Call<BookInfo>, t: Throwable) {
+//                infoCallback?.onFailure(null)
+//            }
+//
+//            override fun onResponse(call: Call<BookInfo>, response: Response<BookInfo>) {
+//                if (response.body() == null)
+//                    infoCallback?.onFailure(null)
+//                else {
+//                    try {
+//                        response.body()?.let {
+//                            infoCallback?.onSuccess(it)
+//                        }
+//                    } catch (e: JsonSyntaxException) {
+//                        infoCallback?.onFailure(null)
+//                    }
+//                }
+//            }
+//        })
     }
 
     /**
@@ -170,27 +187,40 @@ object NetUtil {
      */
     fun getContents(id: Long) {
         val request = infoAndContents.create(Novel::class.java)
-        val call: Call<ResponseBody> = request.getContents(id)
-        call.enqueue(object : Callback<ResponseBody> {
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                contentsCallback?.onFailure(null)
+        GlobalScope.launch(Dispatchers.IO) {
+            runCatching {
+                contentsCallback?.onSuccess(request.getContents(id).let {
+                    Gson().fromJson(
+                        it.string().replace(",]", "]").replace(",}", "}"),
+                        BookContents::class.java
+                    )
+                })
+            }.onFailure {
+                contentsCallback?.onFailure(it)
             }
-
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                if (response.body() != null) {
-                    try {
-                        val str = response.body()!!.string()
-                        val json: String = str
-                            .replace(",]", "]").replace(",}", "}")
-                        contentsCallback?.onSuccess(Gson().fromJson(json, BookContents::class.java))
-                    } catch (e: JsonSyntaxException) {
-                        contentsCallback?.onFailure(null)
-                    }
-                } else
-                    contentsCallback?.onFailure(null)
-            }
-        })
+        }
+//        val call: Call<ResponseBody> = request.getContents(id)
+//        call.enqueue(object : Callback<ResponseBody> {
+//            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+//                contentsCallback?.onFailure(null)
+//            }
+//
+//            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+//                if (response.body() != null) {
+//                    try {
+//                        val str = response.body()!!.string()
+//                        val json: String = str
+//                            .replace(",]", "]").replace(",}", "}")
+//                        contentsCallback?.onSuccess(Gson().fromJson(json, BookContents::class.java))
+//                    } catch (e: JsonSyntaxException) {
+//                        contentsCallback?.onFailure(null)
+//                    }
+//                } else
+//                    contentsCallback?.onFailure(null)
+//            }
+//        })
     }
+
     var chapterCall: Call<ChapterContent>? = null
 
     /**
@@ -198,33 +228,40 @@ object NetUtil {
      */
     fun getChapterContent(novelId: Long, chapterId: Long, slient: Boolean = false) {
         val request = chapterContent.create(Novel::class.java)
-        chapterCall = request.getChapterContent(novelId, chapterId)
-        chapterCall?.enqueue(object : Callback<ChapterContent> {
-            override fun onFailure(call: Call<ChapterContent>, t: Throwable) {
-                if (!slient)
-                    chapterContentCallback?.onFailure(chapterId)
+        GlobalScope.launch(Dispatchers.IO) {
+            runCatching {
+                chapterContentCallback?.onSuccess(request.getChapterContent(novelId, chapterId))
+            }.onFailure {
+                chapterContentCallback?.onFailure(it)
             }
-
-            override fun onResponse(
-                call: Call<ChapterContent>,
-                response: Response<ChapterContent>
-            ) {
-                if (response.body() != null) {
-                    try {
-                        response.body()?.let {
-                            chapterContentCallback?.onSuccess(it)
-                        }?:if (!slient)
-                            chapterContentCallback?.onFailure(chapterId)
-                    } catch (e: JsonSyntaxException) {
-                        if (!slient)
-                            chapterContentCallback?.onFailure(chapterId)
-                    }
-                } else {
-                    if (!slient)
-                        chapterContentCallback?.onFailure(chapterId)
-                }
-            }
-        })
+        }
+//        chapterCall = request.getChapterContent(novelId, chapterId)
+//        chapterCall?.enqueue(object : Callback<ChapterContent> {
+//            override fun onFailure(call: Call<ChapterContent>, t: Throwable) {
+//                if (!slient)
+//                    chapterContentCallback?.onFailure(chapterId)
+//            }
+//
+//            override fun onResponse(
+//                call: Call<ChapterContent>,
+//                response: Response<ChapterContent>
+//            ) {
+//                if (response.body() != null) {
+//                    try {
+//                        response.body()?.let {
+//                            chapterContentCallback?.onSuccess(it)
+//                        } ?: if (!slient)
+//                            chapterContentCallback?.onFailure(chapterId)
+//                    } catch (e: JsonSyntaxException) {
+//                        if (!slient)
+//                            chapterContentCallback?.onFailure(chapterId)
+//                    }
+//                } else {
+//                    if (!slient)
+//                        chapterContentCallback?.onFailure(chapterId)
+//                }
+//            }
+//        })
     }
 
     //取消加载章节
@@ -239,33 +276,44 @@ object NetUtil {
     }
 
     /**
+     *
+     * url https://scxs.pysmei.com/Categories/{categoryId}/{status}/{page}.html
+     * get
      * @param categoryId 分类ID
      * @param status 状态
+     * new 、hot、vote、over 最新  最热  评分  完结
      * @param page 页数
      */
     fun getCategory(categoryId: Int, status: String, page: Int) {
         val request = category.create(Novel::class.java)
-        categoryCall = request.getCategory(categoryId, status, page)
-        categoryCall?.enqueue(object : Callback<BookStoreItem> {
-            override fun onFailure(call: Call<BookStoreItem>, t: Throwable) {
-                categoryCallBack?.onFailure(null)
+        GlobalScope.launch(Dispatchers.IO) {
+            runCatching {
+                categoryCallBack?.onSuccess(request.getCategory(categoryId, status, page))
+            }.onFailure {
+                categoryCallBack?.onFailure(it)
             }
-
-            override fun onResponse(call: Call<BookStoreItem>, response: Response<BookStoreItem>) {
-                if (response.body() == null)
-                    categoryCallBack?.onFailure(null)
-                else {
-                    try {
-                        response.body()?.let {
-                            categoryCallBack?.onSuccess(it)
-                        }
-                    } catch (e: JsonSyntaxException) {
-                        categoryCallBack?.onFailure(null)
-                    }
-                }
-            }
-
-        })
+        }
+//        categoryCall = request.getCategory(categoryId, status, page)
+//        categoryCall?.enqueue(object : Callback<BookStoreItem> {
+//            override fun onFailure(call: Call<BookStoreItem>, t: Throwable) {
+//                categoryCallBack?.onFailure(null)
+//            }
+//
+//            override fun onResponse(call: Call<BookStoreItem>, response: Response<BookStoreItem>) {
+//                if (response.body() == null)
+//                    categoryCallBack?.onFailure(null)
+//                else {
+//                    try {
+//                        response.body()?.let {
+//                            categoryCallBack?.onSuccess(it)
+//                        }
+//                    } catch (e: JsonSyntaxException) {
+//                        categoryCallBack?.onFailure(null)
+//                    }
+//                }
+//            }
+//
+//        })
     }
 
     fun login(username: String, password: String) {

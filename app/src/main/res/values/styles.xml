@@ -2,6 +2,9 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowBackground">@color/backGroundColor</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorPrimary</item>
         <item name="backgroundColor">@android:color/white</item>
@@ -66,7 +69,9 @@
         <!--        <item name="android:windowBackground">@null</item>-->
         <!--        <item name="android:windowTranslucentStatus">true</item>-->
         <!--        <item name="android:windowFullscreen">true</item>-->
+<!--        不应该使用这个，应该手动控制颜色，高度-->
         <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.Activity</item>
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="android:windowTranslucentStatus">true</item>
@@ -96,6 +101,9 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowBackground">@color/backGroundColor</item>
+        <item name="android:windowActivityTransitions">true</item>
         <item name="backgroundColor">#fff</item>
     </style>
 

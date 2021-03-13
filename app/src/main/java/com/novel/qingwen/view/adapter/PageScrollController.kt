@@ -5,9 +5,11 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
+import java.util.*
 
 object PageScrollController {
-    private var view: RecyclerView? = null
+    private var view: WeakReference<RecyclerView?> =  WeakReference(null)
     private var v = 10
 
     /**
@@ -26,13 +28,14 @@ object PageScrollController {
                         return@launch
                     }
                     0 -> {
-                        if (view == null) return@launch
-                        view?.post {
-                            view?.scrollBy(0, 2)
+                        view.get()?.post {
+                            view.get()?.scrollBy(0, 2)
                             //发送已经停止滑动的消息，让自动加载下一章的监听生效
 //                            view?.scrollTo(0,2)
 //                            view?.setScrollState(RecyclerView.SCROLL_STATE_IDLE)
-//                            view?.dispatchOnScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE)
+//                            val function = view.get()?.javaClass?.getMethod("dispatchOnScrollStateChanged",Integer.TYPE)
+//                            function?.invoke(view.get(),Integer.valueOf(RecyclerView.SCROLL_STATE_IDLE))
+//                            view.get()?.dispatchOnScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE)
 //                            view?.onScrollStateChanged(RecyclerView.SCROLL_STATE_IDLE)
                         }
                         val time = ((100 - v) / 2).toLong()
@@ -48,11 +51,11 @@ object PageScrollController {
     }
 
     fun attachView(view: RecyclerView) {
-        this.view = view
+        this.view = WeakReference(view)
     }
 
     fun detachView() {
-        view = null
+        view.clear()
     }
 
     fun setV(value: Int) {

@@ -4,7 +4,10 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.graphics.Color
 import android.os.Bundle
+import android.transition.Explode
+import android.util.Log
 import android.view.View
+import android.view.Window
 import android.widget.RelativeLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -14,8 +17,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
-import com.bumptech.glide.Glide
-import com.bumptech.glide.GlideBuilder
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
 import com.novel.qingwen.R
@@ -40,6 +41,7 @@ import sl.view.elasticviewlibrary.ElasticLayout
 import sl.view.elasticviewlibrary.base.BaseHeader
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.regex.Matcher
 import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
@@ -52,6 +54,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         window.statusBarColor = Color.parseColor("#669900")
+        window.requestFeature(Window.FEATURE_CONTENT_TRANSITIONS)
+        window.allowEnterTransitionOverlap=true
+        window.enterTransition = Explode().apply {
+            duration=500
+        }
         setContentView(R.layout.activity_main)
         loadDownloadCache()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
@@ -270,7 +277,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
     override fun onStop() {
         super.onStop()
         viewModel.detachView()
-        saveDownloadCahce()
+        saveDownloadCache()
         DownloadManager.stopAll()
     }
 
@@ -351,7 +358,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
 
     }
 
-    var time = 0L
+    private var time = 0L
     override fun onRefresh() {
         if (System.currentTimeMillis() - time > 500L) {
             viewModel.refresh()
@@ -360,24 +367,28 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
     }
 
     //装载下载缓存记录
+    @Deprecated("出了问题，暂时弃用")
     private fun loadDownloadCache() {
         val share = getSharedPreferences("download", MODE_PRIVATE)
-        val str = share.getString("list", "")
-        if (!str.isNullOrEmpty()) {
-            kotlin.runCatching {
-                val list = Gson().fromJson(str, Array<DownloadVM.DownloadItem>::class.java)
-                DownloadVM.list.value!!.addAll(list)
-            }
-        }
-
+        share.edit().clear().apply()
+//        val str = share.getString("list", "")
+//        if (!str.isNullOrEmpty()) {
+//            kotlin.runCatching {
+//                val list = Gson().fromJson(str, Array<DownloadVM.DownloadItem>::class.java)
+//                DownloadVM.list.value!!.addAll(list)
+//            }
+//        }
     }
 
     //保存缓存
-    private fun saveDownloadCahce() {
+    @Deprecated("出了问题，暂时弃用")
+    private fun saveDownloadCache() {
+        return
+        if(DownloadVM.list.value?.size == 0)return
         val json = Gson().toJson(DownloadVM.list.value)
         val share = getSharedPreferences("download", MODE_PRIVATE)
         share.edit().apply{
-            this.remove("list").apply()
+            clear().commit()
             putString("list",json)
         }.apply()
     }

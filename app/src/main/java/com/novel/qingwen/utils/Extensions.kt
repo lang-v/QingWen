@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
+import androidx.recyclerview.widget.RecyclerView
 import com.novel.qingwen.room.entity.BookInfo
 import java.io.ByteArrayOutputStream
 import java.util.regex.Matcher
@@ -121,3 +122,11 @@ fun Activity.show(msg: String) {
     Show.show(this, msg, Show.NONE)
 }
 
+
+fun RecyclerView.setMaxVelocity(velocity:Int){
+    kotlin.runCatching {
+        val field = javaClass.getDeclaredField("mMaxFlingVelocity")
+        field.isAccessible=true
+        field.set(this,velocity)
+    }.recoverCatching { it.printStackTrace() }
+}
