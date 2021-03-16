@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
+import com.google.android.material.snackbar.Snackbar
 import com.novel.qingwen.R
 import com.novel.qingwen.utils.BookShelfListUtil
 import com.novel.qingwen.utils.RoomUtil
@@ -22,6 +23,7 @@ import com.novel.qingwen.view.activity.DownloadPage
 import com.novel.qingwen.view.activity.Login
 import com.novel.qingwen.view.activity.UserInfoActivity
 import com.novel.qingwen.view.dialog.NoticeDialog
+import com.tencent.bugly.beta.Beta
 import kotlinx.android.synthetic.main.activity_user_info.*
 import kotlinx.android.synthetic.main.fragment_minepage_layout.*
 import kotlinx.coroutines.Dispatchers
@@ -112,21 +114,21 @@ class MinePage : Fragment(), View.OnClickListener {
                     }.show()
             }
             mineCheckNewVersion -> {
-                Show.show(requireContext(), "当前：2.0.0 已是最新版本")
+                Beta.checkUpgrade()
             }
             //进入下载页面
             download->{
-                startActivity(Intent(requireContext(),DownloadPage::class.java))
+//                Show.show(requireContext(), "此功能存在漏洞，将在下个版本重新上线")
+                Snackbar.make(requireView(),"此功能存在漏洞，将在下个版本重新上线",Snackbar.LENGTH_SHORT)
+                    .setAction("确认") {}
+                    .show()
+                //startActivity(Intent(requireContext(),DownloadPage::class.java))
             }
         }
     }
 
     override fun onStart() {
         super.onStart()
-//        if (UserDataUtil.isLogin())
-//            loadUserData()
-//        else
-//            reset()
         if (UserDataUtil.isWaitRefresh()){
             loadUserData()
         }

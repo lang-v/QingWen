@@ -2,7 +2,12 @@ package com.novel.qingwen.view.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
 import android.graphics.Color
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.transition.Explode
 import android.util.Log
@@ -10,9 +15,12 @@ import android.view.View
 import android.view.Window
 import android.widget.RelativeLayout
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.content.IntentCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,6 +39,13 @@ import com.novel.qingwen.view.fragment.SearchBook
 import com.novel.qingwen.viewmodel.BookShelfVM
 import com.novel.qingwen.viewmodel.DownloadVM
 import com.tbruyelle.rxpermissions2.RxPermissions
+import com.tencent.bugly.Bugly
+import com.tencent.bugly.beta.Beta
+import com.tencent.bugly.beta.UpgradeInfo
+import com.tencent.bugly.beta.download.DownloadListener
+import com.tencent.bugly.beta.download.DownloadTask
+import com.tencent.bugly.beta.ui.BetaActivity
+import com.tencent.bugly.beta.upgrade.UpgradeListener
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_book_shelf.*
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +54,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import sl.view.elasticviewlibrary.ElasticLayout
 import sl.view.elasticviewlibrary.base.BaseHeader
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Matcher
@@ -55,9 +71,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
         super.onCreate(savedInstanceState)
         window.statusBarColor = Color.parseColor("#669900")
         window.requestFeature(Window.FEATURE_CONTENT_TRANSITIONS)
-        window.allowEnterTransitionOverlap=true
+        window.allowEnterTransitionOverlap = true
         window.enterTransition = Explode().apply {
-            duration=500
+            duration = 500
         }
         setContentView(R.layout.activity_main)
         loadDownloadCache()
@@ -67,7 +83,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
                     Manifest.permission.ACCESS_NETWORK_STATE,
                     Manifest.permission.ACCESS_WIFI_STATE,
                     Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.INSTALL_PACKAGES
                 )
                 .subscribe {
                     if (it.name == Manifest.permission.WRITE_EXTERNAL_STORAGE && !it.granted) {
@@ -384,13 +401,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
     @Deprecated("出了问题，暂时弃用")
     private fun saveDownloadCache() {
         return
-        if(DownloadVM.list.value?.size == 0)return
+        if (DownloadVM.list.value?.size == 0) return
         val json = Gson().toJson(DownloadVM.list.value)
         val share = getSharedPreferences("download", MODE_PRIVATE)
-        share.edit().apply{
+        share.edit().apply {
             clear().commit()
-            putString("list",json)
+            putString("list", json)
         }.apply()
     }
+
 }
 

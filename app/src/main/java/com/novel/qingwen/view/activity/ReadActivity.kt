@@ -445,7 +445,6 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
             }
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                show("receive state")
                 //设置界面处于开启状态 不处理滑动加载事件
                 if (isOpen) return
                 currentIndex = contentManager.findFirstVisibleItemPosition()

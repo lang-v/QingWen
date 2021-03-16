@@ -169,7 +169,7 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         //避免重复加载
         if (list.size != 0 && list[list.size - 1].chapterId == t.data.cid) return
         val chapter =
-            Chapter(t.data.id, t.data.cid, t.data.cname, t.data.content, t.data.nid, t.data.pid)
+            Chapter(t.data.id, t.data.cid, t.data.cname, t.data.content.replace("<br/>","\n"), t.data.nid, t.data.pid)
         if (attachStart) {
             if (chapter.chapterId != list[0].chapterId && chapter.chapterId == list[0].pid) {
 //                list.add(0, chapter)

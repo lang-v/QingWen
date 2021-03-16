@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">青文</string>
+    <string name="app_name">青文（特供）</string>
     <string name="book_new">New</string>
     <string name="searchTextTips">搜索作者/书名</string>
     <string name="add_to_bookshelf">加入书架</string>
