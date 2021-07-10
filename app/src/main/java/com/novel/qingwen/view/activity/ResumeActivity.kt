@@ -89,6 +89,7 @@ class ResumeActivity : AppCompatActivity(), IBaseView {
         if (supportActionBar != null) {
             //显示返回按钮
             resumeToolbar.setNavigationIcon(R.drawable.back_btn_selector)
+            resumeToolbar.navigationContentDescription = "返回"
             supportActionBar!!.title = name
             //动态设置toolbar高度
             val statusHeight = (getStatusHeight() * 0.9).roundToInt()

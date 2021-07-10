@@ -8,6 +8,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import com.novel.qingwen.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * 自定义toast布局
@@ -26,26 +29,28 @@ object Show{
      *
      */
     fun show(context:Context,msg:String,status:Int=0){
-        val view = (context as Activity).layoutInflater.inflate(R.layout.show_layout,null)
-        val text:TextView = view.findViewById(R.id.showMsg)
-        val img:ImageView = view.findViewById(R.id.showImg)
-        text.text = msg
-        when(status){
-            0->{
-                img.visibility = View.GONE
+        GlobalScope.launch(Dispatchers.Main) {
+            val view = (context as Activity).layoutInflater.inflate(R.layout.show_layout, null)
+            val text: TextView = view.findViewById(R.id.showMsg)
+            val img: ImageView = view.findViewById(R.id.showImg)
+            text.text = msg
+            when (status) {
+                0 -> {
+                    img.visibility = View.GONE
+                }
+                1 -> {
+                    img.setImageResource(R.drawable.ic_error)
+                }
+                2 -> {
+                    img.setImageResource(R.drawable.ic_right)
+                }
             }
-            1->{
-                img.setImageResource(R.drawable.ic_error)
-            }
-            2->{
-                img.setImageResource(R.drawable.ic_right)
-            }
-        }
-        val toast = Toast(context)
-        toast.view = view
-        toast.duration = Toast.LENGTH_SHORT
+            val toast = Toast(context)
+            toast.view = view
+            toast.duration = Toast.LENGTH_SHORT
 //        toast.setGravity(Gravity.CENTER or Gravity.BOTTOM,0,0)
-        toast.show()
+            toast.show()
+        }
     }
 
 }

@@ -37,8 +37,8 @@ android {
         applicationId "com.novel.qingwen"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 4
-        versionName '2.0.7'
+        versionCode 8
+        versionName '2.1.1'
 
         ndk {
             //设置支持的SO库架构

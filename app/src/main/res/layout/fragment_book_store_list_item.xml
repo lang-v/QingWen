@@ -10,7 +10,6 @@
     <ImageView
         android:id="@+id/novelImg"
         android:layout_width="90dp"
-        android:padding="10dp"
         android:transitionName="novelPic"
         android:layout_height="120dp"
         android:src="@mipmap/ic_launcher"/>

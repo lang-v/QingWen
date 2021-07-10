@@ -37,7 +37,7 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
 
     private var networkAvailable = true
 
-    fun setNetworkAvailable(available:Boolean) {
+    fun setNetworkAvailable(available: Boolean) {
         networkAvailable = available
     }
 
@@ -124,7 +124,12 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         attachStart: Boolean
     ): Int {
         val strList =
-            MeasurePage.getPageString("******\r\n" + chapter.name + "\r\n******\r\n\r\n" + chapter.content)
+            MeasurePage.getPageString(
+                "******\r\n" + chapter.name + "\r\n******\r\n\r\n" + chapter.content.replace(
+                    "<br/>",
+                    "\n"
+                )
+            )
         for (i in 0 until strList.size) {
             val temp = Chapter(
                 chapter.novelId,
@@ -169,7 +174,14 @@ class ReadVM : BaseVM(), ResponseCallback<ChapterContent> {
         //避免重复加载
         if (list.size != 0 && list[list.size - 1].chapterId == t.data.cid) return
         val chapter =
-            Chapter(t.data.id, t.data.cid, t.data.cname, t.data.content.replace("<br/>","\n"), t.data.nid, t.data.pid)
+            Chapter(
+                t.data.id,
+                t.data.cid,
+                t.data.cname,
+                t.data.content.replace("<br/>", "\n"),
+                t.data.nid,
+                t.data.pid
+            )
         if (attachStart) {
             if (chapter.chapterId != list[0].chapterId && chapter.chapterId == list[0].pid) {
 //                list.add(0, chapter)

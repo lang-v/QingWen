@@ -1,5 +1,6 @@
 package com.novel.qingwen.view.adapter
 
+import android.text.TextUtils
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +24,11 @@ import kotlin.collections.ArrayList
 class BookShelfListAdapter(
     private val values: ArrayList<BookInfo>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    init {
+        setHasStableIds(true)
+    }
+
     private val NonBook = 1
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -39,6 +45,7 @@ class BookShelfListAdapter(
             val item = values[position]
             Glide.with(holder.img)
                 .load(item.img)
+                .placeholder(R.drawable.notfoundpic)
                 .error(R.drawable.notfoundpic)
                 .into(holder.img)
 
@@ -120,4 +127,13 @@ class BookShelfListAdapter(
     }
 
     class NonBookViewHolder(view: View) : RecyclerView.ViewHolder(view)
+
+    override fun getItemId(position: Int): Long {
+        val name = values[position].novelName
+        return if (TextUtils.isEmpty(name)) {
+            super.getItemId(position)
+        }else {
+            name.hashCode().toLong()
+        }
+    }
 }

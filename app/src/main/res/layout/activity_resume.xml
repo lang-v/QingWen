@@ -38,6 +38,7 @@
             android:layout_alignParentTop="true"
             android:background="@android:color/transparent"
             android:gravity="center_vertical|start"
+            app:navigationContentDescription="@string/app_name"
             android:minHeight="70dp" />
 
         <ImageView

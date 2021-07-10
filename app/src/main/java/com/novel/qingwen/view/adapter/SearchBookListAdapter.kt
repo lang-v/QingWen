@@ -1,5 +1,6 @@
 package com.novel.qingwen.view.adapter
 
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,10 @@ import com.novel.qingwen.net.bean.SearchResultItem
 
 class SearchBookListAdapter(private val list: ArrayList<SearchResultItem>,private val block:(item:SearchResultItem,view:View)->Unit) :
     RecyclerView.Adapter<SearchBookListAdapter.ViewHolder>() {
+
+    init {
+        setHasStableIds(true)
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.title)
@@ -33,6 +38,7 @@ class SearchBookListAdapter(private val list: ArrayList<SearchResultItem>,privat
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = list[position]
         Glide.with(holder.img).load(item.Img)
+            .placeholder(R.drawable.notfoundpic)
             .error(R.drawable.notfoundpic)
             .into(holder.img)
         holder.title.text = item.Name
@@ -48,5 +54,13 @@ class SearchBookListAdapter(private val list: ArrayList<SearchResultItem>,privat
             block.invoke(item,holder.img)
 //            ResumeActivity.start(holder.itemView.context, item.Id.toLong(), item.Name)
         }
+    }
+
+    override fun getItemId(position: Int): Long {
+        val name = list[position].Name
+        if (!TextUtils.isEmpty(name)) {
+            return name.hashCode().toLong()
+        }
+        return super.getItemId(position)
     }
 }

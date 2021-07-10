@@ -1,5 +1,6 @@
 package com.novel.qingwen.view.adapter
 
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,6 +14,10 @@ import com.novel.qingwen.net.bean.Book
 
 class BookStoreListAdapter(private val list: ArrayList<Book>,private val block:(item:Book,view:View)->Unit) :
     RecyclerView.Adapter<BookStoreListAdapter.ViewHolder>() {
+
+    init {
+        setHasStableIds(true)
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.title)
@@ -35,6 +40,7 @@ class BookStoreListAdapter(private val list: ArrayList<Book>,private val block:(
         val item = list[position]
         Glide.with(holder.img).load("https://imgapixs.pysmei.com/BookFiles/BookImages/"+item.Img)
             .error(R.drawable.notfoundpic)
+            .placeholder(R.drawable.notfoundpic)
             .into(holder.img)
         holder.title.text = item.Name
         holder.resume.text = item.Desc
@@ -50,6 +56,15 @@ class BookStoreListAdapter(private val list: ArrayList<Book>,private val block:(
         holder.itemView.setOnClickListener {
             block.invoke(item,holder.img)
 //            ResumeActivity.start(holder.itemView.context, item.Id.toLong(), item.Name)
+        }
+    }
+
+    override fun getItemId(position: Int): Long {
+        val name = list[position].Name
+        return if (TextUtils.isEmpty(name)) {
+            super.getItemId(position)
+        }else {
+            name.hashCode().toLong()
         }
     }
 }

@@ -59,7 +59,7 @@ object NetUtil {
 
 
     private val userData = Retrofit.Builder()
-        .baseUrl("http://39.97.127.33/qingwen/")
+        .baseUrl("http://47.111.68.59:1999/qingwen/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -232,7 +232,7 @@ object NetUtil {
             runCatching {
                 chapterContentCallback?.onSuccess(request.getChapterContent(novelId, chapterId))
             }.onFailure {
-                chapterContentCallback?.onFailure(it)
+                chapterContentCallback?.onFailure(chapterId)
             }
         }
 //        chapterCall = request.getChapterContent(novelId, chapterId)
