@@ -30,6 +30,7 @@ class BookShelfListAdapter(
     }
 
     private val NonBook = 1
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(
@@ -131,9 +132,12 @@ class BookShelfListAdapter(
     override fun getItemId(position: Int): Long {
         val name = values[position].novelName
         return if (TextUtils.isEmpty(name)) {
-            super.getItemId(position)
+            // 记录一下小问题，super.getItemId() 始终返回-1
+            // super.getItemId(position)
+            values[position].hashCode().toLong()
         }else {
             name.hashCode().toLong()
         }
     }
+
 }
