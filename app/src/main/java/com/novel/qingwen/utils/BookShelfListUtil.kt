@@ -1,11 +1,13 @@
 package com.novel.qingwen.utils
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.novel.qingwen.net.bean.BookShelf
 import com.novel.qingwen.net.callback.ResponseCallback
 import com.novel.qingwen.room.entity.BookInfo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlin.collections.ArrayList
@@ -16,12 +18,16 @@ object BookShelfListUtil {
     var currentBookInfo: BookInfo? = null
 
     fun init(block: (() -> Unit)? = null) {
-        if(list.size == 0)
+        if (list.size == 0)
             list.addAll(bookInfoDao.loadAll())
         pullData(block)
     }
 
-    fun getList(): ArrayList<BookInfo> = list
+    fun getList(): ArrayList<BookInfo> {
+        list.sort()
+        return list
+    }
+
 
     fun insert(bookInfo: BookInfo, push: Boolean = true) {
         if (list.contain(bookInfo.novelId)) return
@@ -31,16 +37,18 @@ object BookShelfListUtil {
                 if (list.contain(bookInfo.novelId)) return@launch
                 bookInfoDao.insert(bookInfo)
                 list.add(bookInfo)
+                list.sort()
                 if (push)
                     pushData()
             }
         }
     }
 
-    fun remove(item: BookInfo, push: Boolean = true) {
+    fun remove(index: Int, push: Boolean = true) {
         synchronized(list) {
-            if (list.contains(item)) {
-                list.remove(item)
+            if (list.size > index) {
+                val item = list[index]
+                list.removeAt(index)
                 GlobalScope.launch {
                     if (bookInfoDao.loadById(item.novelId).size != 1) return@launch
                     bookInfoDao.delete(item)
@@ -51,23 +59,13 @@ object BookShelfListUtil {
         }
     }
 
-    fun update(newBook: BookInfo, needPushData: Boolean = true) {
-        GlobalScope.launch {
+    fun update(needPushData: Boolean, vararg newBook: BookInfo) {
+        GlobalScope.launch(Dispatchers.IO) {
             synchronized(list) {
-                for (bookInfo in list) {
-                    if (bookInfo.novelId == newBook.novelId) {
-                        bookInfo.update = newBook.update
-                        bookInfo.lastReadId = newBook.lastReadId
-                        bookInfo.lastReadOffset = newBook.lastReadOffset
-                        bookInfo.lastChapterName = newBook.lastChapterName
-                        bookInfo.lastChapterId = newBook.lastChapterId
-                        bookInfo.lastUpdateTime = newBook.lastUpdateTime
-                        bookInfoDao.update(newBook)
-                        if (needPushData)
-                            pushData()
-                        return@launch
-                    }
-                }
+                val code = bookInfoDao.update(*newBook)
+                Log.i("BookShelfUtil", "update bookinfo $newBook and return code $code")
+                if (needPushData)
+                    pushData()
             }
         }
     }
@@ -111,7 +109,7 @@ object BookShelfListUtil {
                 }
             })
             NetUtil.pullBookShelf(UserDataUtil.default.token)
-        }else{
+        } else {
             block?.invoke()
         }
     }

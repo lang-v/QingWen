@@ -107,6 +107,7 @@ class ResumeVM : BaseVM(), ResponseCallback<BookInfo> {
         info.lastChapterID = t.data.LastChapterId
         val bookInfo = com.novel.qingwen.room.entity.BookInfo(
             info.id,
+            BookShelfListUtil.getList().size,
             info.img,
             info.status,
             false,

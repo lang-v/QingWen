@@ -78,14 +78,15 @@ class BookShelfListAdapter(
                     }
                 }
             }
-            holder.itemView.setOnLongClickListener {
-                PopupWindowUtil.showPopupWindow(holder.itemView) {
-//                    移出
-                    BookShelfListUtil.remove(item)
-                    refresh()
-                }
-                true
-            }
+            // 长按删除功能调整为拖拽删除
+//            holder.itemView.setOnLongClickListener {
+//                PopupWindowUtil.showPopupWindow(holder.itemView) {
+////                    移出
+//                    BookShelfListUtil.remove(item)
+//                    refresh()
+//                }
+//                true
+//            }
         }
     }
 
@@ -105,7 +106,7 @@ class BookShelfListAdapter(
         if (itemCount == 0) {
             values.add(
                 BookInfo(
-                    -1, "", ",", false,
+                    -1, 0,"", ",", false,
                     -1L, 0, "", -1L,
                     -1L, "", ""
                 )
@@ -130,7 +131,7 @@ class BookShelfListAdapter(
     class NonBookViewHolder(view: View) : RecyclerView.ViewHolder(view)
 
     override fun getItemId(position: Int): Long {
-        val name = values[position].novelName
+        val name = values[position].let { it.novelName + it.novelId }
         return if (TextUtils.isEmpty(name)) {
             // 记录一下小问题，super.getItemId() 始终返回-1
             // super.getItemId(position)

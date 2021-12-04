@@ -2,12 +2,7 @@ package com.novel.qingwen.view.activity
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.content.pm.PackageInstaller
-import android.content.pm.PackageManager
 import android.graphics.Color
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.transition.Explode
 import android.util.Log
@@ -15,15 +10,10 @@ import android.view.View
 import android.view.Window
 import android.widget.RelativeLayout
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.content.IntentCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.*
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
@@ -39,13 +29,6 @@ import com.novel.qingwen.view.fragment.SearchBook
 import com.novel.qingwen.viewmodel.BookShelfVM
 import com.novel.qingwen.viewmodel.DownloadVM
 import com.tbruyelle.rxpermissions2.RxPermissions
-import com.tencent.bugly.Bugly
-import com.tencent.bugly.beta.Beta
-import com.tencent.bugly.beta.UpgradeInfo
-import com.tencent.bugly.beta.download.DownloadListener
-import com.tencent.bugly.beta.download.DownloadTask
-import com.tencent.bugly.beta.ui.BetaActivity
-import com.tencent.bugly.beta.upgrade.UpgradeListener
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_book_shelf.*
 import kotlinx.coroutines.Dispatchers
@@ -54,10 +37,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import sl.view.elasticviewlibrary.ElasticLayout
 import sl.view.elasticviewlibrary.base.BaseHeader
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.regex.Matcher
 import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
@@ -243,7 +224,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
             override fun scrollProgress(progress: Int) {
                 super.scrollProgress(progress)
                 scrollTarget =
-                    if (progress < offset) 0 else if (progress in offset until offset + 200) 1 else 2
+                    if (progress < offset) 0 else if (progress in offset until offset + 150) 1 else 2
             }
 
             override fun releaseToDo() {
@@ -264,9 +245,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
         })
         bookShelfRefresh.setAnimTime(500L)
         adapter = BookShelfListAdapter(viewModel.getList())
+        println(viewModel.getList())
         bookShelfList.adapter = adapter
         bookShelfList.layoutManager = LinearLayoutManager(this)
         bookShelfList.itemAnimator = DefaultItemAnimator()
+        addDragAndSwipeFunction()
+
         //分割线
         bookShelfList.addItemDecoration(
             DividerItemDecoration(
@@ -280,6 +264,71 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, IBaseView,
 //            delay(1000)
 //            bookShelfRefresh.isRefreshing = true
 //        }
+    }
+
+    /**
+     * 添加拖拽排序、滑动删除功能
+     * 后面考虑是否需要添加一个滑动删除确认 todo
+     */
+    private fun addDragAndSwipeFunction() {
+        val itemTouchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
+            override fun getMovementFlags(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder
+            ): Int {
+                // 当书架没有书本时存在一个占位标签，这个标签不能被手动拖拽或者移除
+                val list = viewModel.getList()
+                if (list.size == 1 && list[0].novelId == -1L){
+                    return 0
+                }
+
+                // 上下拖拽、左右滑动
+                return makeMovementFlags(
+                    ItemTouchHelper.DOWN or ItemTouchHelper.UP,
+                    ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+                )
+            }
+
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                val list = viewModel.getList()
+                val s = list[viewHolder.absoluteAdapterPosition]
+                val t = list[target.absoluteAdapterPosition]
+
+                Log.i("BookShelf","发生拖拽事件 index from ${s.itemIndex}(绝对位置${viewHolder.absoluteAdapterPosition}) to ${t.itemIndex}（绝对位置${target.absoluteAdapterPosition})")
+
+                if (s.itemIndex == t.itemIndex) {
+                    if (viewHolder.absoluteAdapterPosition > target.absoluteAdapterPosition) {
+                        s.itemIndex++
+                    } else {
+                        t.itemIndex++
+                    }
+                } else {
+                    val tmp = s.itemIndex
+                    s.itemIndex = t.itemIndex
+                    t.itemIndex = tmp
+                }
+
+                // 同步到本地数据库以及服务器
+                BookShelfListUtil.update(true,s,t)
+
+                viewModel.getList().sort()
+                adapter.notifyItemMoved(viewHolder.absoluteAdapterPosition,target.absoluteAdapterPosition)
+                return false
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.absoluteAdapterPosition
+                BookShelfListUtil.remove(position)
+                adapter.refresh()
+            }
+
+        })
+
+        itemTouchHelper.attachToRecyclerView(bookShelfList)
     }
 
     override fun onStart() {

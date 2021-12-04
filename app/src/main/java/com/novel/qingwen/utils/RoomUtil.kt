@@ -35,7 +35,13 @@ object RoomUtil {
                 database.execSQL("alter table Config add column scrollDirection integer not null default 0")
             }
         }
+
+        val mi4 = object :Migration(4,5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("alter table book_info add column itemIndex integer not null default 0")
+            }
+        }
         db = Room.databaseBuilder(context,
-            AppDatabase::class.java,"qingwenebook").addMigrations(mi,mi2,mi3).build()
+            AppDatabase::class.java,"qingwenebook").addMigrations(mi,mi2,mi3,mi4).build()
     }
 }

@@ -146,7 +146,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     it.lastReadId = currentReadID
                     it.lastReadOffset = readOffset
                     it.update = false
-                    BookShelfListUtil.update(it)
+                    BookShelfListUtil.update(true, it)
                     return@forEach
                 }
             }
@@ -1199,7 +1199,7 @@ class ReadActivity : AppCompatActivity(), IBaseView, CustomSeekBar.OnProgressCha
                     it.lastReadId = currentReadID
                     it.lastReadOffset = readOffset
                     it.update = false
-                    BookShelfListUtil.update(it)
+                    BookShelfListUtil.update(true,it)
                     return@forEach
                 }
             }

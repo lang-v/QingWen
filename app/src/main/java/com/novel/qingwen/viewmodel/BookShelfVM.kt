@@ -36,7 +36,7 @@ class BookShelfVM : BaseVM() {
                                 it.lastChapterName = t.data.LastChapter
                                 it.lastUpdateTime = t.data.LastTime
                                 it.update = true
-                                BookShelfListUtil.update(it)
+                                BookShelfListUtil.update(true, it)
                             }
                         }
                     }

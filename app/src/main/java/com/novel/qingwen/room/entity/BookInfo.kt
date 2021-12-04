@@ -8,6 +8,8 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "book_info")
 data class BookInfo(
     @PrimaryKey val novelId: Long,
+    // 小说在书架中的位置
+    var itemIndex:Int = 0,
     val img:String,
     val status:String,
     var update:Boolean=false,
@@ -19,4 +21,8 @@ data class BookInfo(
     var lastChapterId: Long,
     var lastUpdateTime: String,
     var lastChapterName: String
-)
+) :Comparable<BookInfo> {
+    override fun compareTo(other: BookInfo): Int {
+        return other.itemIndex - itemIndex
+    }
+}
